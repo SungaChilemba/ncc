@@ -1,248 +1,87 @@
 @extends("layouts.app")
 
-@section("title", 'Children\'s Corner')
+@section("title", "Children's Corner")
 
 @section("content")
+				@php
+								$hero = $cmsHero ?? null;
+								$activities = ($cmsCards ?? collect())->where("category", "Activities")->values();
+								$rights = ($cmsCards ?? collect())->where("category", "Child Rights")->values();
+								$updates = $cmsNews ?? collect();
+								$gallery = $cmsGallery ?? collect();
+				@endphp
 
-				<div class="w-full px-4 py-12 relative overflow-hidden bg-cover bg-center bg-black/45">
-								<div class="relative z-10 text-center text-black">
-												<!-- Hero Title -->
-												<h1 class="text-4xl md:text-6xl font-bold animate-bounce">
-																CHILD RIGHTS CORNER
-												</h1>
-
-												<!-- Mission Statement -->
-												<p class="max-w-xl mx-auto mt-4 text-base md:text-lg">
-																We are dedicated to safeguarding the well-being of all children by promoting their rights,
-																protecting their dignity and empowering them to reach their full potential.
-												</p>
-
-												<!-- Responsive Layout -->
-												<div
-																class="flex flex-col items-center justify-center mt-10 lg:flex-row lg:justify-between lg:items-center transition-all duration-500 ease-in-out">
-
-																<!-- Right Icons (first on mobile, last on desktop) -->
-																<div class="order-1 lg:order-3 flex flex-wrap justify-center gap-20">
-																				<!-- Share Story -->
-																				<div class="flex flex-col items-center">
-																								<div
-																												class="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center rounded-full bg-purple-100 hover:bg-purple-200 hover:scale-110 hover:shadow-lg transition animate-bounce">
-																												<i class="fa-solid fa-pencil text-purple-600 text-lg"></i>
-																								</div>
-																								<span class="text-sm mt-2">Share Story</span>
+				<section class="bg-white px-4 py-12 text-center">
+								<h1 class="text-4xl md:text-6xl font-bold text-green-800">{{ $hero?->title ?: "Child Rights Corner" }}</h1>
+								@if ($hero?->description)
+												<p class="max-w-xl mx-auto mt-4 text-base md:text-lg">{{ $hero->description }}</p>
+								@endif
+								@if ($hero?->image_url)
+												<img src="{{ $hero->image_url }}?v={{ $hero->updated_at->timestamp }}" alt="{{ $hero->alt_text ?: $hero->title }}" class="mx-auto mt-8 w-70 md:w-96">
+								@endif
+								<div class="mt-10 flex flex-wrap justify-center gap-8">
+												@foreach ($activities as $activity)
+																<div class="flex flex-col items-center">
+																				<div class="flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-green-700 shadow-sm">
+																								<i class="{{ $activity->subtitle ?: "fa-solid fa-star" }} text-lg"></i>
 																				</div>
-																				<!-- Share Drawing -->
-																				<div class="flex flex-col items-center">
-																								<div
-																												class="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center rounded-full bg-pink-100 hover:bg-pink-200 hover:scale-110 hover:shadow-lg transition animate-bounce">
-																												<i class="fa-solid fa-paintbrush text-pink-600 text-lg"></i>
-																								</div>
-																								<span class="text-sm mt-2">Share Drawing</span>
-																				</div>
-																				<!-- Share Poem -->
-																				<div class="flex flex-col items-center">
-																								<div
-																												class="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center rounded-full bg-indigo-100 hover:bg-indigo-200 hover:scale-110 hover:shadow-lg transition animate-bounce">
-																												<i class="fa-solid fa-feather text-indigo-600 text-lg"></i>
-																								</div>
-																								<span class="text-sm mt-2">Share Poem</span>
-																				</div>
+																				<span class="mt-2 text-sm font-semibold">{{ $activity->title }}</span>
 																</div>
-
-																<!-- Stick Figure (second on mobile, center on desktop) -->
-																<div class="order-2 lg:order-2 flex justify-center animate-pulse my-9 lg:my-0">
-																				<img src="/images/child-hero.png" alt="Children illustration" class="w-70 md:w-96 mx-auto" />
-																</div>
-
-																<!-- Left Icons (last on mobile, first on desktop) -->
-																<div class="order-3 lg:order-1 flex flex-wrap justify-center gap-20">
-																				<!-- Quizzes -->
-																				<div class="flex flex-col items-center">
-																								<div
-																												class="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center rounded-full bg-blue-100 hover:bg-blue-200 hover:scale-110 hover:shadow-lg transition animate-bounce">
-																												<i class="fa-solid fa-question text-blue-600 text-lg"></i>
-																								</div>
-																								<span class="text-sm mt-2">Quizzes</span>
-																				</div>
-																				<!-- Games -->
-																				<div class="flex flex-col items-center">
-																								<div
-																												class="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center rounded-full bg-green-100 hover:bg-green-200 hover:scale-110 hover:shadow-lg transition animate-bounce">
-																												<i class="fa-solid fa-gamepad text-green-600 text-lg"></i>
-																								</div>
-																								<span class="text-sm mt-2">Games</span>
-																				</div>
-																				<!-- Videos -->
-																				<div class="flex flex-col items-center">
-																								<div
-																												class="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center rounded-full bg-red-100 hover:bg-red-200 hover:scale-110 hover:shadow-lg transition animate-bounce">
-																												<i class="fa-solid fa-video text-red-600 text-lg"></i>
-																								</div>
-																								<span class="text-sm mt-2">Videos</span>
-																				</div>
-																				<!-- Stories -->
-																				<div class="flex flex-col items-center">
-																								<div
-																												class="w-14 h-14 md:w-16 md:h-16 flex items-center justify-center rounded-full bg-yellow-100 hover:bg-yellow-200 hover:scale-110 hover:shadow-lg transition animate-bounce">
-																												<i class="fa-solid fa-book-open text-yellow-600 text-lg"></i>
-																								</div>
-																								<span class="text-sm mt-2">Stories</span>
-																				</div>
-																</div>
-												</div>
-								</div>
-				</div>
-
-				<div class="w-full px-4 py-12 bg-green-700">
-								<!-- Intro Text -->
-								<h1 class="text-2xl md:text-2xl text-center text-white font-bold animate-bounce">
-												CHILD RIGHTS
-								</h1>
-								<p class="max-w-3xl mx-auto text-center text-base md:text-lg font-medium mb-20">
-												Awareness Of Child Rights Also Encourages Families, Schools, And Communities To Create A Safe And Supportive
-												Environment Where Every Child Can Grow, Learn, And Reach Their Full Potential.
-								</p>
-
-								<!-- Rights Icons Row -->
-								<div class="flex justify-center gap-8 md:gap-50">
-												<!-- Education Rights -->
-												<div class="flex flex-col items-center">
-																<div
-																				class="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center rounded-full bg-blue-100 hover:bg-blue-200 hover:scale-110 hover:shadow-lg transition">
-																				<i class="fa-solid fa-graduation-cap text-blue-600 text-xl"></i>
-																</div>
-																<span class="text-sm md:text-base mt-2 text-white font-semibold">Education Rights</span>
-												</div>
-
-												<!-- Participation Rights -->
-												<div class="flex flex-col items-center">
-																<div
-																				class="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center rounded-full bg-green-100 hover:bg-green-200 hover:scale-110 hover:shadow-lg transition">
-																				<i class="fa-solid fa-people-group text-green-600 text-xl"></i>
-																</div>
-																<span class="text-sm md:text-base mt-2 text-white font-semibold">Participation Rights</span>
-												</div>
-
-												<!-- Protection Rights -->
-												<div class="flex flex-col items-center">
-																<div
-																				class="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center rounded-full bg-yellow-100 hover:bg-yellow-200 hover:scale-110 hover:shadow-lg transition">
-																				<i class="fa-solid fa-shield text-yellow-600 text-xl"></i>
-																</div>
-																<span class="text-sm md:text-base mt-2 text-white font-semibold">Protection Rights</span>
-												</div>
-
-												<!-- Healthy Rights -->
-												<div class="flex flex-col items-center">
-																<div
-																				class="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center rounded-full bg-red-100 hover:bg-red-200 hover:scale-110 hover:shadow-lg transition">
-																				<i class="fa-solid fa-heart text-red-600 text-xl"></i>
-																</div>
-																<span class="text-sm md:text-base mt-2 text-white font-semibold">Healthy Rights</span>
-												</div>
-								</div>
-				</div>
-				<!-- images section -->
-				<!-- images section -->
-				<div class="w-full px-4 py-12 bg-white">
-
-								<div x-data="{
-		    current: 0,
-		    images: [
-		        '/images/window1.png',
-		        '/images/window2.png',
-		        '/images/window3.png',
-		        '/images/window4.png',
-		        '/images/window5.png'
-		    ]
-		}" class="w-full px-4 py-12 bg-white">
-
-												<!-- Section Heading -->
-												<h2 class="text-2xl md:text-3xl font-bold text-center mb-4 mt-8 animate-bounce">
-																Helping Kids Grow Through Play And Learning
-												</h2>
-
-												<!-- Desktop: normal row -->
-												<div class="hidden md:flex justify-center gap-4">
-																<template x-for="img in images" :key="img">
-																				<img :src="img" class="shrink-0" alt="Image">
-																</template>
-												</div>
-
-												<!-- Mobile: arrows + single row view -->
-												<div class="relative md:hidden flex justify-center items-center">
-																<img :src="images[current]" class="shrink-0" alt="Image">
-
-																<!-- Left Arrow -->
-																<button x-show="current > 0" @click="current--"
-																				class="absolute left-0 top-1/2 -translate-y-1/2 bg-gray-800 text-white px-3 py-2 rounded-full">
-																				&#8592;
-																</button>
-
-																<!-- Right Arrow -->
-																<button x-show="current < images.length - 1" @click="current++"
-																				class="absolute right-0 top-1/2 -translate-y-1/2 bg-gray-800 text-white px-3 py-2 rounded-full">
-																				&#8594;
-																</button>
-												</div>
-								</div>
-
-				</div>
-
-				<!-- Kids News & Updates Section -->
-				<section class="py-16 px-6 md:px-12 bg-white">
-								<div class="max-w-8xl mx-auto">
-												<h2 class="text-3xl md:text-4xl font-bold text-green-700 mb-10 text-center animate-bounce">Kids News & Updates
-												</h2>
-
-												<div class="flex flex-wrap justify-center items-start gap-8">
-																<!-- Card 1: Career Girl -->
-																<div class="relative inline-block rounded-lg shadow-lg animate-fadeInUp">
-																				<img src="{{ asset("images/career-girl.png") }}" alt="Career Girl" class="rounded-lg shadow-md z-0">
-																				<!-- Overlay -->
-																				<div class="absolute inset-0 bg-black/40 rounded-lg pointer-events-none"></div>
-																				<!-- Text + Button -->
-																				<div class="absolute inset-0 flex flex-col justify-end items-center p-4 z-20">
-																								<h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
-																												<i class="fa-solid fa-play text-red-500"></i> Career Kids
-																								</h3>
-																								<button class="bg-red-600 text-white px-3 py-1 text-sm rounded-md hover:bg-red-700 transition">
-																												Share Video
-																								</button>
-																				</div>
-																</div>
-
-																<!-- Card 2: Spelling Game -->
-																<div class="relative inline-block rounded-lg shadow-lg animate-fadeInUp delay-200">
-																				<img src="{{ asset("images/spelling.png") }}" alt="Spelling Game" class="rounded-lg shadow-md z-0">
-																				<!-- Overlay -->
-																				<div class="absolute inset-0 bg-black/40 rounded-lg pointer-events-none"></div>
-																				<!-- Text + Button -->
-																				<div class="absolute inset-0 flex flex-col justify-end items-center p-4 z-20">
-																								<h3 class="text-xl font-bold text-green-400 mb-2 animate-bounce">SPELLING GAME</h3>
-																								<button class="bg-red-600 text-white px-3 py-1 text-sm rounded-md hover:bg-red-700 transition">
-																												Compete
-																								</button>
-																				</div>
-																</div>
-
-																<!-- Card 3: Career Boy -->
-																<div class="relative inline-block rounded-lg shadow-lg animate-fadeInUp delay-500">
-																				<img src="{{ asset("images/career-boy.png") }}" alt="Career Boy" class="rounded-lg shadow-md z-0">
-																				<!-- Overlay -->
-																				<div class="absolute inset-0 bg-black/40 rounded-lg pointer-events-none"></div>
-																				<!-- Text + Button -->
-																				<div class="absolute inset-0 flex flex-col justify-end items-center p-4 z-20">
-																								<h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
-																												<i class="fa-solid fa-play text-red-500"></i> Career Kids
-																								</h3>
-																								<button class="bg-red-600 text-white px-3 py-1 text-sm rounded-md hover:bg-red-700 transition">
-																												Share Video
-																								</button>
-																				</div>
-																</div>
-												</div>
+												@endforeach
 								</div>
 				</section>
 
+				<section class="bg-green-700 px-4 py-12 text-white">
+								<h2 class="text-center text-2xl font-bold">CHILD RIGHTS</h2>
+								<p class="mx-auto mt-4 mb-12 max-w-3xl text-center text-base font-medium">
+												Awareness of child rights also encourages families, schools, and communities to create a safe and supportive environment where every child can grow, learn, and reach their full potential.
+								</p>
+								<div class="mx-auto flex max-w-5xl flex-wrap justify-center gap-8">
+												@foreach ($rights as $right)
+																<div class="flex flex-col items-center">
+																				<div class="flex h-20 w-20 items-center justify-center rounded-full bg-white text-green-700 shadow-sm">
+																								<i class="{{ $right->subtitle ?: "fa-solid fa-shield" }} text-xl"></i>
+																				</div>
+																				<span class="mt-2 text-sm font-semibold">{{ $right->title }}</span>
+																</div>
+												@endforeach
+								</div>
+				</section>
+
+				@if ($gallery->isNotEmpty())
+								<section class="bg-white px-4 py-12">
+												<h2 class="mb-6 text-center text-2xl font-bold md:text-3xl">Helping Kids Grow Through Play And Learning</h2>
+												<div class="mx-auto grid max-w-6xl grid-cols-2 gap-4 md:grid-cols-5">
+																@foreach ($gallery as $image)
+																				@if ($image->image_url)
+																								<img src="{{ $image->image_url }}?v={{ $image->updated_at->timestamp }}" alt="{{ $image->alt_text ?: $image->title ?: "Children gallery image" }}" class="h-32 w-full rounded object-contain">
+																				@endif
+																@endforeach
+												</div>
+								</section>
+				@endif
+
+				@if ($updates->isNotEmpty())
+								<section class="bg-white px-6 py-16 md:px-12">
+												<div class="mx-auto max-w-7xl">
+																<h2 class="mb-10 text-center text-3xl font-bold text-green-700 md:text-4xl">Kids News & Updates</h2>
+																<div class="flex flex-wrap justify-center gap-8">
+																				@foreach ($updates as $update)
+																								<article class="relative overflow-hidden rounded-lg shadow-lg">
+																												@if ($update->image_url)
+																																<img src="{{ $update->image_url }}?v={{ $update->updated_at->timestamp }}" alt="{{ $update->alt_text ?: $update->title }}" class="rounded-lg">
+																												@endif
+																												<div class="absolute inset-0 bg-black/40"></div>
+																												<div class="absolute inset-0 z-10 flex flex-col items-center justify-end p-4 text-center">
+																																<h3 class="mb-2 text-lg font-bold text-white">{{ $update->title }}</h3>
+																																@if ($update->button_text)
+																																				<a href="{{ $update->button_link ?: "#" }}" class="rounded-md bg-red-600 px-3 py-1 text-sm text-white hover:bg-red-700">{{ $update->button_text }}</a>
+																																@endif
+																												</div>
+																								</article>
+																				@endforeach
+																</div>
+												</div>
+								</section>
+				@endif
 @endsection

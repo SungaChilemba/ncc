@@ -1,4 +1,17 @@
 @import "tailwindcss";
 
+@source "../views/**/*.blade.php";
+@source "../../app/**/*.php";
+@source "../../config/**/*.php";
 
+@theme {
+    --container-8xl: 90rem;
+}
 
+@utility max-w-8xl {
+    max-width: var(--container-8xl);
+}
+
+[x-cloak] {
+    display: none !important;
+}

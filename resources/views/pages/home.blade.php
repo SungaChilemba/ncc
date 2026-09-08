@@ -3,30 +3,6 @@
 @section("title", "Home")
 
 @section("content")
-				@php
-								$hero = \App\Models\SiteContent::where("section", "home")
-								    ->where("type", "hero")
-								    ->where("is_published", true)
-								    ->first();
-								$heroImage =
-								    $hero && $hero->image_path
-								        ? asset("storage/" . $hero->image_path . "?v=" . $hero->updated_at->timestamp)
-								        : asset("images/hero-children.jpg");
-
-								$updates = \App\Models\SiteContent::where("section", "home")
-								    ->where("type", "update")
-								    ->where("is_published", true)
-								    ->orderBy("sort_order")
-								    ->get();
-								$featuredUpdate = $updates->first();
-								$sidebarUpdate = $updates->slice(1);
-
-								$news = \App\Models\SiteContent::where("section", "home")
-								    ->where("type", "news")
-								    ->where("is_published", true)
-								    ->orderBy("sort_order")
-								    ->get();
-				@endphp
 				<style>
 								@keyframes heroFade1 {
 
@@ -104,17 +80,20 @@
 				</style>
 				<!-- Hero Section -->
 				<section class="relative h-[70vh] flex items-center justify-center text-center text-white overflow-hidden">
-								<div class="hero-slide hero-slide-1" style="background-image: url('{{ asset("images/NCChero.jpg") }}');"></div>
+								<div class="hero-slide hero-slide-1" style="background-image: url('{{ $heroImage }}');"></div>
 								<div class="hero-slide hero-slide-2" style="background-image: url('{{ asset("images/nccNews1.jpg") }}');"></div>
 								<div class="hero-slide hero-slide-3" style="background-image: url('{{ asset("images/nccCeleb.jpg") }}');"></div>
 								<div class="bg-black/50 absolute inset-0 z-10"></div>
 								<div class="relative z-20 px-4">
-												<h1 class="text-3xl md:text-5xl font-bold animate-bounce">Our Children, Our Responsibility</h1>
-												<p class="mt-4 text-lg md:text-xl">Safeguarding children’s rights and dignity.</p>
+												<h1 class="text-3xl md:text-5xl font-bold animate-bounce">{{ $hero?->title ?: "Our Children, Our Responsibility" }}</h1>
+												<p class="mt-4 text-lg md:text-xl">{{ $hero?->subtitle ?: "Safeguarding children’s rights and dignity." }}</p>
+												@if ($hero?->description)
+																<p class="mx-auto mt-3 max-w-3xl text-sm md:text-base">{{ $hero->description }}</p>
+												@endif
 												<div class="mt-6 flex flex-col md:flex-row gap-4 justify-center">
-																<a href="{{ route("reporting") }}"
+																<a href="{{ $hero?->button_url ?: route("reporting") }}"
 																				class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm">
-																				Report a Case Now
+																				{{ $hero?->button_text ?: "Report a Case Now" }}
 																</a>
 																<a href="{{ route("what-we-do") }}" class="border border-white px-4 py-2 rounded-lg font-semibold text-sm">
 																				Work With Us
@@ -203,7 +182,7 @@
 																<div class="md:col-span-2 flex flex-col md:flex-row rounded-lg overflow-hidden shadow-lg">
 																				<!-- Image side -->
 																				<div class="flex-1">
-																								<img src="{{ $featuredUpdate->image_path ? asset("storage/" . $featuredUpdate->image_path . "?v=" . $featuredUpdate->updated_at->timestamp) : asset("images/vaccine.jpg") }}"
+																								<img src="{{ $featuredUpdate->image_path ? $featuredUpdate->image_url . "?v=" . $featuredUpdate->updated_at->timestamp : asset("images/vaccine.jpg") }}"
 																												alt="{{ $featuredUpdate->title }}" class="w-full h-full object-cover">
 																				</div>
 																				<!-- Red rectangle side -->
@@ -221,8 +200,8 @@
 																												</p>
 																								</div>
 																								<!-- Read More -->
-																								@if ($featuredUpdate->button_text && $featuredUpdate->button_url)
-																												<a href="{{ $featuredUpdate->button_url }}"
+																								@if ($featuredUpdate->button_text)
+																												<a href="{{ $featuredUpdate->button_link && $featuredUpdate->button_link !== "#" ? $featuredUpdate->button_link : route("news") }}"
 																																class="underline text-sm hover:text-gray-200">{{ $featuredUpdate->button_text }}</a>
 																								@endif
 																				</div>
@@ -262,7 +241,7 @@ mibextid=rS40aB7S9Ucbxw6v"
 																@php $s = $sidebarUpdate->first(); @endphp
 																<div class="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col">
 																				<!-- Image -->
-																				<img src="{{ $s->image_path ? asset("storage/" . $s->image_path . "?v=" . $s->updated_at->timestamp) : asset("images/Kids-Coding.jpg") }}"
+																				<img src="{{ $s->image_path ? $s->image_url . "?v=" . $s->updated_at->timestamp : asset("images/Kids-Coding.jpg") }}"
 																								alt="{{ $s->title }}" class="w-full h-48 object-cover">
 																				<!-- Text -->
 																				<div class="p-6 flex flex-col justify-between flex-1">
@@ -272,8 +251,8 @@ mibextid=rS40aB7S9Ucbxw6v"
 																																{{ $s->description }}
 																												</p>
 																								</div>
-																								@if ($s->button_text && $s->button_url)
-																												<a href="{{ $s->button_url }}"
+																								@if ($s->button_text)
+																												<a href="{{ $s->button_link && $s->button_link !== "#" ? $s->button_link : route("news") }}"
 																																class="underline text-sm text-green-700 hover:text-green-900">{{ $s->button_text }}</a>
 																								@endif
 																				</div>
@@ -313,161 +292,74 @@ mibextid=rS40aB7S9Ucbxw6v"
 												</div>
 												<h2 class="text-xl md:text-xl font-bold text-green-800 mb-6">LATEST NEWS</h2>
 												<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-																<!-- News Card -->
-																<div class="bg-white rounded-lg shadow-md overflow-hidden">
-																				<img src="{{ asset("images/news1.png") }}" alt="News 1" class="w-full h-40 object-cover">
-																				<div class="p-4">
-																								<h3 class="font-bold text-gray-900 mb-2">NCC Calls for Stronger Action Against Child Labor</h3>
-																								<p class="text-sm text-gray-500 mb-2">7 May 2026 | Dedza</p>
-																								<p class="text-gray-600 text-sm">Leaders need to put more effort in nabbing perpetrators of child
-																												labor…</p>
-																								<a href="#"
-																												class="inline-block mt-2 text-sm font-semibold text-green-700 hover:underline">Read
-																												More ></a>
+																@forelse(($latestNews ?? collect())->take(3) as $article)
+																				<article class="bg-white rounded-lg shadow-md overflow-hidden">
+																								<a href="{{ $article->public_url }}" class="block">
+																												<img src="{{ $article->image_path ? $article->image_url . '?v=' . $article->updated_at->timestamp : asset('images/news1.png') }}" alt="{{ $article->alt_text ?: $article->title }}" class="w-full h-40 object-cover">
+																								</a>
+																								<div class="p-4">
+																												<h3 class="font-bold text-gray-900 mb-2">{{ $article->title }}</h3>
+																												@if ($article->published_on || $article->location)
+																																<p class="text-sm text-gray-500 mb-2">
+																																				{{ $article->published_on?->format('j F Y') }}@if($article->published_on && $article->location) | @endif{{ $article->location }}
+																																</p>
+																												@endif
+																												@if ($article->description)
+																																<p class="text-gray-600 text-sm">{{ str($article->description)->limit(120) }}</p>
+																												@endif
+																												<a href="{{ $article->public_url }}" class="inline-block mt-2 text-sm font-semibold text-green-700 hover:underline">Read More ></a>
+																								</div>
+																				</article>
+																@empty
+																				<div class="col-span-full rounded-lg border border-slate-200 bg-white p-8 text-center text-gray-500">
+																								No news articles have been published yet.
 																				</div>
-																</div>
-																<!-- News Card -->
-																<div class="bg-white rounded-lg shadow-md overflow-hidden">
-																				<img src="{{ asset("images/news2.png") }}" alt="News 2" class="w-full h-40 object-cover">
-																				<div class="p-4">
-																								<h3 class="font-bold text-gray-900 mb-2">New Child Protection Guidelines Launched</h3>
-																								<p class="text-sm text-gray-500 mb-2">7 May 2026 | Ntcheu</p>
-																								<p class="text-gray-600 text-sm">NCC introduces new child protection guidelines, as one of the ways
-																												to help…</p>
-																								<a href="#"
-																												class="inline-block mt-2 text-sm font-semibold text-green-700 hover:underline">Read
-																												More ></a>
-																				</div>
-																</div>
-																<!-- News Card -->
-																<div class="bg-white rounded-lg shadow-md overflow-hidden">
-																				<img src="{{ asset("images/news3.png") }}" alt="News 3" class="w-full h-40 object-cover">
-																				<div class="p-4">
-																								<h3 class="font-bold text-gray-900 mb-2">NCC Meets Youth Leaders to Promote Child Participation
-																								</h3>
-																								<p class="text-sm text-gray-500 mb-2">7 May 2026 | Mzuzu</p>
-																								<p class="text-gray-600 text-sm">The National Children’s Commission (NCC) held a meeting with youth
-																												leaders to discuss strategies for promoting child participation in community development
-																												initiatives.</p>
-																								<a href="#"
-																												class="inline-block mt-2 text-sm font-semibold text-green-700 hover:underline">Read
-																												More ></a>
-																				</div>
-																</div>
+																@endforelse
 												</div>
-												<!-- Hidden additional news cards -->
-												<div x-show="showMoreNews" class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
-																<!-- News Card -->
-																<div class="bg-white rounded-lg shadow-md overflow-hidden">
-																				<img src="{{ asset("images/image1.jpg") }}" alt="News 4" class="w-full h-40 object-cover">
-																				<div class="p-4">
-																								<h3 class="font-bold text-gray-900 mb-2">NCC Commissioners Visit Dedza Border Post to Strengthen
-																												Child
-																												Protection</h3>
-																								<p class="text-sm text-gray-500 mb-2">5 August 2026 | Lilongwe</p>
-																								<p class="text-gray-600 text-sm">Visited the Dedza Border Post to appreciate the child protection
-																												services being offered at the facility.</p>
-																								<a href="#"
-																												class="inline-block mt-2 text-sm font-semibold text-green-700 hover:underline">Read
-																												More ></a>
-																				</div>
+
+												@if (($latestNews ?? collect())->count() > 3)
+																<div x-show="showMoreNews" class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+																				@foreach(($latestNews ?? collect())->slice(3) as $article)
+																								<article class="bg-white rounded-lg shadow-md overflow-hidden">
+																												<a href="{{ $article->public_url }}" class="block">
+																																<img src="{{ $article->image_path ? $article->image_url . '?v=' . $article->updated_at->timestamp : asset('images/news1.png') }}" alt="{{ $article->alt_text ?: $article->title }}" class="w-full h-40 object-cover">
+																												</a>
+																												<div class="p-4">
+																																<h3 class="font-bold text-gray-900 mb-2">{{ $article->title }}</h3>
+																																@if ($article->published_on || $article->location)
+																																				<p class="text-sm text-gray-500 mb-2">
+																																								{{ $article->published_on?->format('j F Y') }}@if($article->published_on && $article->location) | @endif{{ $article->location }}
+																																				</p>
+																																@endif
+																																@if ($article->description)
+																																				<p class="text-gray-600 text-sm">{{ str($article->description)->limit(120) }}</p>
+																																@endif
+																																<a href="{{ $article->public_url }}" class="inline-block mt-2 text-sm font-semibold text-green-700 hover:underline">Read More ></a>
+																												</div>
+																								</article>
+																				@endforeach
 																</div>
-																<!-- News Card -->
-																<div class="bg-white rounded-lg shadow-md overflow-hidden">
-																				<img src="{{ asset("images/image6.jpg") }}" alt="News 5" class="w-full h-40 object-cover">
-																				<div class="p-4">
-																								<h3 class="font-bold text-gray-900 mb-2">CHIEF MALEMIA SENTENCED TO 21 YEARS IN PRISON</h3>
-																								<p class="text-sm text-gray-500 mb-2">1 August 2026 | Blantyre</p>
-																								<p class="text-gray-600 text-sm">The National Children’s Commission (NCC) welcomes the sentencing
-																												of Traditional Authority Malemia to 21 years’ imprisonment.</p>
-																								<a href="#"
-																												class="inline-block mt-2 text-sm font-semibold text-green-700 hover:underline">Read
-																												More ></a>
-																				</div>
+																<div class="mt-8 text-center" x-show="!showMoreNews">
+																				<button @click="showMoreNews = true" class="bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-md font-semibold transition duration-200">Load More</button>
 																</div>
-																<!-- News Card -->
-																<div class="bg-white rounded-lg shadow-md overflow-hidden">
-																				<img src="{{ asset("images/image3.jpg") }}" alt="News 6" class="w-full h-40 object-cover">
-																				<div class="p-4">
-																								<h3 class="font-bold text-gray-900 mb-2">Save the Children was honored to host the National
-																												Children’s
-																												Commission of Malawi (NCC)</h3>
-																								<p class="text-sm text-gray-500 mb-2">20 July 2026 | Zomba</p>
-																								<p class="text-gray-600 text-sm">He committed that Save the Children will continue to walk
-																												hand-in-hand with the NCC.</p>
-																								<a href="#"
-																												class="inline-block mt-2 text-sm font-semibold text-green-700 hover:underline">Read
-																												More ></a>
-																				</div>
+																<div class="mt-8 text-center" x-show="showMoreNews">
+																				<button @click="showMoreNews = false" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md font-semibold transition duration-200">Show Less</button>
 																</div>
-																<!-- News Card -->
-																<div class="bg-white rounded-lg shadow-md overflow-hidden">
-																				<img src="{{ asset("images/image4.jpg") }}" alt="News 7" class="w-full h-40 object-cover">
-																				<div class="p-4">
-																								<h3 class="font-bold text-gray-900 mb-2">National Children’s Commission Appreciates World Vision’s
-																												Support for Children</h3>
-																								<p class="text-sm text-gray-500 mb-2">14 July 2026 | Kasungu</p>
-																								<p class="text-gray-600 text-sm">The Commissioners interacted with beneficiaries around Mtengo
-																												wambalame communities in T/A Kalumo.</p>
-																								<a href="#"
-																												class="inline-block mt-2 text-sm font-semibold text-green-700 hover:underline">Read
-																												More ></a>
-																				</div>
-																</div>
-																<!-- News Card -->
-																<div class="bg-white rounded-lg shadow-md overflow-hidden">
-																				<img src="{{ asset("images/cc1.jpg") }}" alt="News 8" class="w-full h-40 object-cover">
-																				<div class="p-4">
-																								<h3 class="font-bold text-gray-900 mb-2">Child Protection Policy Review Underway</h3>
-																								<p class="text-sm text-gray-500 mb-2">12 May 2026 | Salima</p>
-																								<p class="text-gray-600 text-sm">Stakeholders gather to review and strengthen existing
-																												child protection policies and frameworks.</p>
-																								<a href="#"
-																												class="inline-block mt-2 text-sm font-semibold text-green-700 hover:underline">Read
-																												More ></a>
-																				</div>
-																</div>
-																<!-- News Card -->
-																<div class="bg-white rounded-lg shadow-md overflow-hidden">
-																				<img src="{{ asset("images/news1.png") }}" alt="News 9" class="w-full h-40 object-cover">
-																				<div class="p-4">
-																								<h3 class="font-bold text-gray-900 mb-2">NCC Celebrates Milestone in District Coverage</h3>
-																								<p class="text-sm text-gray-500 mb-2">13 May 2026 | Mangochi</p>
-																								<p class="text-gray-600 text-sm">NCC reaches new districts, expanding child protection
-																												services to more vulnerable communities.</p>
-																								<a href="#"
-																												class="inline-block mt-2 text-sm font-semibold text-green-700 hover:underline">Read
-																												More ></a>
-																				</div>
-																</div>
-												</div>
-												<!-- Load More Button -->
-												<div class="mt-8 text-center" x-show="!showMoreNews">
-																<button @click="showMoreNews = true"
-																				class="bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-md font-semibold transition duration-200">
-																				Load More
-																</button>
-												</div>
-												<!-- Show Less Button -->
-												<div class="mt-8 text-center" x-show="showMoreNews">
-																<button @click="showMoreNews = false"
-																				class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md font-semibold transition duration-200">
-																				Show Less
-																</button>
-												</div>
+												@endif
 								</div>
 				</section>
-
-				<!-- moments that matter section -->
+<!-- moments that matter section -->
 				<section class="py-12 px-6 md:px-12 bg-white">
 
 								<div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-6">
 												@forelse($news as $article)
 																<article class="overflow-hidden bg-white shadow rounded-[10px]">
-																				<img src="{{ $article->image_path ? asset("storage/" . $article->image_path . "?v=" . $article->updated_at->timestamp) : asset("images/update-1.jpg") }}"
-																								alt="{{ $article->title }}" class="w-full h-70 object-cover rounded-t-[10px]">
+																				<a href="{{ route("news") }}" class="block">
+																								<img src="{{ $article->image_path ? $article->image_url . "?v=" . $article->updated_at->timestamp : asset("images/update-1.jpg") }}"
+																												alt="{{ $article->alt_text ?: $article->title }}" class="w-full h-70 object-cover rounded-t-[10px]">
+																				</a>
 																				<div class="p-6">
-																								<h3 class="font-semibold text-xl">{{ $article->title }}</h3>
+																								<a href="{{ route("news") }}" class="font-semibold text-xl hover:text-green-700">{{ $article->title }}</a>
 																				</div>
 																</article>
 												@empty
@@ -541,3 +433,4 @@ mibextid=rS40aB7S9Ucbxw6v"
 				</section>
 
 @endsection
+

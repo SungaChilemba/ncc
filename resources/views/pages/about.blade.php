@@ -3,552 +3,332 @@
 @section("title", "About Us")
 
 @section("content")
-				<section class="relative overflow-hidden py-12 px-6 md:px-12 min-h-128" x-data="{
-	    tab: 'mandate',
-	    backgrounds: {
-	        mandate: '{{ asset("images/about-mandate.jpg") }}',
-	        mission: '{{ asset("images/about-mission.jpg") }}',
-	        vision: '{{ asset("images/about-vision.jpg") }}'
-	    },
-	    cycleInterval: null,
-	    startCycle() {
-	        this.cycleInterval = setInterval(() => {
-	            this.tab = this.tab === 'mandate' ? 'mission' : this.tab === 'mission' ? 'vision' : 'mandate'
-	        }, 8000)
-	    },
-	    stopCycle() {
-	        clearInterval(this.cycleInterval)
-	        this.cycleInterval = null
-	    }
-	}" x-init="startCycle()"
-								@mouseenter="stopCycle()" @mouseleave="startCycle()">
-								<div class="absolute inset-0">
-												<template x-for="(image, key) in backgrounds" :key="key">
-																<div x-show="tab === key" x-cloak x-transition:enter="transition-opacity duration-1000"
-																				x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-																				x-transition:leave="transition-opacity duration-1000" x-transition:leave-start="opacity-100"
-																				x-transition:leave-end="opacity-0" class="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
-																				:style="'background-image: url(' + image + ')'"></div>
-												</template>
-												<div class="absolute inset-0 z-10 bg-green-900/50"></div>
-								</div>
+    @php
+        $cards = $cmsCards ?? collect();
+        $hero = $cmsHero ?? null;
+        $stats = $cmsContent->get("stat", collect()) ?? collect();
+        $storyCards = $cards->where("category", "Mandate, Mission & Vision")->values();
+        $storyTabs = [
+            "mandate" => $storyCards->firstWhere("slug", "our-mandate"),
+            "mission" => $storyCards->firstWhere("slug", "our-mission"),
+            "vision" => $storyCards->firstWhere("slug", "our-vision"),
+        ];
+        $fallbackStory = $storyCards->first();
+        $commissioners = $cards->where("category", "Commissioners")->values();
+        $leadership = $cards->where("category", "Organogram")->values();
+        $executive = $leadership->firstWhere("slug", "chief-executive-officer") ?? $leadership->first();
+        $managers = $leadership->reject(fn ($item) => $executive && $item->is($executive))->values();
+        $exOfficials = $cards->where("category", "Ex-Officials")->values();
+        $backgrounds = collect($storyTabs)
+            ->map(fn ($item) => $item?->image_url ? $item->image_url . "?v=" . $item->updated_at->timestamp : null)
+            ->filter()
+            ->all();
+        $featureIcons = [
+            "mandate" => "fa-shield-halved",
+            "mission" => "fa-scale-balanced",
+            "vision" => "fa-bullhorn",
+        ];
+        $featureLabels = [
+            "mandate" => "Protection",
+            "mission" => "Policy & Law",
+            "vision" => "Advocacy",
+        ];
+        $featureDescriptions = [
+            "mandate" => "Safeguarding children from abuse, neglect, trafficking, and exploitation.",
+            "mission" => "Coordinating policy, law, and institutional accountability for children.",
+            "vision" => "Amplifying children's voices and strengthening national child rights action.",
+        ];
+    @endphp
 
-								<div class="relative max-w-7xl mx-auto z-20">
-												<div class="bg-white/90 border border-slate-200 rounded-2xl shadow-sm p-8 backdrop-blur-sm">
-																<div class="flex flex-wrap items-center justify-center gap-4 border-b border-slate-200 pb-6 mb-8">
-																				<button @click="tab = 'mandate'"
-																								:class="tab === 'mandate' ? 'border-b-4 border-green-600 text-green-700' : 'text-gray-600'"
-																								class="px-4 py-3 font-semibold transition duration-200">
-																								Our Mandate
-																				</button>
-																				<button @click="tab = 'mission'"
-																								:class="tab === 'mission' ? 'border-b-4 border-green-600 text-green-700' : 'text-gray-600'"
-																								class="px-4 py-3 font-semibold transition duration-200">
-																								Our Mission
-																				</button>
-																				<button @click="tab = 'vision'"
-																								:class="tab === 'vision' ? 'border-b-4 border-green-600 text-green-700' : 'text-gray-600'"
-																								class="px-4 py-3 font-semibold transition duration-200">
-																								Our Vision
-																				</button>
-																</div>
+    <section
+        class="relative overflow-hidden rounded-lg px-4 py-14 sm:px-6 lg:px-8"
+        x-data="{
+            tab: 'mandate',
+            cycleInterval: null,
+            startCycle() {
+                this.stopCycle();
+                this.cycleInterval = setInterval(() => {
+                    this.tab = this.tab === 'mandate' ? 'mission' : this.tab === 'mission' ? 'vision' : 'mandate';
+                }, 8000);
+            },
+            stopCycle() {
+                if (this.cycleInterval) {
+                    clearInterval(this.cycleInterval);
+                    this.cycleInterval = null;
+                }
+            }
+        }"
+        x-init="startCycle()"
+        @mouseenter="stopCycle()"
+        @mouseleave="startCycle()"
+    >
+        <div class="absolute inset-0">
+            @if ($hero?->image_url)
+                <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ $hero->image_url }}?v={{ $hero->updated_at->timestamp }}')"></div>
+            @endif
+            @foreach (["mandate", "mission", "vision"] as $key)
+                @if (! empty($backgrounds[$key]))
+                    <div
+                        x-show="tab === '{{ $key }}'"
+                        x-cloak
+                        x-transition.opacity.duration.700ms
+                        class="absolute inset-0 bg-cover bg-center"
+                        style="background-image: url('{{ $backgrounds[$key] }}')"
+                    ></div>
+                @endif
+            @endforeach
+            <div class="absolute inset-0 bg-green-950/65"></div>
+        </div>
 
-																<div class="space-y-6">
-																				<div x-show="tab === 'mandate'" class="grid grid-cols-1 gap-8" x-cloak>
-																								<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-																												<div class="bg-slate-50 rounded-3xl shadow-sm p-6 text-center">
-																																<i class="fa-solid fa-shield-halved text-green-600 text-3xl mb-4"></i>
-																																<h3 class="font-bold text-lg mb-2">Protection</h3>
-																																<p class="text-gray-600 text-sm">Safeguarding children from abuse and exploitation.</p>
-																												</div>
-																												<div class="bg-slate-50 rounded-3xl shadow-sm p-6 text-center">
-																																<i class="fa-solid fa-scale-balanced text-green-600 text-3xl mb-4"></i>
-																																<h3 class="font-bold text-lg mb-2">Policy & Law</h3>
-																																<p class="text-gray-600 text-sm">Monitoring child rights laws and conventions.</p>
-																												</div>
-																												<div class="bg-slate-50 rounded-3xl shadow-sm p-6 text-center">
-																																<i class="fa-solid fa-bullhorn text-green-600 text-3xl mb-4"></i>
-																																<h3 class="font-bold text-lg mb-2">Advocacy</h3>
-																																<p class="text-gray-600 text-sm">Amplifying children’s voices in society.</p>
-																												</div>
-																								</div>
-																								<div class="bg-slate-50 rounded-3xl p-8 shadow-sm">
-																												<h2 class="text-xl font-bold text-green-700 mb-4">What the Commission is Mandated to Do</h2>
-																												<p class="text-gray-700 mb-6">
-																																The Commission was established under the Child Care, Protection and Justice Act to serve as
-																																the independent authority for promoting and protecting children’s rights across all 28
-																																districts.
-																																We collaborate with government ministries, civil society, and communities to ensure every
-																																child in Malawi grows up safe and able to reach their full potential.
-																												</p>
-																												<div class="flex flex-wrap gap-3">
-																																<span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">Child
-																																				Protection</span>
-																																<span
-																																				class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">Rights
-																																				Monitoring</span>
-																																<span
-																																				class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">Community
-																																				Engagement</span>
-																																<span
-																																				class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">Education
-																																				Access</span>
-																																<span
-																																				class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">Policy
-																																				Reform</span>
-																												</div>
-																								</div>
-																				</div>
+        <div class="relative z-10 mx-auto max-w-7xl">
+            <div class="mb-8 max-w-4xl text-white">
+                <p class="text-sm font-semibold uppercase tracking-wide text-green-100">{{ $hero?->subtitle ?: "Championing the Rights of Children in Malawi" }}</p>
+                <h1 class="mt-3 text-3xl font-bold md:text-5xl">{{ $hero?->title ?: "About Us" }}</h1>
+                @if ($hero?->description)
+                    <p class="mt-4 max-w-3xl text-base leading-7 text-white/90">{{ $hero->description }}</p>
+                @endif
+            </div>
 
-																				<div x-show="tab === 'mission'" class="grid grid-cols-1 gap-8" x-cloak>
-																								<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-																												<div class="bg-slate-50 rounded-3xl shadow-sm p-6 text-center">
-																																<i class="fa-solid fa-shield-halved text-green-600 text-3xl mb-4"></i>
-																																<h3 class="font-bold text-lg mb-2">Protection</h3>
-																																<p class="text-gray-600 text-sm">Safeguarding children from abuse and exploitation.</p>
-																												</div>
-																												<div class="bg-slate-50 rounded-3xl shadow-sm p-6 text-center">
-																																<i class="fa-solid fa-scale-balanced text-green-600 text-3xl mb-4"></i>
-																																<h3 class="font-bold text-lg mb-2">Policy & Law</h3>
-																																<p class="text-gray-600 text-sm">Monitoring child rights laws and conventions.</p>
-																												</div>
-																												<div class="bg-slate-50 rounded-3xl shadow-sm p-6 text-center">
-																																<i class="fa-solid fa-bullhorn text-green-600 text-3xl mb-4"></i>
-																																<h3 class="font-bold text-lg mb-2">Advocacy</h3>
-																																<p class="text-gray-600 text-sm">Amplifying children’s voices in society.</p>
-																												</div>
-																								</div>
-																								<div class="bg-slate-50 rounded-3xl p-8 shadow-sm">
-																												<h2 class="text-xl font-bold text-green-700 mb-4">What the Commission is Mandated to Do</h2>
-																												<p class="text-gray-700 mb-6">
-																																The Commission was established under the Child Care, Protection and Justice Act to serve as
-																																the independent authority for promoting and protecting children’s rights across all 28
-																																districts.
-																																We collaborate with government ministries, civil society, and communities to ensure every
-																																child in Malawi grows up safe and able to reach their full potential.
-																												</p>
-																												<div class="flex flex-wrap gap-3">
-																																<span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">Child
-																																				Protection</span>
-																																<span
-																																				class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">Rights
-																																				Monitoring</span>
-																																<span
-																																				class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">Community
-																																				Engagement</span>
-																																<span
-																																				class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">Education
-																																				Access</span>
-																																<span
-																																				class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">Policy
-																																				Reform</span>
-																												</div>
-																								</div>
-																				</div>
+            <div class="rounded-lg border border-white/30 bg-white/95 p-5 shadow-lg backdrop-blur sm:p-8">
+                <div class="mb-8 flex flex-wrap items-center justify-center gap-3 border-b border-slate-200 pb-5">
+                    @foreach (["mandate" => "Our Mandate", "mission" => "Our Mission", "vision" => "Our Vision"] as $key => $label)
+                        <button
+                            type="button"
+                            @click="tab = '{{ $key }}'"
+                            :class="tab === '{{ $key }}' ? 'border-green-700 text-green-700' : 'border-transparent text-gray-600 hover:text-green-700'"
+                            class="border-b-4 px-4 py-3 font-semibold transition"
+                        >
+                            {{ $label }}
+                        </button>
+                    @endforeach
+                </div>
 
-																				<div x-show="tab === 'vision'" class="grid grid-cols-1 gap-8" x-cloak>
-																								<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-																												<div class="bg-slate-50 rounded-3xl shadow-sm p-6 text-center">
-																																<i class="fa-solid fa-shield-halved text-green-600 text-3xl mb-4"></i>
-																																<h3 class="font-bold text-lg mb-2">Protection</h3>
-																																<p class="text-gray-600 text-sm">Safeguarding children from abuse and exploitation.</p>
-																												</div>
-																												<div class="bg-slate-50 rounded-3xl shadow-sm p-6 text-center">
-																																<i class="fa-solid fa-scale-balanced text-green-600 text-3xl mb-4"></i>
-																																<h3 class="font-bold text-lg mb-2">Policy & Law</h3>
-																																<p class="text-gray-600 text-sm">Monitoring child rights laws and conventions.</p>
-																												</div>
-																												<div class="bg-slate-50 rounded-3xl shadow-sm p-6 text-center">
-																																<i class="fa-solid fa-bullhorn text-green-600 text-3xl mb-4"></i>
-																																<h3 class="font-bold text-lg mb-2">Advocacy</h3>
-																																<p class="text-gray-600 text-sm">Amplifying children’s voices in society.</p>
-																												</div>
-																								</div>
-																								<div class="bg-slate-50 rounded-3xl p-8 shadow-sm">
-																												<h2 class="text-xl font-bold text-green-700 mb-4">What the Commission is Mandated to Do</h2>
-																												<p class="text-gray-700 mb-6">
-																																The Commission was established under the Child Care, Protection and Justice Act to serve as
-																																the independent authority for promoting and protecting children’s rights across all 28
-																																districts.
-																																We collaborate with government ministries, civil society, and communities to ensure every
-																																child in Malawi grows up safe and able to reach their full potential.
-																												</p>
-																												<div class="flex flex-wrap gap-3">
-																																<span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">Child
-																																				Protection</span>
-																																<span
-																																				class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">Rights
-																																				Monitoring</span>
-																																<span
-																																				class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">Community
-																																				Engagement</span>
-																																<span
-																																				class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">Education
-																																				Access</span>
-																																<span
-																																				class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">Policy
-																																				Reform</span>
-																												</div>
-																								</div>
-																				</div>
-																</div>
-												</div>
-								</div>
-				</section>
+                @foreach ($storyTabs as $key => $item)
+                    @php
+                        $tabItem = $item ?: $fallbackStory;
+                    @endphp
+                    @if ($tabItem)
+                        <div x-show="tab === '{{ $key }}'" x-cloak class="space-y-7">
+                            <div class="grid grid-cols-1 gap-5 md:grid-cols-3">
+                                @foreach (["mandate", "mission", "vision"] as $feature)
+                                    <div class="rounded-lg bg-slate-50 p-5 text-center shadow-sm">
+                                        <i class="fa-solid {{ $featureIcons[$feature] }} mb-4 text-3xl text-green-700"></i>
+                                        <h3 class="text-lg font-bold">{{ $featureLabels[$feature] }}</h3>
+                                        <p class="mt-2 text-sm leading-6 text-gray-600">{{ $featureDescriptions[$feature] }}</p>
+                                    </div>
+                                @endforeach
+                            </div>
 
-				<div class="max-w-8xl mx-auto px-4 py-10">
-								<!-- Tabs -->
-								<div class="flex space-x-4 border-b mb-6">
-												<button class="tab-btn px-4 py-2 font-semibold text-blue-600 border-b-2 border-blue-600"
-																data-tab="commissioners">
-																Commissioners
-												</button>
-												<button class="tab-btn px-4 py-2 font-semibold text-gray-600 hover:text-blue-600" data-tab="ex-officials">
-																Ex-Officials
-												</button>
-												<button class="tab-btn px-4 py-2 font-semibold text-gray-600 hover:text-blue-600" data-tab="managers">
-																Management
-												</button>
-								</div>
+                            <div class="rounded-lg bg-slate-50 p-6 shadow-sm sm:p-8">
+                                <p class="text-sm font-semibold uppercase tracking-wide text-green-700">{{ $tabItem->subtitle }}</p>
+                                <h2 class="mt-2 text-2xl font-bold text-slate-950">{{ $tabItem->title }}</h2>
+                                @if ($tabItem->description)
+                                    <div class="mt-4 space-y-3 text-gray-700">
+                                        @foreach (preg_split("/\n\s*\n/", $tabItem->description) as $paragraph)
+                                            <p>{{ $paragraph }}</p>
+                                        @endforeach
+                                    </div>
+                                @endif
+                                <div class="mt-6 flex flex-wrap gap-3">
+                                    @foreach (["Child Protection", "Rights Monitoring", "Community Engagement", "Education Access", "Policy Reform"] as $tag)
+                                        <span class="rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-700">{{ $tag }}</span>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                @endforeach
+            </div>
+        </div>
+    </section>
 
-								<!-- Commissioners -->
-								<div id="commissioners" class="tab-content grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-												<div class="bg-white shadow rounded-lg p-4 flex flex-col items-center">
-																<img src="{{ asset("images/vincent-mwakawawa.jpg") }}"
-																				class="w-32 h-40  object-cover transform transition duration-300 hover:scale-110 mb-4 rounded-md"
-																				alt="Vincent Mwakawawa">
-																<h3 class="text-lg font-bold">Mr Vincent Mwakawawa</h3>
-																<p class="text-gray-600">Chairperson</p>
-																<button onclick="document.getElementById('bio-modal-vincent').classList.remove('hidden')"
-																				class="mt-2 text-sm text-green-600 hover:underline font-semibold transition duration-200">View
-																				Biography</button>
-												</div>
-												<div class="bg-white shadow rounded-lg p-4 flex flex-col items-center">
-																<img src="{{ asset("images/benedicto-khondowe.jpg") }}"
-																				class="w-32 h-40 object-cover transform transition duration-300 hover:scale-110 mb-4 rounded-md"
-																				alt="Benedicto Khondowe">
-																<h3 class="text-lg font-bold">Mr Benedicto Khondowe</h3>
-																<p class="text-gray-600">Vice Chairperson</p>
-																<button onclick="document.getElementById('bio-modal-benedicto').classList.remove('hidden')"
-																				class="mt-2 text-sm text-green-600 hover:underline font-semibold transition duration-200">View
-																				Biography</button>
-												</div>
-												<div class="bg-white shadow rounded-lg p-4 flex flex-col items-center">
-																<img src="{{ asset("images/lucy-kapachira.jpg") }}"
-																				class="w-32 h-40 object-cover transform transition duration-300 hover:scale-110 mb-4 rounded-md"
-																				alt="Lucy Kapachira">
-																<h3 class="text-lg font-bold">Dr Lucy Kapachira</h3>
-																<p class="text-gray-600">Chair, Corporate Division</p>
-																<button onclick="document.getElementById('bio-lucy-kapachira').classList.remove('hidden')"
-																				class="mt-2 text-sm text-green-600 hover:underline font-semibold transition duration-200">View
-																				Biography</button>
-												</div>
+    <section class="px-4 py-12 sm:px-6 lg:px-8" x-data="{ peopleTab: 'commissioners' }">
+        <div class="mx-auto max-w-7xl">
+            <div class="mb-6 flex flex-wrap gap-4 border-b border-slate-200">
+                @foreach (["commissioners" => "Commissioners", "exOfficials" => "Ex-Officials", "management" => "Management"] as $key => $label)
+                    <button
+                        type="button"
+                        @click="peopleTab = '{{ $key }}'"
+                        :class="peopleTab === '{{ $key }}' ? 'border-green-700 text-green-700' : 'border-transparent text-gray-600 hover:text-green-700'"
+                        class="border-b-2 px-4 py-3 font-semibold transition"
+                    >
+                        {{ $label }}
+                    </button>
+                @endforeach
+            </div>
 
-												<div class="bg-white shadow rounded-lg p-4 flex flex-col items-center">
-																<img src="{{ asset("images/laika-milanzi.jpg") }}"
-																				class="w-32 h-40 object-cover transform transition duration-300 hover:scale-110 mb-4 rounded-md"
-																				alt="Laika Milanzi">
-																<h3 class="text-lg font-bold">Mrs Laika Milanzi</h3>
-																<p class="text-gray-600">Chair, Compliance Division</p>
-																<button onclick="document.getElementById('bio-laika-milanzi').classList.remove('hidden')"
-																				class="mt-2 text-sm text-green-600 hover:underline font-semibold transition duration-200">View
-																				Biography</button>
-												</div>
-												<div class="bg-white shadow rounded-lg p-4 flex flex-col items-center">
-																<img src="{{ asset("images/julia-chimuna.jpg") }}"
-																				class="w-32 h-40 object-cover transform transition duration-300 hover:scale-110 mb-4 rounded-md"
-																				alt="Julia Chimuna">
-																<h3 class="text-lg font-bold">Mrs Julia Chimuna</h3>
-																<p class="text-gray-600">Chair, Documentation & Learning Division</p>
-																<button onclick="document.getElementById('bio-julia-chimuna').classList.remove('hidden')"
-																				class="mt-2 text-sm text-green-600 hover:underline font-semibold transition duration-200">View
-																				Biography</button>
-												</div>
-								</div>
+            <div x-show="peopleTab === 'commissioners'" x-cloak>
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
+                    @forelse ($commissioners as $person)
+                        @php
+                            $bioSections = collect($person->data["bio_sections"] ?? [])
+                                ->filter(fn ($section) => ! empty($section["heading"]) || ! empty($section["body"]));
 
-								<!-- Managers (hidden by default) -->
-								<div id="managers" class="tab-content hidden">
-												<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-																@foreach (["vincent-mwakawawa.jpg", "benedicto-khondowe.jpg", "lucy-kapachira.jpg", "laika-milanzi.jpg"] as $img)
-																				<div class="bg-white shadow rounded-lg p-4 flex flex-col items-center">
-																								<div class="overflow-hidden rounded-md mb-4">
-																												<img src="{{ asset("images/" . $img) }}"
-																																class="w-32 h-40 object-cover transform transition duration-300 hover:scale-110"
-																																alt="Manager">
-																								</div>
-																								<h3 class="text-lg font-bold">Manager Name</h3>
-																								<p class="text-gray-600">Manager Position</p>
-																				</div>
-																@endforeach
-												</div>
-								</div>
+                            if ($bioSections->isEmpty() && $person->description) {
+                                $bioSections = collect([
+                                    [
+                                        "heading" => "Professional Background",
+                                        "body" => $person->description,
+                                    ],
+                                    [
+                                        "heading" => "Education & Certifications",
+                                        "body" => "This profile can be expanded in the CMS with education, certifications, and professional development details.",
+                                    ],
+                                ]);
+                            }
+                        @endphp
+                        <article class="flex flex-col items-center rounded-lg bg-white p-4 text-center shadow" x-data="{ bioOpen: false }">
+                            @if ($person->image_url)
+                                <img src="{{ $person->image_url }}?v={{ $person->updated_at->timestamp }}" class="mb-4 h-40 w-32 rounded-md object-cover transition duration-300 hover:scale-105" alt="{{ $person->alt_text ?: $person->title }}">
+                            @endif
+                            <h3 class="text-lg font-bold">{{ $person->title }}</h3>
+                            <p class="text-sm text-gray-600">{{ $person->subtitle }}</p>
+                            @if ($bioSections->isNotEmpty())
+                                <button
+                                    type="button"
+                                    @click="bioOpen = true"
+                                    class="mt-3 text-sm font-semibold text-green-700 hover:underline"
+                                >
+                                    View Biography
+                                </button>
+                            @endif
 
-								<!-- Ex-Officials (hidden by default) -->
-								<div id="ex-officials" class="tab-content hidden">
-												<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-																@foreach (["vincent-mwakawawa.jpg", "benedicto-khondowe.jpg", "lucy-kapachira.jpg"] as $img)
-																				<div class="bg-white shadow rounded-lg p-4 flex flex-col items-center">
-																								<div class="overflow-hidden rounded-md mb-4">
-																												<img src="{{ asset("images/" . $img) }}"
-																																class="w-32 h-40 object-cover transform transition duration-300 hover:scale-110"
-																																alt="Ex-Official">
-																								</div>
-																								<h3 class="text-lg font-bold">Ex-Official Name</h3>
-																								<p class="text-gray-600">Ex-Official Position</p>
-																				</div>
-																@endforeach
-												</div>
-								</div>
-								<!-- Organogram -->
-								<div class="mt-12">
-												<div class="flex flex-col items-center">
-																<!-- CEO -->
-																<div class="bg-green-500 text-white font-bold px-6 py-3 rounded-lg shadow">
-																				Chief Executive Officer
-																</div>
+                            @if ($bioSections->isNotEmpty())
+                                <div
+                                    x-show="bioOpen"
+                                    x-cloak
+                                    x-transition.opacity.duration.300ms
+                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm"
+                                    @click.self="bioOpen = false"
+                                    @keydown.escape.window="bioOpen = false"
+                                >
+                                    <div
+                                        x-show="bioOpen"
+                                        x-transition:enter="transition ease-out duration-300"
+                                        x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+                                        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                                        x-transition:leave="transition ease-in duration-200"
+                                        x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                                        x-transition:leave-end="opacity-0 translate-y-3 scale-95"
+                                        class="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6 text-left shadow-xl"
+                                    >
+                                        <button type="button" @click="bioOpen = false" class="absolute right-4 top-4 text-gray-400 transition hover:text-gray-600" aria-label="Close biography">
+                                            <i class="fa-solid fa-xmark text-xl"></i>
+                                        </button>
+                                        <div class="mb-6 text-center">
+                                            @if ($person->image_url)
+                                                <img src="{{ $person->image_url }}?v={{ $person->updated_at->timestamp }}" class="mx-auto mb-3 h-24 w-24 rounded-full object-cover" alt="{{ $person->alt_text ?: $person->title }}">
+                                            @endif
+                                            <h3 class="text-xl font-bold">{{ $person->title }}</h3>
+                                            <p class="text-gray-600">{{ $person->subtitle }}</p>
+                                        </div>
+                                        <div class="space-y-5 text-gray-700">
+                                            @foreach ($bioSections as $section)
+                                                <div>
+                                                    @if (! empty($section["heading"]))
+                                                        <h4 class="mb-2 font-semibold text-green-700">{{ $section["heading"] }}</h4>
+                                                    @endif
+                                                    @if (! empty($section["body"]))
+                                                        <div class="space-y-3 text-sm leading-6">
+                                                            @foreach (preg_split("/\n\s*\n/", $section["body"]) as $paragraph)
+                                                                <p>{{ $paragraph }}</p>
+                                                            @endforeach
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        </article>
+                    @empty
+                        <p class="rounded-lg bg-white p-6 text-gray-600 shadow-sm">No commissioners have been published yet.</p>
+                    @endforelse
+                </div>
+            </div>
 
-																<!-- Line -->
-																<div class="h-12 w-1 bg-green-500"></div>
+            <div x-show="peopleTab === 'exOfficials'" x-cloak>
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    @forelse ($exOfficials as $person)
+                        <article class="flex flex-col items-center rounded-lg bg-white p-4 text-center shadow">
+                            @if ($person->image_url)
+                                <img src="{{ $person->image_url }}?v={{ $person->updated_at->timestamp }}" class="mb-4 h-40 w-32 rounded-md object-cover transition duration-300 hover:scale-105" alt="{{ $person->alt_text ?: $person->title }}">
+                            @endif
+                            <h3 class="text-lg font-bold">{{ $person->title }}</h3>
+                            <p class="text-sm text-gray-600">{{ $person->subtitle }}</p>
+                        </article>
+                    @empty
+                        <p class="rounded-lg bg-white p-6 text-gray-600 shadow-sm">No ex-officials have been published yet.</p>
+                    @endforelse
+                </div>
+            </div>
 
-																<!-- Managers -->
-																<div class="flex flex-wrap mb-8 justify-center gap-20">
-																				<div class="bg-green-500 text-white font-bold px-6 py-3 rounded-lg shadow">
-																								Director of Compliance
-																				</div>
-																				<div class="bg-green-500 text-white font-bold px-6 py-3 rounded-lg shadow">
-																								Finance Manager
-																				</div>
-																				<div class="bg-green-500 text-white font-bold px-6 py-3 rounded-lg shadow">
-																								Human Resource Manager
-																				</div>
-																</div>
-												</div>
-								</div>
-				</div>
+            <div x-show="peopleTab === 'management'" x-cloak>
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    @forelse ($leadership as $person)
+                        <article class="rounded-lg bg-white p-5 text-center shadow">
+                            <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-green-700">
+                                <i class="fa-solid fa-user-tie text-xl"></i>
+                            </div>
+                            <h3 class="text-lg font-bold">{{ $person->title }}</h3>
+                            @if ($person->description)
+                                <p class="mt-2 text-sm leading-6 text-gray-600">{{ $person->description }}</p>
+                            @endif
+                        </article>
+                    @empty
+                        <p class="rounded-lg bg-white p-6 text-gray-600 shadow-sm">No management roles have been published yet.</p>
+                    @endforelse
+                </div>
+            </div>
 
-				<!-- Simple Tab Script -->
-				<script>
-								document.querySelectorAll('.tab-btn').forEach(btn => {
-												btn.addEventListener('click', () => {
-																// Reset all buttons
-																document.querySelectorAll('.tab-btn').forEach(b => {
-																				b.classList.remove('text-blue-600', 'border-blue-600');
-																				b.classList.add('text-gray-600');
-																				b.classList.remove('border-b-2');
-																});
-																// Highlight active
-																btn.classList.add('text-blue-600', 'border-blue-600', 'border-b-2');
+            @if ($executive || $managers->isNotEmpty())
+                <div class="mt-12 rounded-lg bg-white px-5 py-8 shadow-sm">
+                    <h2 class="mb-8 text-center text-2xl font-bold text-slate-950">Organogram</h2>
+                    <div class="flex flex-col items-center">
+                        @if ($executive)
+                            <div class="rounded-lg bg-green-600 px-6 py-3 text-center font-bold text-white shadow">
+                                {{ $executive->title }}
+                            </div>
+                        @endif
+                        @if ($managers->isNotEmpty())
+                            <div class="h-12 w-1 bg-green-600"></div>
+                            <div class="flex flex-wrap justify-center gap-5 md:gap-12">
+                                @foreach ($managers as $manager)
+                                    <div class="rounded-lg bg-green-600 px-6 py-3 text-center font-bold text-white shadow">
+                                        {{ $manager->title }}
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
+        </div>
+    </section>
 
-																// Hide all content
-																document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-																// Show selected
-																document.getElementById(btn.dataset.tab).classList.remove('hidden');
-												});
-								});
-				</script>
+    @if ($stats->isNotEmpty())
+        <section class="px-4 py-12 sm:px-6 lg:px-8">
+            <div class="mx-auto grid max-w-7xl grid-cols-2 gap-6 text-center md:grid-cols-4">
+                @foreach ($stats as $stat)
+                    <div class="rounded-lg bg-white p-5 shadow-sm">
+                        <h3 class="text-2xl font-bold text-green-700">{{ $stat->title }}</h3>
+                        <p class="mt-1 text-sm text-gray-600">{{ $stat->description }}</p>
+                    </div>
+                @endforeach
+            </div>
+        </section>
+    @endif
 
-				<!-- Statistics Section -->
-				<section class="py-12 px-6 md:px-12">
-								<div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-												<div>
-																<h3 class="text-2xl font-bold text-green-700">1,249</h3>
-																<p>Children Supported</p>
-												</div>
-												<div>
-																<h3 class="text-2xl font-bold text-green-700">2,000+</h3>
-																<p>Families Reached</p>
-												</div>
-												<div>
-																<h3 class="text-2xl font-bold text-green-700">6,000</h3>
-																<p>Community Members</p>
-												</div>
-												<div>
-																<h3 class="text-2xl font-bold text-green-700">28</h3>
-																<p>Districts Covered</p>
-												</div>
-								</div>
-				</section>
-
-				<!-- Biography Modal -->
-				<div id="bio-modal-vincent" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 hidden"
-								onclick="this.classList.add('hidden')">
-								<div class="bg-white rounded-2xl shadow-xl max-w-lg w-full mx-4 p-6 relative" onclick="event.stopPropagation()">
-												<button onclick="document.getElementById('bio-modal-vincent').classList.add('hidden')"
-																class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition duration-200">
-																<i class="fa-solid fa-xmark text-xl"></i>
-												</button>
-												<div class="text-center mb-6">
-																<img src="{{ asset("images/vincent-mwakawawa.jpg") }}"
-																				class="w-24 h-24 rounded-full mx-auto mb-3 object-cover" alt="Vincent Mwakawawa">
-																<h3 class="text-xl font-bold">Mr Vincent Mwakawawa</h3>
-																<p class="text-gray-600">Chairperson</p>
-												</div>
-												<div class="space-y-4 text-gray-700">
-																<div>
-																				<h4 class="font-semibold text-green-700 mb-1">Professional Background</h4>
-																				<p class="text-sm">Mr. Mwakawawa has over two decades of experience in child protection policy and
-																								advocacy across Malawi. He has led initiatives to strengthen legislative frameworks for children's
-																								rights and has worked extensively with government ministries and community organizations. His career
-																								has focused on ensuring vulnerable children have access to safety, education, and justice.</p>
-																</div>
-																<div>
-																				<h4 class="font-semibold text-green-700 mb-1">Education &amp; Certifications</h4>
-																				<p class="text-sm">Mr. Mwakawawa holds a degree in Social Work from a recognized institution and has
-																								completed advanced certifications in child rights and protection. He has attended numerous
-																								professional development programs on advocacy, policy reform, and community engagement. He is a
-																								registered member of relevant professional bodies in the social services sector.</p>
-																</div>
-												</div>
-								</div>
-				</div>
-
-				<!-- Biography Modal for Benedicto Khondowe -->
-				<div id="bio-modal-benedicto" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 hidden"
-								onclick="this.classList.add('hidden')">
-								<div class="bg-white rounded-2xl shadow-xl max-w-lg w-full mx-4 p-6 relative" onclick="event.stopPropagation()">
-												<button onclick="document.getElementById('bio-modal-benedicto').classList.add('hidden')"
-																class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition duration-200">
-																<i class="fa-solid fa-xmark text-xl"></i>
-												</button>
-												<div class="text-center mb-6">
-																<img src="{{ asset("images/benedicto-khondowe.jpg") }}"
-																				class="w-24 h-24 rounded-full mx-auto mb-3 object-cover" alt="Benedicto Khondowe">
-																<h3 class="text-xl font-bold">Mr Benedicto Khondowe</h3>
-																<p class="text-gray-600">Vice Chairperson</p>
-												</div>
-												<div class="space-y-4 text-gray-700">
-																<div>
-																				<h4 class="font-semibold text-green-700 mb-1">Professional Background</h4>
-																				<p class="text-sm">Mr. Khondowe has over two decades of experience in child protection policy and
-																								advocacy across Malawi. He has led initiatives to strengthen legislative frameworks for children's
-																								rights and has worked extensively with government ministries and community organizations. His career
-																								has focused on ensuring vulnerable children have access to safety, education, and justice.</p>
-																</div>
-																<div>
-																				<h4 class="font-semibold text-green-700 mb-1">Education &amp; Certifications</h4>
-																				<p class="text-sm">Mr. Khondowe holds a degree in Social Work from a recognized institution and has
-																								completed advanced certifications in child rights and protection. He has attended numerous
-																								professional development programs on advocacy, policy reform, and community engagement. He is a
-																								registered member of relevant professional bodies in the social services sector.</p>
-																</div>
-												</div>
-								</div>
-				</div>
-
-				<!-- Biography Modal for DR lucy Kapachira -->
-				<div id="bio-lucy-kapachira" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 hidden"
-								onclick="this.classList.add('hidden')">
-								<div class="bg-white rounded-2xl shadow-xl max-w-lg w-full mx-4 p-6 relative" onclick="event.stopPropagation()">
-												<button onclick="document.getElementById('bio-lucy-kapachira').classList.add('hidden')"
-																class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition duration-200">
-																<i class="fa-solid fa-xmark text-xl"></i>
-												</button>
-												<div class="text-center mb-6">
-																<img src="{{ asset("images/lucy-kapachira.jpg") }}"
-																				class="w-24 h-24 rounded-full mx-auto mb-3 object-cover" alt="Benedicto Khondowe">
-																<h3 class="text-xl font-bold">DR Lucy Kapachira</h3>
-																<p class="text-gray-600">Chair, Coorporate Division</p>
-												</div>
-												<div class="space-y-4 text-gray-700">
-																<div>
-																				<h4 class="font-semibold text-green-700 mb-1">Professional Background</h4>
-																				<p class="text-sm">Dr Lucy Kapachira has over two decades of experience in child protection policy and
-																								advocacy across Malawi. He has led initiatives to strengthen legislative frameworks for children's
-																								rights and has worked extensively with government ministries and community organizations. His career
-																								has focused on ensuring vulnerable children have access to safety, education, and justice.</p>
-																</div>
-																<div>
-																				<h4 class="font-semibold text-green-700 mb-1">Education &amp; Certifications</h4>
-																				<p class="text-sm">Dr Lucy Kapachira holds a PHD in Social Work from a recognized institution and has
-																								completed advanced certifications in child rights and protection. He has attended numerous
-																								professional development programs on advocacy, policy reform, and community engagement. He is a
-																								registered member of relevant professional bodies in the social services sector.</p>
-																</div>
-												</div>
-								</div>
-				</div>
-
-				<!-- Biography Modal for Mrs Laika Milanzi -->
-				<div id="bio-laika-milanzi" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 hidden"
-								onclick="this.classList.add('hidden')">
-								<div class="bg-white rounded-2xl shadow-xl max-w-lg w-full mx-4 p-6 relative" onclick="event.stopPropagation()">
-												<button onclick="document.getElementById('bio-laika-milanzi').classList.add('hidden')"
-																class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition duration-200">
-																<i class="fa-solid fa-xmark text-xl"></i>
-												</button>
-												<div class="text-center mb-6">
-																<img src="{{ asset("images/laika-milanzi.jpg") }}"
-																				class="w-24 h-24 rounded-full mx-auto mb-3 object-cover" alt="Benedicto Khondowe">
-																<h3 class="text-xl font-bold">Mrs Lika Milanzi</h3>
-																<p class="text-gray-600">Chair, Compliance Division</p>
-												</div>
-												<div class="space-y-4 text-gray-700">
-																<div>
-																				<h4 class="font-semibold text-green-700 mb-1">Professional Background</h4>
-																				<p class="text-sm">Mrs Laika Milanzi has over two decades of experience in child protection policy and
-																								advocacy across Malawi. He has led initiatives to strengthen legislative frameworks for children's
-																								rights and has worked extensively with government ministries and community organizations. His career
-																								has focused on ensuring vulnerable children have access to safety, education, and justice.</p>
-																</div>
-																<div>
-																				<h4 class="font-semibold text-green-700 mb-1">Education &amp; Certifications</h4>
-																				<p class="text-sm">Mrs Laika Milanzi holds a PHD in Social Work from a recognized institution and has
-																								completed advanced certifications in child rights and protection. He has attended numerous
-																								professional development programs on advocacy, policy reform, and community engagement. He is a
-																								registered member of relevant professional bodies in the social services sector.</p>
-																</div>
-												</div>
-								</div>
-				</div>
-
-				<!-- Biography Modal for Mrs Julia Chimuna -->
-				<div id="bio-julia-chimuna" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 hidden"
-								onclick="this.classList.add('hidden')">
-								<div class="bg-white rounded-2xl shadow-xl max-w-lg w-full mx-4 p-6 relative" onclick="event.stopPropagation()">
-												<button onclick="document.getElementById('bio-julia-chimuna').classList.add('hidden')"
-																class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition duration-200">
-																<i class="fa-solid fa-xmark text-xl"></i>
-												</button>
-												<div class="text-center mb-6">
-																<img src="{{ asset("images/julia-chimuna.jpg") }}"
-																				class="w-24 h-24 rounded-full mx-auto mb-3 object-cover" alt="Benedicto Khondowe">
-																<h3 class="text-xl font-bold">Mrs Julia Chimuna</h3>
-																<p class="text-gray-600">Chair, Documentation & Learning Division</p>
-												</div>
-												<div class="space-y-4 text-gray-700">
-																<div>
-																				<h4 class="font-semibold text-green-700 mb-1">Professional Background</h4>
-																				<p class="text-sm">Mrs Julia Chimuna has over two decades of experience in child protection policy and
-																								advocacy across Malawi. He has led initiatives to strengthen legislative frameworks for children's
-																								rights and has worked extensively with government ministries and community organizations. His career
-																								has focused on ensuring vulnerable children have access to safety, education, and justice.</p>
-																</div>
-																<div>
-																				<h4 class="font-semibold text-green-700 mb-1">Education &amp; Certifications</h4>
-																				<p class="text-sm">Mrs Julia Chimuna holds a PHD in Social Work from a recognized institution and has
-																								completed advanced certifications in child rights and protection. He has attended numerous
-																								professional development programs on advocacy, policy reform, and community engagement. He is a
-																								registered member of relevant professional bodies in the social services sector.</p>
-																</div>
-												</div>
-								</div>
-				</div>
-
-				<!-- Action Buttons Section -->
-				<section class="py-12 px-6 md:px-12">
-								<div class="flex flex-col md:flex-row justify-center gap-100">
-												<!-- Child Rights Corner Button -->
-												<a href="{{ route("childrens-corner") }}"
-																class="flex items-center justify-center border border-gray-300 px-6 py-3 rounded-lg font-bold uppercase text-gray-800 hover:text-green-700 hover:border-green-700">
-																<i class="fa-solid fa-child mr-2 text-red-600"></i>
-																CHILD RIGHTS CORNER
-												</a>
-
-												<!-- Report a Case Button -->
-												<a href="{{ route("reporting") }}"
-																class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-bold uppercase text-center">
-																REPORT A CASE NOW
-												</a>
-								</div>
-				</section>
+    <section class="px-4 py-12 sm:px-6 lg:px-8">
+        <div class="mx-auto flex max-w-7xl flex-col justify-center gap-4 md:flex-row">
+            <a href="{{ route("childrens-corner") }}" class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-6 py-3 text-center font-bold uppercase text-gray-800 transition hover:border-green-700 hover:text-green-700">
+                <i class="fa-solid fa-child mr-2 text-red-600"></i>
+                Child Rights Corner
+            </a>
+            <a href="{{ route("reporting") }}" class="inline-flex items-center justify-center rounded-lg bg-red-600 px-6 py-3 text-center font-bold uppercase text-white transition hover:bg-red-700">
+                Report a Case Now
+            </a>
+        </div>
+    </section>
 @endsection

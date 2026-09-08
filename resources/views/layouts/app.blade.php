@@ -8,7 +8,7 @@
 								@vite(["resources/css/app.css", "resources/js/app.js"])
 								<!-- Free Font Awesome 6 CDN -->
 								<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-												integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+												crossorigin="anonymous" referrerpolicy="no-referrer" />
 								<script src="//unpkg.com/alpinejs" defer></script>
 								<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -47,7 +47,7 @@
 																																class="absolute top-full left-0 mt-2 bg-white border border-slate-200 rounded-lg shadow-lg py-2 min-w-50 z-40">
 																																<a href="{{ route("news") }}"
 																																				class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-emerald-700">News</a>
-																																<a href="#"
+																<a href="{{ route("news") }}"
 																																				class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-emerald-700">Stories</a>
 																												</div>
 																								</div>
@@ -107,8 +107,8 @@
 																												Latest <i class="fa-solid fa-chevron-down text-xs"></i>
 																								</button>
 																								<div x-show="latestOpen" x-transition class="ml-4 mt-2 flex flex-col gap-2">
-																												<a href="#" class="hover:text-emerald-700">News</a>
-																												<a href="#" class="hover:text-emerald-700">Stories</a>
+																												<a href="{{ route("news") }}" class="hover:text-emerald-700">News</a>
+																												<a href="{{ route("news") }}" class="hover:text-emerald-700">Stories</a>
 																								</div>
 																				</div>
 																				<a href="{{ route("what-we-do") }}" class="hover:text-emerald-700">What we do</a>
@@ -121,6 +121,9 @@
 
 								<main class="mx-auto w-full max-w-8xl px-4 py-6 sm:px-6 lg:px-8">
 												@yield("content")
+												@if (!request()->routeIs('home') && empty($suppressCmsBlocks))
+																@includeIf('partials.cms-public-blocks')
+												@endif
 								</main>
 
 								<footer class="bg-green-700 text-white pt-12 pb-6">
@@ -154,10 +157,10 @@
 																				<h3 class="font-bold text-white mb-4">Help & Support</h3>
 																				<ul class="space-y-2">
 																								<li><a href="{{ route("reporting") }}" class="hover:text-green-600">Report a Case</a></li>
-																								<li><a href="#" class="hover:text-green-600">Donate</a></li>
-																								<li><a href="#" class="hover:text-green-600">Check Case Studies</a></li>
-																								<li><a href="#" class="hover:text-green-600">FAQs</a></li>
-																								<li><a href="#" class="hover:text-green-600">Contact Us</a></li>
+																								<li><a href="{{ route("donate") }}" class="hover:text-green-600">Donate</a></li>
+																								<li><a href="{{ route("news") }}" class="hover:text-green-600">Check Case Studies</a></li>
+																								<li><a href="{{ route("resources") }}" class="hover:text-green-600">FAQs</a></li>
+																								<li><a href="mailto:nccmalawi@gmail.com" class="hover:text-green-600">Contact Us</a></li>
 																				</ul>
 																</div>
 
