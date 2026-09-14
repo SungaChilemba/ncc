@@ -12,6 +12,7 @@
 
     if ($supportsSubmissions) {
         $statusLinks['private'] = 'Private';
+        $statusLinks['enquiries'] = 'Enquiries';
     }
 @endphp
 
@@ -78,6 +79,7 @@
                 <option value="draft" @selected($currentStatus === 'draft')>Draft</option>
                 @if ($supportsSubmissions)
                     <option value="private" @selected($currentStatus === 'private')>Private</option>
+                    <option value="enquiries" @selected($currentStatus === 'enquiries')>Enquiries</option>
                 @endif
             </select>
             <button type="submit" class="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700">Filter</button>
@@ -129,6 +131,35 @@
                                         @endif
                                         @if ($item->description)
                                             <p class="mt-1 max-w-2xl text-xs leading-5 text-slate-500">{{ str($item->description)->squish()->limit(120) }}</p>
+                                        @endif
+                                        @if ($section === 'advertise' && $item->type === 'submission' && !empty($item->data))
+                                            <div class="mt-2 grid gap-1.5 rounded-md border border-amber-200 bg-amber-50/60 p-2.5 text-xs">
+                                                @if (!empty($item->data['contact_name']))
+                                                    <div class="flex flex-wrap gap-x-3"><span class="font-semibold text-slate-700">Contact:</span><span class="text-slate-800">{{ $item->data['contact_name'] }}</span>
+                                                        @if (!empty($item->data['contact_email']))
+                                                            <a href="mailto:{{ $item->data['contact_email'] }}" class="font-medium text-green-700 hover:underline">{{ $item->data['contact_email'] }}</a>
+                                                        @endif
+                                                        @if (!empty($item->data['contact_phone']))
+                                                            <a href="tel:{{ $item->data['contact_phone'] }}" class="text-slate-600">{{ $item->data['contact_phone'] }}</a>
+                                                        @endif
+                                                    </div>
+                                                @endif
+                                                <div class="flex flex-wrap gap-x-3 gap-y-1 text-slate-600">
+                                                    @if (!empty($item->data['company']))<span>Company: <span class="font-medium text-slate-800">{{ $item->data['company'] }}</span></span>@endif
+                                                    @if (!empty($item->data['industry']))<span>· {{ $item->data['industry'] }}</span>@endif
+                                                    @if (!empty($item->data['budget']))<span>· Budget: {{ $item->data['budget'] }}</span>@endif
+                                                    @if (!empty($item->data['start_date']))<span>· Start: {{ \Carbon\Carbon::parse($item->data['start_date'])->format('j M Y') }}</span>@endif
+                                                    @if (!empty($item->data['preferred_contact']))<span>· Pref: {{ $item->data['preferred_contact'] }}</span>@endif
+                                                    @if (!empty($item->data['reference_number']))<span class="ml-auto rounded bg-white px-1.5 py-0.5 font-mono text-[11px] font-semibold text-slate-700 border">{{ $item->data['reference_number'] }}</span>@endif
+                                                </div>
+                                                @if (!empty($item->data['artwork']['url'] ?? $item->data['artwork']['path'] ?? null))
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="font-semibold text-slate-700">Artwork:</span>
+                                                        <a href="{{ $item->data['artwork']['url'] ?? Storage::disk('public')->url($item->data['artwork']['path']) }}" target="_blank" class="text-green-700 hover:underline truncate max-w-[18rem]">{{ $item->data['artwork']['original_name'] ?? basename($item->data['artwork']['path']) }}</a>
+                                                        @if (!empty($item->data['artwork']['size']))<span class="text-slate-400">({{ round($item->data['artwork']['size']/1024) }} KB)</span>@endif
+                                                    </div>
+                                                @endif
+                                            </div>
                                         @endif
                                         <div class="mt-2 flex flex-wrap gap-x-2 gap-y-1 text-xs font-semibold opacity-100 transition group-hover:opacity-100 md:opacity-0">
                                             <a href="{{ route('admin.contents.edit', ['section' => $section, 'id' => $item->id] + request()->query()) }}" class="text-green-700 hover:underline">Edit</a>

@@ -20,9 +20,10 @@ Route::get('/resources/{slug}/download', [PageController::class, 'downloadResour
 Route::get('/resources/{slug}', [PageController::class, 'resourceDetail'])->name('resources.show');
 Route::get('/donate', [PageController::class, 'donate'])->name('donate');
 Route::get('/advertise', [PageController::class, 'advertise'])->name('advertise');
+Route::post('/advertise/inquire', [PageController::class, 'storeAdvertiseInquiry'])->name('advertise.inquire');
 Route::get('/news', [PageController::class, 'news'])->name('news');
 Route::get('/news/{slug}', [PageController::class, 'newsArticle'])->name('news.show');
-
+Route::get('/latest-news', function () {return view('pages.latest-news'); })->name('latest-news');
 Route::get('/checkout', [PageController::class, 'checkout'])->name('checkout');
 
 

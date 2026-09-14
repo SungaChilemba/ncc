@@ -13,6 +13,21 @@ return [
         'submission' => 'Report Submission',
     ],
 
+    'resource_categories' => [
+        'Acts' => 'Acts',
+        'Guidelines' => 'Guidelines',
+        'Legal Instruments' => 'Legal Instruments',
+        'Strategic Policies' => 'Strategic Policies',
+        'Stakeholder Tools' => 'Stakeholder Tools',
+        'Reports' => 'Reports',
+    ],
+
+    'advertise_categories' => [
+        'Opportunities' => 'Opportunities',
+        'Sponsored Ads' => 'Sponsored Ads',
+        'Partnership' => 'Partnership',
+    ],
+
     'accent_colors' => [
         'red' => 'Red',
         'green' => 'Green',
@@ -76,7 +91,7 @@ return [
             'label' => 'Advertise',
             'description' => 'Advertising packages, calls to action, and partner-facing copy.',
             'route' => 'advertise',
-            'types' => ['hero', 'card', 'cta'],
+            'types' => ['hero', 'card', 'cta', 'submission'],
         ],
     ],
 ];

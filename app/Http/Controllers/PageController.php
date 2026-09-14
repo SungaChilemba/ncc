@@ -187,6 +187,100 @@ class PageController extends Controller
         return $this->show('advertise', 'pages.advertise');
     }
 
+    public function storeAdvertiseInquiry(Request $request)
+    {
+        $validated = $request->validate([
+            'company' => ['required', 'string', 'max:255'],
+            'industry' => ['required', 'string', 'max:100'],
+            'objectives' => ['required', 'string', 'min:10', 'max:2000'],
+            'start_date' => ['required', 'date', 'after_or_equal:today'],
+            'budget' => ['nullable', 'string', 'max:50'],
+            'artwork' => ['nullable', File::types(['jpg', 'jpeg', 'png', 'webp', 'pdf'])->max('5mb')],
+            'agreement' => ['accepted'],
+            'contact_name' => ['required', 'string', 'max:255'],
+            'contact_email' => ['required', 'email', 'max:255'],
+            'contact_phone' => ['required', 'string', 'max:30', 'regex:/^\+?[0-9\s\-\(\)]+$/'],
+            'org_address' => ['nullable', 'string', 'max:255'],
+            'preferred_contact' => ['required', 'in:Email,Phone,WhatsApp'],
+        ]);
+
+        $reference = $this->newAdvertiseReference();
+        $artworkData = null;
+
+        if ($request->hasFile('artwork')) {
+            $file = $request->file('artwork');
+            $path = $file->store('advertise-inquiries/' . Str::lower($reference), 'public');
+            $asset = MediaAsset::create([
+                'disk' => 'public',
+                'path' => $path,
+                'original_name' => $file->getClientOriginalName(),
+                'mime_type' => $file->getMimeType(),
+                'size' => $file->getSize(),
+                'alt_text' => "Artwork for {$validated['company']} ({$reference})",
+            ]);
+            $artworkData = [
+                'media_asset_id' => $asset->id,
+                'path' => $path,
+                'url' => $asset->url,
+                'original_name' => $asset->original_name,
+                'mime_type' => $asset->mime_type,
+                'size' => $asset->size,
+            ];
+        }
+
+        SiteContent::create([
+            'section' => 'advertise',
+            'type' => 'submission',
+            'slug' => Str::lower($reference),
+            'title' => $validated['company'] . " — {$reference}",
+            'subtitle' => $validated['industry'],
+            'category' => 'Ad Inquiries',
+            'description' => $validated['objectives'],
+            'data' => array_filter([
+                'reference_number' => $reference,
+                'company' => $validated['company'],
+                'industry' => $validated['industry'],
+                'objectives' => $validated['objectives'],
+                'start_date' => $validated['start_date'],
+                'budget' => $validated['budget'] ?? null,
+                'contact_name' => $validated['contact_name'],
+                'contact_email' => $validated['contact_email'],
+                'contact_phone' => $validated['contact_phone'],
+                'org_address' => $validated['org_address'] ?? null,
+                'preferred_contact' => $validated['preferred_contact'],
+                'agreement' => true,
+                'artwork' => $artworkData,
+                'submitted_at' => now()->toIso8601String(),
+                'status' => 'pending_review',
+            ], fn ($v) => ! is_null($v)),
+            'accent_color' => 'green',
+            'sort_order' => 0,
+            'is_published' => false,
+            'published_at' => null,
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Inquiry received.',
+                'reference' => $reference,
+            ]);
+        }
+
+        return redirect()
+            ->route('advertise')
+            ->with('inquiry_status', 'Inquiry received — reference ' . $reference . '. NCC board will review within 5–7 days.')
+            ->with('inquiry_reference', $reference);
+    }
+
+    private function newAdvertiseReference(): string
+    {
+        do {
+            $reference = 'AD-' . now()->year . '-' . random_int(10000, 99999);
+        } while (SiteContent::where('section', 'advertise')->where('slug', Str::lower($reference))->exists());
+
+        return $reference;
+    }
+
     public function news()
     {
         return $this->show('news', 'pages.news');

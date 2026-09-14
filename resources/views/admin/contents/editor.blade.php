@@ -191,7 +191,37 @@
             <section class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
                 <h2 class="text-sm font-semibold text-slate-950">Metadata</h2>
                 <div class="mt-3 space-y-3">
-                    <input id="category" type="text" name="category" value="{{ old('category', $editingItem->category ?? '') }}" placeholder="Category" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+                    @if ($section === 'resources')
+                        <div>
+                            <label for="category" class="block text-xs font-semibold text-slate-700 mb-1">Category</label>
+                            <select id="category" name="category" class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100">
+                                <option value="">Select category</option>
+                                @foreach (config('cms.resource_categories') as $catValue => $catLabel)
+                                    <option value="{{ $catValue }}" @selected(old('category', $editingItem->category ?? '') === $catValue)>{{ $catLabel }}</option>
+                                @endforeach
+                            </select>
+                            @error('category')
+                                <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                            @enderror
+                            <p class="mt-1 text-xs text-slate-500">Matches frontend filters: {{ implode(', ', array_values(config('cms.resource_categories'))) }}.</p>
+                        </div>
+                    @elseif ($section === 'advertise')
+                        <div>
+                            <label for="category" class="block text-xs font-semibold text-slate-700 mb-1">Category</label>
+                            <select id="category" name="category" class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100">
+                                <option value="">Select category</option>
+                                @foreach (config('cms.advertise_categories') as $catValue => $catLabel)
+                                    <option value="{{ $catValue }}" @selected(old('category', $editingItem->category ?? '') === $catValue)>{{ $catLabel }}</option>
+                                @endforeach
+                            </select>
+                            @error('category')
+                                <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                            @enderror
+                            <p class="mt-1 text-xs text-slate-500">Ad card groups: {{ implode(', ', array_values(config('cms.advertise_categories'))) }}. Maps to Why Partner / Sponsorship / Sponsored Ads sections.</p>
+                        </div>
+                    @else
+                        <input id="category" type="text" name="category" value="{{ old('category', $editingItem->category ?? '') }}" placeholder="Category" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+                    @endif
                     <input id="location" type="text" name="location" value="{{ old('location', $editingItem->location ?? '') }}" placeholder="Location" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
                     <input id="published_on" type="date" name="published_on" value="{{ old('published_on', optional($editingItem?->published_on)->format('Y-m-d')) }}" class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
                     <select id="accent_color" name="accent_color" class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm">

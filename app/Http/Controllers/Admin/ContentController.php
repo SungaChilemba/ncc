@@ -34,12 +34,18 @@ class ContentController extends Controller
         $sectionConfig = $this->sectionConfig($section);
         $this->hydrateSlug($request);
 
+        $categoryRule = match (true) {
+            $section === 'resources' && $request->string('type')->toString() === 'resource' => ['nullable', 'string', Rule::in(array_keys(config('cms.resource_categories')))],
+            $section === 'advertise' && $request->string('type')->toString() === 'card' => ['nullable', 'string', Rule::in(array_keys(config('cms.advertise_categories')))],
+            default => ['nullable', 'string', 'max:100'],
+        };
+
         $validated = $request->validate([
             'type' => ['required', Rule::in($sectionConfig['types'])],
             'slug' => ['nullable', 'string', 'max:255', $this->uniqueSlugRule($request, $section)],
             'title' => ['nullable', 'string', 'max:255'],
             'subtitle' => ['nullable', 'string', 'max:255'],
-            'category' => ['nullable', 'string', 'max:100'],
+            'category' => $categoryRule,
             'location' => ['nullable', 'string', 'max:100'],
             'published_on' => ['nullable', 'date'],
             'description' => ['nullable', 'string'],
@@ -123,12 +129,18 @@ class ContentController extends Controller
         $content = SiteContent::where('section', $section)->findOrFail($id);
         $this->hydrateSlug($request);
 
+        $categoryRuleUpdate = match (true) {
+            $section === 'resources' && $request->string('type')->toString() === 'resource' => ['nullable', 'string', Rule::in(array_keys(config('cms.resource_categories')))],
+            $section === 'advertise' && $request->string('type')->toString() === 'card' => ['nullable', 'string', Rule::in(array_keys(config('cms.advertise_categories')))],
+            default => ['nullable', 'string', 'max:100'],
+        };
+
         $validated = $request->validate([
             'type' => ['required', Rule::in($sectionConfig['types'])],
             'slug' => ['nullable', 'string', 'max:255', $this->uniqueSlugRule($request, $section, $content->id)],
             'title' => ['nullable', 'string', 'max:255'],
             'subtitle' => ['nullable', 'string', 'max:255'],
-            'category' => ['nullable', 'string', 'max:100'],
+            'category' => $categoryRuleUpdate,
             'location' => ['nullable', 'string', 'max:100'],
             'published_on' => ['nullable', 'date'],
             'description' => ['nullable', 'string'],
@@ -420,7 +432,7 @@ class ContentController extends Controller
     {
         return SiteContent::forSection($section)
             ->when($request->filled('type'), fn ($query) => $query->where('type', $request->string('type')->toString()))
-            ->when($request->filled('status'), function ($query) use ($request) {
+            ->when($request->filled('status'), function ($query) use ($request, $section) {
                 $status = $request->string('status')->toString();
 
                 if ($status === 'private') {
@@ -429,7 +441,29 @@ class ContentController extends Controller
                     return;
                 }
 
+                if ($status === 'enquiries') {
+                    $query->where('type', 'submission');
+                    // For advertise, scope to Ad Inquiries only to keep enquiry tab clean (reporting has Case Submissions)
+                    if ($section === 'advertise') {
+                        $query->where('category', 'Ad Inquiries');
+                    } elseif ($section === 'reporting') {
+                        $query->where('category', 'Case Submissions');
+                    }
+
+                    return;
+                }
+
+                if ($status === 'all') {
+                    $query->where('type', '!=', 'submission');
+
+                    return;
+                }
+
                 $query->where('is_published', $status === 'published');
+            })
+            ->when(!$request->filled('status'), function ($query) {
+                // Default "All" view should not show enquiries — only Enquiries tab does
+                $query->where('type', '!=', 'submission');
             })
             ->when($request->filled('q'), function ($query) use ($request) {
                 $term = '%' . $request->string('q')->toString() . '%';

@@ -10,7 +10,7 @@
 								$related = $articles->take(3);
 								$latest = $articles->slice(3)->values();
 								$categories = $articles->pluck("category")->filter()->unique()->values();
-								$excerpt = fn ($text, $limit = 220) => str($text)->squish()->limit($limit);
+								$excerpt = fn($text, $limit = 220) => str($text)->squish()->limit($limit);
 				@endphp
 
 				<section class="w-full bg-white">
@@ -41,14 +41,15 @@
 												@endif
 												@if ($featured?->description)
 																@foreach (preg_split("/\n\s*\n/", $featured->description) as $index => $paragraph)
-																				<p class="{{ $index === 0 ? "text-lg text-gray-700 leading-relaxed font-bold" : "text-lg text-gray-700 leading-relaxed mt-4" }}">
+																				<p
+																								class="{{ $index === 0 ? "text-lg text-gray-700 leading-relaxed font-bold" : "text-lg text-gray-700 leading-relaxed mt-4" }}">
 																								{{ $paragraph }}
 																				</p>
 																@endforeach
 												@endif
 								</div>
 				</section>
-
+				<!-- Related News Section -->
 				<section class="w-full bg-white py-12 px-4 sm:px-6 lg:px-8" x-data="{ headingsOnly: false }">
 								<div class="flex justify-center my-6">
 												<hr class="w-7xl border-t-3 border-red-600">
@@ -74,8 +75,8 @@
 												@forelse ($related as $article)
 																<article class="flex flex-col md:flex-row bg-white rounded-lg shadow overflow-hidden">
 																				@if ($article->image_url)
-																								<img src="{{ $article->image_url }}?v={{ $article->updated_at->timestamp }}" alt="{{ $article->title }}"
-																												class="w-full md:w-1/2 h-64 object-cover" x-show="!headingsOnly">
+																								<img src="{{ $article->image_url }}?v={{ $article->updated_at->timestamp }}"
+																												alt="{{ $article->title }}" class="w-full md:w-1/2 h-64 object-cover" x-show="!headingsOnly">
 																				@endif
 																				<div class="p-6 flex-1">
 																								<p class="text-sm text-gray-500 mb-2">
@@ -86,22 +87,25 @@
 																								</p>
 																								<h3 class="text-xl font-bold text-gray-900 mb-4">{{ $article->title }}</h3>
 																								@if ($article->description)
-																												<p class="text-gray-700 leading-7" x-show="!headingsOnly">{{ $excerpt($article->description, 260) }}</p>
+																												<p class="text-gray-700 leading-7" x-show="!headingsOnly">
+																																{{ $excerpt($article->description, 260) }}</p>
 																								@endif
-																								<a href="{{ route("news.show", $article->slug) }}" class="mt-4 inline-flex text-sm font-semibold text-green-700 hover:underline">Read More</a>
+																								<a href="{{ route("news.show", $article->slug) }}"
+																												class="mt-4 inline-flex text-sm font-semibold text-green-700 hover:underline">Read More</a>
 																				</div>
 																</article>
 												@empty
-																<p class="rounded-lg border border-slate-200 bg-white p-8 text-center text-gray-500">No related news has been published yet.</p>
+																<p class="rounded-lg border border-slate-200 bg-white p-8 text-center text-gray-500">No related news has
+																				been published yet.</p>
 												@endforelse
 								</div>
 				</section>
-
+				<!-- Latest News Section -->
 				<section class="w-full bg-white py-12 px-4 sm:px-6 lg:px-8">
 								<div class="flex justify-center my-6">
 												<hr class="w-7xl border-t-3 border-red-600">
 								</div>
-								<div class="max-w-6xl mx-auto" x-data="{ showMoreNews: false, tab: 'All', mobileOpen: false, headingsOnly: false }">
+								<div class="max-w-6xl mx-auto" x-data="{ showMoreNews: false, tab: 'All', mobileOpen: false, headingsOnly: false, tabCounts: { 'All': {{ $latest->count() }}, @foreach($categories as $c)'{{ $c }}': {{ $latest->where('category', $c)->count() }},@endforeach } }">
 												<div class="flex justify-between items-center gap-4">
 																<h2 class="text-2xl sm:text-3xl font-bold text-red-700 mb-4">
 																				LATEST NEWS
@@ -128,23 +132,26 @@
 																				</button>
 																				<div x-show="mobileOpen" @click.away="mobileOpen = false" x-transition
 																								class="mt-2 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden">
-																								<button @click="tab = 'All'; mobileOpen = false"
+																				<button @click="tab = 'All'; mobileOpen = false; showMoreNews = false"
 																												:class="tab === 'All' ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-gray-50'"
 																												class="block w-full text-left px-4 py-3 text-sm font-medium">ALL</button>
-																								@foreach ($categories as $category)
-																												<button @click="tab = @js($category); mobileOpen = false"
-																																:class="tab === @js($category) ? 'bg-red-600 text-white' : 'text-gray-700 hover:bg-gray-50'"
+																				@foreach ($categories as $category)
+																												<button @click="tab = @js($category); mobileOpen = false; showMoreNews = false"
+																																:class="tab === @js($category) ? 'bg-red-600 text-white' :
+																																    'text-gray-700 hover:bg-gray-50'"
 																																class="block w-full text-left px-4 py-3 text-sm font-medium">{{ strtoupper($category) }}</button>
-																								@endforeach
+																				@endforeach
 																				</div>
 																</div>
 																<div class="hidden md:flex flex-wrap gap-2">
-																				<button @click="tab = 'All'"
-																								:class="tab === 'All' ? 'bg-red-600 text-white' : 'bg-white text-gray-700 border hover:border-red-600 hover:text-red-600'"
+																				<button @click="tab = 'All'; showMoreNews = false"
+																								:class="tab === 'All' ? 'bg-red-600 text-white' :
+																								    'bg-white text-gray-700 border hover:border-red-600 hover:text-red-600'"
 																								class="px-4 py-2 rounded-md font-semibold text-sm transition">ALL</button>
 																				@foreach ($categories as $category)
-																								<button @click="tab = @js($category)"
-																												:class="tab === @js($category) ? 'bg-red-600 text-white' : 'bg-white text-gray-700 border hover:border-red-600 hover:text-red-600'"
+																								<button @click="tab = @js($category); showMoreNews = false"
+																												:class="tab === @js($category) ? 'bg-red-600 text-white' :
+																												    'bg-white text-gray-700 border hover:border-red-600 hover:text-red-600'"
 																												class="px-4 py-2 rounded-md font-semibold text-sm transition">{{ strtoupper($category) }}</button>
 																				@endforeach
 																</div>
@@ -155,8 +162,8 @@
 																				<article class="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden"
 																								x-show="({{ $index }} < 3 || showMoreNews) && (tab === 'All' || tab === @js($article->category))">
 																								@if ($article->image_url)
-																												<img src="{{ $article->image_url }}?v={{ $article->updated_at->timestamp }}" alt="{{ $article->title }}"
-																																class="w-full h-48 object-cover" x-show="!headingsOnly">
+																												<img src="{{ $article->image_url }}?v={{ $article->updated_at->timestamp }}"
+																																alt="{{ $article->title }}" class="w-full h-48 object-cover" x-show="!headingsOnly">
 																								@endif
 																								<div class="p-6">
 																												<p class="text-sm text-gray-500 mb-2">
@@ -167,30 +174,31 @@
 																												</p>
 																												<h3 class="text-lg font-bold text-gray-900 mb-3">{{ $article->title }}</h3>
 																												@if ($article->description)
-																																<p class="text-gray-700 text-sm leading-6" x-show="!headingsOnly">{{ $excerpt($article->description, 150) }}</p>
+																																<p class="text-gray-700 text-sm leading-6" x-show="!headingsOnly">
+																																				{{ $excerpt($article->description, 150) }}</p>
 																												@endif
-																												<a href="{{ route("news.show", $article->slug) }}" class="mt-4 inline-flex text-sm font-semibold text-green-700 hover:underline">Read More</a>
+																												<a href="{{ route("news.show", $article->slug) }}"
+																																class="mt-4 inline-flex text-sm font-semibold text-green-700 hover:underline">Read More</a>
 																								</div>
 																				</article>
 																@empty
-																				<p class="col-span-full rounded-lg border border-slate-200 bg-white p-8 text-center text-gray-500">No latest news has been published yet.</p>
+																				<p class="col-span-full rounded-lg border border-slate-200 bg-white p-8 text-center text-gray-500">No
+																								latest news has been published yet.</p>
 																@endforelse
 												</div>
 
-												@if ($latest->count() > 3)
-																<div class="mt-8 text-center" x-show="!showMoreNews">
-																				<button @click="showMoreNews = true"
-																								class="bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-md font-semibold transition duration-200">
-																								Load More
-																				</button>
-																</div>
-																<div class="mt-8 text-center" x-show="showMoreNews">
-																				<button @click="showMoreNews = false"
-																								class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md font-semibold transition duration-200">
-																								Show Less
-																				</button>
-																</div>
-												@endif
+												<div class="mt-8 text-center" x-show="!showMoreNews && (tabCounts[tab] || 0) > 3" x-cloak>
+																<button @click="showMoreNews = true"
+																				class="bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-md font-semibold transition duration-200">
+																				Load More
+																</button>
+												</div>
+												<div class="mt-8 text-center" x-show="showMoreNews && (tabCounts[tab] || 0) > 3" x-cloak>
+																<button @click="showMoreNews = false"
+																				class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md font-semibold transition duration-200">
+																				Show Less
+																</button>
+												</div>
 								</div>
 				</section>
 
