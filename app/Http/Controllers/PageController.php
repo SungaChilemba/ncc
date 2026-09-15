@@ -317,6 +317,10 @@ class PageController extends Controller
     {
         $article = $this->content->bySlug('news', $slug, 'news');
 
+        if (! $article) {
+            $article = $this->content->bySlug('home', $slug, 'update');
+        }
+
         abort_unless($article, 404);
 
         return view('pages.news', [
