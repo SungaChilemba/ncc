@@ -35,6 +35,96 @@ class CmsContent
             ->get();
     }
 
+    /**
+     * Canonical published global news (section=news, type=news) ordered by published_on DESC with updated_at fallback.
+     */
+    public function publishedNews(?int $limit = null): Collection
+    {
+        $query = SiteContent::forSection('news')
+            ->ofType('news')
+            ->published()
+            ->orderByRaw('published_on IS NULL, published_on DESC')
+            ->orderByDesc('updated_at')
+            ->orderBy('sort_order');
+
+        if ($limit !== null) {
+            $query->limit($limit);
+        }
+
+        return $query->get();
+    }
+
+    public function latestNews(int $limit = 6): Collection
+    {
+        return $this->publishedNews($limit);
+    }
+
+    public function newsCategories(): Collection
+    {
+        return $this->publishedNews()
+            ->pluck('category')
+            ->filter()
+            ->unique()
+            ->values();
+    }
+
+    public function featuredNews(int $limit = 3): Collection
+    {
+        $all = $this->publishedNews();
+
+        $featured = $all->filter(function (SiteContent $item) {
+            $placements = data_get($item->data, 'placements');
+            if (is_array($placements) && in_array('featured', $placements, true)) {
+                return true;
+            }
+            if (data_get($item->data, 'is_featured') === true) {
+                return true;
+            }
+            if (data_get($item->data, 'featured') === true) {
+                return true;
+            }
+            return false;
+        });
+
+        if ($featured->isNotEmpty()) {
+            return $featured->take($limit)->values();
+        }
+
+        return $all->take($limit)->values();
+    }
+
+    public function heroNews(int $limit = 3): Collection
+    {
+        $all = $this->publishedNews();
+
+        $hero = $all->filter(function (SiteContent $item) {
+            $placements = data_get($item->data, 'placements');
+            if (is_array($placements) && (in_array('hero', $placements, true) || in_array('featured', $placements, true))) {
+                return true;
+            }
+            return false;
+        });
+
+        if ($hero->isNotEmpty()) {
+            return $hero->take($limit)->values();
+        }
+
+        return $all->take($limit)->values();
+    }
+
+    public function relatedNews(SiteContent $article, int $limit = 3): Collection
+    {
+        return SiteContent::forSection('news')
+            ->ofType('news')
+            ->published()
+            ->where('id', '!=', $article->id)
+            ->orderByRaw('published_on IS NULL, published_on DESC')
+            ->orderByDesc('updated_at')
+            ->orderBy('sort_order')
+            ->limit($limit)
+            ->get();
+    }
+
     public function bySlug(string $section, string $slug, ?string $type = null): ?SiteContent
     {
         return SiteContent::forSection($section)

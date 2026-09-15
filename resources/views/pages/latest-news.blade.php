@@ -3,33 +3,61 @@
 @section("title", "Latest News")
 
 @section("content")
+@php
+    use Illuminate\Support\Str;
+    $articles = $articles ?? collect();
+    $heroSlides = $heroSlides ?? collect();
+    $featuredArticle = $featuredArticle ?? $articles->first();
+    $categoriesCollection = $categories ?? $articles->pluck('category')->filter()->unique()->values();
+
+    $slides = $heroSlides->map(function ($a) {
+        return [
+            'tag' => 'NEWS',
+            'category' => $a->category ?: 'Headlines',
+            'title' => $a->title,
+            'image' => $a->image_url ? $a->image_url . '?v=' . $a->updated_at->timestamp : asset('images/LATEST1.jpg'),
+            'link' => route('news.show', ['slug' => $a->slug]),
+        ];
+    })->values();
+
+    // Fallback to latest articles if heroSlides empty but articles exist
+    if ($slides->isEmpty() && $articles->isNotEmpty()) {
+        $slides = $articles->take(3)->map(function ($a) {
+            return [
+                'tag' => 'NEWS',
+                'category' => $a->category ?: 'Headlines',
+                'title' => $a->title,
+                'image' => $a->image_url ? $a->image_url . '?v=' . $a->updated_at->timestamp : asset('images/LATEST1.jpg'),
+                'link' => route('news.show', ['slug' => $a->slug]),
+            ];
+        })->values();
+    }
+
+    $categoriesForAlpine = $categoriesCollection->map(function ($c) {
+        return ['value' => Str::slug($c), 'label' => strtoupper($c)];
+    })->values();
+
+    $firstCategory = $categoriesForAlpine->first()['value'] ?? '';
+
+    $newsItemsForAlpine = $articles->map(function ($a) {
+        return [
+            'category' => Str::slug($a->category ?? 'general'),
+            'categoryLabel' => strtoupper($a->category ?? 'GENERAL'),
+            'date' => $a->published_on ? $a->published_on->format('d M Y') : ($a->updated_at ? $a->updated_at->format('d M Y') : ''),
+            'location' => $a->location ? strtoupper($a->location) : '',
+            'title' => $a->title,
+            'excerpt' => str($a->description ?? '')->squish()->limit(150)->toString(),
+            'image' => $a->image_url ? $a->image_url . '?v=' . $a->updated_at->timestamp : asset('images/news1.png'),
+            'link' => route('news.show', ['slug' => $a->slug]),
+        ];
+    })->values();
+@endphp
 				<!--hero section-->
 				<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 ">
 								<!-- Carousel & Hero Container -->
 								<div x-data="{
 		    activeSlide: 0,
-		    slides: [{
-		            tag: 'NEWS',
-		            category: 'Headlines',
-		            title: 'NCC unveils child commissioners',
-		            image: '{{ asset("images/LATEST1.jpg") }}',
-		            link: '#'
-		        },
-		        {
-		            tag: 'NEWS',
-		            category: 'Headlines',
-		            title: 'Strategic Partnership for Community Development',
-		            image: '{{ asset("images/LATEST2.jpg") }}',
-		            link: '#'
-		        },
-		        {
-		            tag: 'NEWS',
-		            category: 'Headlines',
-		            title: 'National Child Protection Initiative Launched',
-		            image: '{{ asset("images/LATEST3.jpg") }}',
-		            link: '#'
-		        }
-		    ],
+		    slides: @js($slides),
 		    next() {
 		        this.activeSlide = (this.activeSlide + 1) % this.slides.length;
 		    },
@@ -38,6 +66,9 @@
 		    }
 		}"
 												class="relative rounded-xl overflow-hidden shadow-md group bg-gray-900 h-104 md:h-124 min-h-104">
+												<template x-if="slides.length === 0">
+																<div class="absolute inset-0 flex items-center justify-center text-white text-lg font-semibold bg-gray-800">No published news yet.</div>
+												</template>
 												<!-- Slides Loop -->
 												<template x-for="(slide, index) in slides" :key="index">
 																<div class="absolute inset-0 w-full h-full transition-opacity duration-700"
@@ -108,7 +139,7 @@
 																				<span>PARTNER WITH NCC TO INCREASE YOUR REACH AND IMPACT</span>
 																				<span class="hidden md:inline-block text-red-500 font-light text-xl">|</span>
 																</div>
-																<a href="#"
+																<a href="{{ route('advertise') }}"
 																				class="inline-flex items-center gap-2 border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white font-bold text-sm px-5 py-2.5 rounded-md transition-colors duration-200 tracking-wider whitespace-nowrap uppercase">
 																				<span>ADVERTISE WITH NCC</span>
 																				<span class="font-black">&gt;</span>
@@ -123,51 +154,18 @@
 				</div>
 
 				<!-- latest news section -->
-				<!-- latest news section -->
 				<section class="w-full bg-white py-12 px-4 sm:px-6 lg:px-8">
 								<!-- Red Line Divider -->
 								<div class="flex justify-center my-6">
 												<hr class="w-7xl border-t-3 border-red-600">
 								</div>
 								<div class="max-w-6xl mx-auto" x-data="{
-		    tab: 'child-protection',
+		    tab: @js($firstCategory),
 		    mobileOpen: false,
 		    headingsOnly: false,
 		    visible: {},
-		    categories: [
-		        { value: 'child-protection', label: 'CHILD PROTECTION' },
-		        { value: 'education', label: 'EDUCATION' },
-		        { value: 'health', label: 'HEALTH' },
-		        { value: 'community-events', label: 'COMMUNITY-EVENTS' },
-		        { value: 'policy', label: 'POLICY' },
-		        { value: 'partnerships', label: 'PARTNERSHIPS' }
-		    ],
-		    newsItems: [
-		        { category: 'child-protection', date: '24 JULY 2026', location: 'ZOMBA', title: 'Chief Malemia Sentenced to 21 Years in Prison for Child Defilement', excerpt: 'The National Children\'s Commission (NCC) welcomes the sentencing of Traditional Authority Malemia to 21 years in prison.', image: '{{ asset("images/image6.jpg") }}' },
-		        { category: 'child-protection', date: '12 MAY 2026', location: 'LILONGWE', title: 'NCC Commissioners Visit Dedza Border Post to Strengthen Child Protection', excerpt: 'The visit appreciated the child protection services being offered at the facility.', image: '{{ asset("images/image1.jpg") }}' },
-		        { category: 'child-protection', date: '01 AUG 2026', location: 'BLANTYRE', title: 'NCC Intensifies Crackdown on Child Trafficking Networks', excerpt: 'Joint operations with police and social welfare officers continue to rescue and reintegrate victims.', image: '{{ asset("images/news1.png") }}' },
-		        { category: 'child-protection', date: '18 JUL 2026', location: 'KARONGA', title: 'NCC Rescues 12 Children from Forced Labour at Border Town', excerpt: 'The children were reunited with their families and enrolled in psychosocial support programmes.', image: '{{ asset("images/image4.jpg") }}' },
-		        { category: 'child-protection', date: '30 JUN 2026', location: 'MANGOCHI', title: 'Community Watch Groups Trained to Report Child Abuse', excerpt: 'Over 200 community volunteers were equipped with child protection reporting and referral tools.', image: '{{ asset("images/image3.jpg") }}' },
-		        { category: 'child-protection', date: '22 JUN 2026', location: 'LILONGWE', title: 'NCC Launches Toll-Free Child Helpline Awareness Drive', excerpt: 'The campaign encourages children and adults to report abuse through the 116 toll-free helpline.', image: '{{ asset("images/image6.jpg") }}' },
-		        { category: 'education', date: '18 JUN 2026', location: 'MZUZU', title: 'NCC Launches Back-to-School Campaign for Vulnerable Children', excerpt: 'The campaign aims to re-enrol out-of-school children and support learners at risk of dropping out.', image: '{{ asset("images/image3.jpg") }}' },
-		        { category: 'education', date: '02 APR 2026', location: 'SALIMA', title: 'Teachers Trained on Child-Friendly Learning Environments', excerpt: 'NCC partnered with district education officers to promote inclusive, child-centred teaching methods.', image: '{{ asset("images/image4.jpg") }}' },
-		        { category: 'education', date: '20 FEB 2026', location: 'MANGOCHI', title: 'School Clubs Champion Children\'s Rights Awareness', excerpt: 'Learners formed school clubs to promote children\'s rights and safely report abuse in their communities.', image: '{{ asset("images/news2.png") }}' },
-		        { category: 'education', date: '28 MAY 2026', location: 'KARONGA', title: 'NCC Donates Learning Materials to Flood-Affected Schools', excerpt: 'Exercise books, pens and uniforms were distributed to over 500 displaced learners.', image: '{{ asset("images/image1.jpg") }}' },
-		        { category: 'education', date: '14 APR 2026', location: 'BLANTYRE', title: 'Girls\' Education Drive Targets Dropout Hotspots', excerpt: 'Community sensitisation meetings encouraged families to keep girls in school.', image: '{{ asset("images/news1.png") }}' },
-		        { category: 'education', date: '01 APR 2026', location: 'DEDZA', title: 'Radio Learning Programme Reaches Rural Learners', excerpt: 'Weekly lessons broadcast in Chichewa and Tumbuka support children in remote areas.', image: '{{ asset("images/image4.jpg") }}' },
-		        { category: 'health', date: '09 JUL 2026', location: 'ZOMBA', title: 'NCC Advocates for Improved Adolescent Health Services', excerpt: 'The Commission engaged health officials on youth-friendly services for adolescents nationwide.', image: '{{ asset("images/image6.jpg") }}' },
-		        { category: 'health', date: '15 MAY 2026', location: 'BLANTYRE', title: 'Free Medical Camp Reaches Vulnerable Children', excerpt: 'Hundreds of children received screenings, treatment and referrals through a partner-led medical camp.', image: '{{ asset("images/image1.jpg") }}' },
-		        { category: 'health', date: '03 MAR 2026', location: 'MZUZU', title: 'Nutrition Programme Boosts Under-Five Child Health', excerpt: 'Community nutrition clinics recorded improved growth outcomes for children under five.', image: '{{ asset("images/image4.jpg") }}' },
-		        { category: 'community-events', date: '2 JUNE 2026', location: 'BLANTYRE', title: 'NCC Commemorates International Day of Families and Street-Connected Children', excerpt: 'The event at Lunzu Primary School brought together stakeholders to reflect on families and child well being.', image: '{{ asset("images/news1.png") }}' },
-		        { category: 'community-events', date: '25 APR 2026', location: 'LILONGWE', title: 'Children\'s Fun Day Promotes Play and Participation', excerpt: 'Children enjoyed games, music and storytelling while learning about their rights.', image: '{{ asset("images/image3.jpg") }}' },
-		        { category: 'community-events', date: '12 JAN 2026', location: 'MZUZU', title: 'Community Dialogue on Street-Connected Children Held', excerpt: 'Traditional leaders and community members committed to protecting street-connected children.', image: '{{ asset("images/image4.jpg") }}' },
-		        { category: 'policy', date: '05 MAR 2026', location: 'GLOBAL', title: 'Bungwe la NCC Lakhazikitsa Ndondomeko Zopititsa Ufulu wa Ana Patsogolo', excerpt: 'National Children\'s Commission lati liyika ndondomeko zabwino zofuna kuonetsetsa kuti ufulu wa ana ukupita patsogolo.', image: '{{ asset("images/image4.jpg") }}' },
-		        { category: 'policy', date: '22 FEB 2026', location: 'LILONGWE', title: 'NCC Submits Recommendations on the Child Justice Bill', excerpt: 'The Commission presented proposals to strengthen child-friendly justice procedures.', image: '{{ asset("images/image6.jpg") }}' },
-		        { category: 'policy', date: '10 JAN 2026', location: 'GLOBAL', title: 'NCC Reviews National Child Protection Policy Framework', excerpt: 'A comprehensive review will guide the next phase of child protection policy reforms.', image: '{{ asset("images/news2.png") }}' },
-		        { category: 'partnerships', date: '25 JUL 2026', location: 'GLOBAL', title: 'NCC and Save the Children Strengthen Collaboration', excerpt: 'Save the Children hosted the NCC, led by Vice Chairperson, Commissioner Benedicto Kondowe.', image: '{{ asset("images/image3.jpg") }}' },
-		        { category: 'partnerships', date: '20 JULY 2026', location: 'ZOMBA', title: 'Save the Children Commits to Walk Hand-in-Hand with NCC', excerpt: 'He committed that Save the Children will continue to walk hand-in-hand with the NCC.', image: '{{ asset("images/news2.png") }}' },
-		        { category: 'partnerships', date: '28 JUN 2026', location: 'BLANTYRE', title: 'NCC Signs MoU with Local NGOs on Child Welfare', excerpt: 'The agreement formalises coordination on case management and child protection reporting.', image: '{{ asset("images/image1.jpg") }}' }
-		    ],
+		    categories: @js($categoriesForAlpine),
+		    newsItems: @js($newsItemsForAlpine),
 		    countFor(value) { return this.newsItems.filter(n => n.category === value).length },
 		    shownCount(value) { return Math.min(this.visible[value] || 3, this.countFor(value)) },
 		    isShown(item) { return this.newsItems.filter(n => n.category === item.category).indexOf(item) < this.shownCount(item.category) },
@@ -231,6 +229,7 @@
 																								</button>
 																				</template>
 																</div>
+																<p x-show="categories.length === 0" class="text-sm text-gray-500 mt-4">No categories available yet.</p>
 												</div>
 
 												<!-- Grid of Cards -->
@@ -243,16 +242,21 @@
 																								x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
 																								x-transition:leave-end="opacity-0"
 																								class="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden">
-																								<img :src="item.image" :alt="item.title" class="w-full h-48 object-cover"
-																												x-show="!headingsOnly">
+																								<a :href="item.link" class="block" x-show="!headingsOnly">
+																												<img :src="item.image" :alt="item.title" class="w-full h-48 object-cover">
+																								</a>
 																								<div class="p-6">
-																												<p class="text-sm text-gray-500 mb-2" x-text="item.date + ' · ' + item.location"></p>
-																												<h3 class="text-lg font-bold text-gray-900 mb-3" x-text="item.title"></h3>
-																												<p class="text-gray-700 text-sm" x-text="item.excerpt"></p>
+																												<p class="text-sm text-gray-500 mb-2" x-text="(item.date ? item.date : '') + (item.date && item.location ? ' · ' : '') + item.location"></p>
+																												<h3 class="text-lg font-bold text-gray-900 mb-3">
+																																<a :href="item.link" class="hover:text-red-700" x-text="item.title"></a>
+																												</h3>
+																												<p class="text-gray-700 text-sm" x-text="item.excerpt" x-show="!headingsOnly"></p>
+																												<a :href="item.link" class="mt-3 inline-flex text-sm font-semibold text-green-700 hover:underline">Read More</a>
 																								</div>
 																				</div>
 																</template>
 												</div>
+												<p x-show="newsItems.length === 0" class="col-span-full text-center text-gray-500 py-8">No news articles have been published yet.</p>
 
 												<!-- Load More Button (per category, shown only when more than 3 cards exist) -->
 												<div class="mt-8 text-center" x-show="hasMore(tab)" x-transition>
@@ -295,7 +299,7 @@
 																<span class="h-2.5 w-2.5 rounded-full bg-orange-500 inline-block animate-pulse"></span>
 																<h2 class="text-xs font-bold uppercase tracking-wider text-slate-500">Sponsored Ads</h2>
 												</div>
-												<a href='#'
+												<a href='{{ route('advertise') }}'
 																class="text-sm font-medium text-slate-600 hover:text-orange-600 transition-colors flex items-center gap-1">
 																View all
 																<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -316,7 +320,7 @@
 																				        "image" => asset("images/ad-promo-1.jfif"),
 																				        "is_featured" => true,
 																				        "ends_at" => "Aug 31",
-																				        "url" => "#"
+																				        "url" => route('advertise')
 																				    ],
 																				    [
 																				        "title" => "HELP SPONSOR OUR CHILD FRIENDLY PROGRAMS...",
@@ -324,7 +328,7 @@
 																				        "image" => asset("images/ad-promo-2.jfif"),
 																				        "is_featured" => true,
 																				        "ends_at" => "Dec 31",
-																				        "url" => "#"
+																				        "url" => route('advertise')
 																				    ],
 																				    [
 																				        "title" => "APPLY TO BE THE NEXT CHILD COMMISSIONER",
@@ -332,7 +336,7 @@
 																				        "image" => asset("images/ad-promo-3.png"),
 																				        "is_featured" => true,
 																				        "ends_at" => "Dec 31",
-																				        "url" => "#"
+																				        "url" => route('advertise')
 																				    ]
 																				];
 																@endphp
@@ -346,9 +350,9 @@
 																																<div
 																																				class="w-24 h-24 sm:w-28 sm:h-28 shrink-0 rounded-lg overflow-hidden bg-slate-100 border border-slate-100">
 																																				<img src="{{ $ad["image"] }}" alt="{{ $ad["title"] }}"
-																																								class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-																																								loading="lazy"
-																																								onerror="this.src='https://via.placeholder.com/150?text=Ad+Image'" />
+																																				                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+																																				                loading="lazy"
+																																				                onerror="this.src='https://via.placeholder.com/150?text=Ad+Image'" />
 																																</div>
 
 																																<!-- Details -->
@@ -418,23 +422,19 @@
 												</button>
 								</div>
 				</section>
-				<!-- Featured Health News Section -->
+				<!-- Featured News Section -->
+				@if($featuredArticle)
 				<section class="w-full bg-white mx-auto px-4 sm:px-6 lg:px-8 py-6">
-								<div x-data="{
-		    article: {
-		        badge: 'FEATURED NEWS',
-		        category: 'HEALTHY',
-		        title: 'MALAWI REACHES 7.37 MILLION CHILDREN WITH POLIO VACCINATION',
-		        image: '{{ asset("images/EBOLA.webp") }}',
-		        link: '#',
-		        source: 'Ministry of healthy'
-		    }
-		}"
-												class="relative h-112 md:h-136 min-h-112 max-w-7xl mx-auto rounded-2xl overflow-hidden shadow-lg group bg-gray-900 flex flex-col justify-between p-6 md:p-10">
+								<div class="relative h-112 md:h-136 min-h-112 max-w-7xl mx-auto rounded-2xl overflow-hidden shadow-lg group bg-gray-900 flex flex-col justify-between p-6 md:p-10">
+												@php
+																$featuredImage = $featuredArticle->image_url ? $featuredArticle->image_url . '?v=' . $featuredArticle->updated_at->timestamp : asset('images/EBOLA.webp');
+																$featuredLink = route('news.show', ['slug' => $featuredArticle->slug]);
+																$featuredSource = data_get($featuredArticle->data, 'source.name') ?: ($featuredArticle->category ?: 'NCC');
+												@endphp
 												<!-- Background Image -->
-												<img :src="article.image" :alt="article.title"
+												<img src="{{ $featuredImage }}" alt="{{ $featuredArticle->title }}"
 																class="absolute inset-0 w-full h-full object-cover z-0 transition-transform duration-500 group-hover:scale-105"
-																onerror="this.src='https://via.placeholder.com/1200x600/1e293b/ffffff?text=Featured+Health+News'" />
+																onerror="this.src='https://via.placeholder.com/1200x600/1e293b/ffffff?text=Featured+News'" />
 
 												<!-- Dark Gradient Overlay for Readability -->
 												<div class="absolute inset-0 bg-linear-to-t from-black/85 via-black/30 to-black/20 z-0"></div>
@@ -443,9 +443,9 @@
 												<div class="relative z-10 self-start">
 																<div
 																				class="inline-flex items-center gap-2 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-lg text-sm font-black tracking-wider text-gray-900 shadow-md">
-																				<span x-text="article.badge"></span>
+																				<span>FEATURED NEWS</span>
 																				<span class="text-red-600 font-bold">&rarr;</span>
-																				<span class="text-red-600 uppercase" x-text="article.category"></span>
+																				<span class="text-red-600 uppercase">{{ $featuredArticle->category ?: 'News' }}</span>
 																</div>
 												</div>
 
@@ -453,9 +453,9 @@
 												<div class="relative z-10 w-full flex flex-col md:flex-row md:items-end justify-between gap-6">
 																<!-- Headline Link -->
 																<div class="max-w-3xl">
-																				<a :href="article.link"
+																				<a href="{{ $featuredLink }}"
 																								class="inline-flex items-baseline gap-2 text-white text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight hover:text-gray-200 transition-colors drop-shadow-lg leading-tight">
-																								<span x-text="article.title"></span>
+																								<span>{{ $featuredArticle->title }}</span>
 																								<svg class="w-6 h-6 md:w-8 md:h-8 stroke-current inline-block shrink-0 self-center" fill="none"
 																												viewBox="0 0 24 24" stroke-width="3">
 																												<path stroke-linecap="round" stroke-linejoin="round"
@@ -470,11 +470,12 @@
 																								class="inline-flex items-center gap-2 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-md text-xs font-semibold text-gray-800 shadow-md">
 																								<span class="text-red-600 font-bold">&amp;</span>
 																								<span class="uppercase tracking-wider">SOURCE :</span>
-																								<span class="text-gray-600 capitalize" x-text="article.source"></span>
+																								<span class="text-gray-600 capitalize">{{ $featuredSource }}</span>
 																				</div>
 																</div>
 												</div>
 								</div>
 				</section>
+				@endif
 
 @endsection

@@ -21,9 +21,9 @@ Route::get('/resources/{slug}', [PageController::class, 'resourceDetail'])->name
 Route::get('/donate', [PageController::class, 'donate'])->name('donate');
 Route::get('/advertise', [PageController::class, 'advertise'])->name('advertise');
 Route::post('/advertise/inquire', [PageController::class, 'storeAdvertiseInquiry'])->name('advertise.inquire');
-Route::get('/news', [PageController::class, 'news'])->name('news');
+Route::get('/latest-news', [PageController::class, 'latestNews'])->name('latest-news');
+Route::get('/news', function () { return redirect()->route('latest-news', [], 301); })->name('news');
 Route::get('/news/{slug}', [PageController::class, 'newsArticle'])->name('news.show');
-Route::get('/latest-news', function () {return view('pages.latest-news'); })->name('latest-news');
 Route::get('/checkout', [PageController::class, 'checkout'])->name('checkout');
 
 

@@ -21,7 +21,7 @@ class PageController extends Controller
         $hero = $this->content->first('home', 'hero');
         $updates = $this->content->type('home', 'update');
         $news = $this->content->type('home', 'news');
-        $latestNews = $this->content->type('news', 'news');
+        $latestNews = $this->content->publishedNews();
 
         return view('pages.home', [
             'cmsContent' => $this->content->forSection('home'),
@@ -47,7 +47,22 @@ class PageController extends Controller
 
     public function childrensCorner()
     {
-        return $this->show('childrens-corner', 'pages.childrens-corner');
+        // Preserve section-specific blocks but ensure news cards use canonical global news when available
+        $globalNews = $this->content->publishedNews();
+
+        // Fallback to section-specific news for backwards compatibility when global news is empty (e.g. in tests)
+        $cmsNews = $globalNews->isNotEmpty() ? $globalNews : $this->content->type('childrens-corner', 'news');
+
+        return view('pages.childrens-corner', [
+            'cmsContent' => $this->content->forSection('childrens-corner'),
+            'cmsHero' => $this->content->first('childrens-corner', 'hero'),
+            'cmsCards' => $this->content->type('childrens-corner', 'card'),
+            'cmsCtas' => $this->content->type('childrens-corner', 'cta'),
+            'cmsNews' => $cmsNews,
+            'cmsResources' => $this->content->type('childrens-corner', 'resource'),
+            'cmsGallery' => $this->content->type('childrens-corner', 'gallery'),
+            'suppressCmsBlocks' => true,
+        ]);
     }
 
     public function reporting()
@@ -281,9 +296,21 @@ class PageController extends Controller
         return $reference;
     }
 
-    public function news()
+    public function latestNews()
     {
-        return $this->show('news', 'pages.news');
+        $articles = $this->content->publishedNews();
+        $heroSlides = $this->content->heroNews(3);
+        $featuredArticle = $this->content->featuredNews(1)->first() ?? $articles->first();
+        $categories = $this->content->newsCategories();
+
+        return view('pages.latest-news', [
+            'articles' => $articles,
+            'heroSlides' => $heroSlides,
+            'featuredArticle' => $featuredArticle,
+            'categories' => $categories,
+            'latestArticles' => $articles,
+            'suppressCmsBlocks' => true,
+        ]);
     }
 
     public function newsArticle(string $slug)
@@ -292,11 +319,9 @@ class PageController extends Controller
 
         abort_unless($article, 404);
 
-        return view('pages.news-detail', [
+        return view('pages.news', [
             'article' => $article,
-            'relatedArticles' => $this->content->type('news', 'news')
-                ->reject(fn ($item) => $item->is($article))
-                ->take(3),
+            'relatedArticles' => $this->content->relatedNews($article, 3),
             'suppressCmsBlocks' => true,
         ]);
     }

@@ -66,17 +66,19 @@
 												<div class="mx-auto max-w-7xl">
 																<h2 class="mb-10 text-center text-3xl font-bold text-green-700 md:text-4xl">Kids News & Updates</h2>
 																<div class="flex flex-wrap justify-center gap-8">
-																				@foreach ($updates as $update)
+												@foreach ($updates as $update)
 																								<article class="relative overflow-hidden rounded-lg shadow-lg">
-																												@if ($update->image_url)
-																																<img src="{{ $update->image_url }}?v={{ $update->updated_at->timestamp }}" alt="{{ $update->alt_text ?: $update->title }}" class="rounded-lg">
-																												@endif
-																												<div class="absolute inset-0 bg-black/40"></div>
-																												<div class="absolute inset-0 z-10 flex flex-col items-center justify-end p-4 text-center">
-																																<h3 class="mb-2 text-lg font-bold text-white">{{ $update->title }}</h3>
-																																@if ($update->button_text)
-																																				<a href="{{ $update->button_link ?: "#" }}" class="rounded-md bg-red-600 px-3 py-1 text-sm text-white hover:bg-red-700">{{ $update->button_text }}</a>
+																												<a href="{{ route('news.show', ['slug' => $update->slug]) }}" class="block">
+																																@if ($update->image_url)
+																																				<img src="{{ $update->image_url }}?v={{ $update->updated_at->timestamp }}" alt="{{ $update->alt_text ?: $update->title }}" class="rounded-lg w-full object-cover">
+																																@else
+																																				<img src="{{ asset('images/news1.png') }}" alt="{{ $update->title }}" class="rounded-lg w-full object-cover">
 																																@endif
+																												</a>
+																												<div class="absolute inset-0 bg-black/40 pointer-events-none"></div>
+																												<div class="absolute inset-0 z-10 flex flex-col items-center justify-end p-4 text-center">
+																																<h3 class="mb-2 text-lg font-bold text-white"><a href="{{ route('news.show', ['slug' => $update->slug]) }}" class="hover:underline">{{ $update->title }}</a></h3>
+																																<a href="{{ route('news.show', ['slug' => $update->slug]) }}" class="rounded-md bg-red-600 px-3 py-1 text-sm text-white hover:bg-red-700">{{ $update->button_text ?: 'Read More' }}</a>
 																												</div>
 																								</article>
 																				@endforeach

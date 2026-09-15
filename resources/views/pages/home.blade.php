@@ -354,12 +354,12 @@ mibextid=rS40aB7S9Ucbxw6v"
 								<div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-6">
 												@forelse($news as $article)
 																<article class="overflow-hidden bg-white shadow rounded-[10px]">
-																				<a href="{{ route("news") }}" class="block">
+																				<a href="{{ route("news.show", ['slug' => $article->slug]) }}" class="block">
 																								<img src="{{ $article->image_path ? $article->image_url . "?v=" . $article->updated_at->timestamp : asset("images/update-1.jpg") }}"
 																												alt="{{ $article->alt_text ?: $article->title }}" class="w-full h-70 object-cover rounded-t-[10px]">
 																				</a>
 																				<div class="p-6">
-																								<a href="{{ route("news") }}" class="font-semibold text-xl hover:text-green-700">{{ $article->title }}</a>
+																								<a href="{{ route("news.show", ['slug' => $article->slug]) }}" class="font-semibold text-xl hover:text-green-700">{{ $article->title }}</a>
 																				</div>
 																</article>
 												@empty

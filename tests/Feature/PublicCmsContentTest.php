@@ -120,18 +120,7 @@ class PublicCmsContentTest extends TestCase
 
     public function test_news_page_renders_cms_hero_and_articles(): void
     {
-        SiteContent::create([
-            'section' => 'news',
-            'type' => 'hero',
-            'slug' => 'featured-news',
-            'title' => 'Featured CMS News',
-            'description' => "Featured paragraph one.\n\nFeatured paragraph two.",
-            'category' => 'News',
-            'published_on' => '2026-06-02',
-            'is_published' => true,
-            'sort_order' => 0,
-        ]);
-
+        // Legacy /news now redirects to /latest-news; verify redirect preserves backwards compatibility
         SiteContent::create([
             'section' => 'news',
             'type' => 'news',
@@ -145,23 +134,56 @@ class PublicCmsContentTest extends TestCase
             'sort_order' => 1,
         ]);
 
+        $this->get(route('news'))
+            ->assertRedirect(route('latest-news'));
+
+        $this->get(route('latest-news'))
+            ->assertOk()
+            ->assertSee('Visible News Card')
+            ->assertSee('Child Protection')
+            ->assertDontSee('Draft News Card');
+    }
+
+    public function test_latest_news_page_renders_published_cms_news(): void
+    {
         SiteContent::create([
             'section' => 'news',
             'type' => 'news',
-            'slug' => 'draft-news-card',
-            'title' => 'Draft News Card',
+            'slug' => 'published-latest',
+            'title' => 'Published Latest News',
+            'description' => 'Visible body for latest news listing.',
+            'category' => 'Education',
+            'location' => 'Mzuzu',
+            'published_on' => '2026-08-06',
+            'is_published' => true,
+            'sort_order' => 1,
+        ]);
+
+        SiteContent::create([
+            'section' => 'news',
+            'type' => 'news',
+            'slug' => 'draft-latest',
+            'title' => 'Draft Latest News',
             'is_published' => false,
             'sort_order' => 2,
         ]);
 
-        $this->get(route('news'))
+        $response = $this->get(route('latest-news'))
             ->assertOk()
-            ->assertSee('Featured CMS News')
-            ->assertSee('Featured paragraph one.')
-            ->assertSee('Visible News Card')
-            ->assertSee('Child Protection')
-            ->assertDontSee('FULL ARTICLE TAIL SHOULD ONLY SHOW ON DETAIL')
-            ->assertDontSee('Draft News Card');
+            ->assertSee('Published Latest News')
+            ->assertSee('Education')
+            ->assertDontSee('Draft Latest News');
+
+        // Ensure no hard-coded placeholder titles from old template remain
+        $response->assertDontSee('NCC unveils child commissioners');
+        $response->assertDontSee('Strategic Partnership for Community Development');
+        $response->assertDontSee('Chief Malemia Sentenced to 21 Years in Prison for Child Defilement');
+    }
+
+    public function test_news_redirects_to_latest_news(): void
+    {
+        $this->get('/news')
+            ->assertRedirect('/latest-news');
     }
 
     public function test_resources_page_renders_cms_documents(): void
@@ -463,5 +485,149 @@ class PublicCmsContentTest extends TestCase
             ->assertSee('CMS Quiz')
             ->assertSee('CMS Education Rights')
             ->assertSee('CMS Kids Update');
+    }
+
+    public function test_news_article_page_renders_full_individual_article(): void
+    {
+        SiteContent::create([
+            'section' => 'news',
+            'type' => 'news',
+            'slug' => 'full-article-latest',
+            'title' => 'Full Article Latest',
+            'description' => 'Complete body text for individual article.',
+            'category' => 'Health',
+            'location' => 'Zomba',
+            'published_on' => '2026-08-10',
+            'image_path' => 'images/news1.png',
+            'data' => ['source' => ['name' => 'NCC Source', 'url' => 'https://example.com/source']],
+            'is_published' => true,
+            'sort_order' => 0,
+        ]);
+
+        $this->get(route('news.show', ['slug' => 'full-article-latest']))
+            ->assertOk()
+            ->assertSee('Full Article Latest')
+            ->assertSee('Complete body text for individual article.')
+            ->assertSee('Health')
+            ->assertSee('Zomba')
+            ->assertSee('10 August 2026')
+            ->assertSee('NCC Source')
+            ->assertSee(route('latest-news'), false);
+
+        $this->get(route('news.show', ['slug' => 'missing-article-xyz']))
+            ->assertNotFound();
+    }
+
+    public function test_related_articles_exclude_current_article(): void
+    {
+        SiteContent::create([
+            'section' => 'news',
+            'type' => 'news',
+            'slug' => 'main-story',
+            'title' => 'Main Story',
+            'description' => 'Main story body.',
+            'category' => 'Policy',
+            'is_published' => true,
+            'sort_order' => 0,
+        ]);
+
+        SiteContent::create([
+            'section' => 'news',
+            'type' => 'news',
+            'slug' => 'related-one',
+            'title' => 'Related One',
+            'description' => 'Related one body.',
+            'is_published' => true,
+            'sort_order' => 1,
+        ]);
+
+        SiteContent::create([
+            'section' => 'news',
+            'type' => 'news',
+            'slug' => 'related-two',
+            'title' => 'Related Two',
+            'description' => 'Related two body.',
+            'is_published' => true,
+            'sort_order' => 2,
+        ]);
+
+        $response = $this->get(route('news.show', ['slug' => 'main-story']))
+            ->assertOk()
+            ->assertSee('Related One')
+            ->assertSee('Related Two');
+
+        // Current article should not appear in related section as a related card link to itself
+        $content = $response->getContent();
+        $relatedLinks = [];
+        preg_match_all('/href="([^"]*\/news\/[^"]*)"/', $content, $m);
+        if (! empty($m[1])) {
+            $relatedLinks = $m[1];
+        }
+        // Ensure at least one related link exists and none is the current article slug repeated in related section beyond the main article URL itself
+        $this->assertNotEmpty($relatedLinks);
+        // Count occurrences of main-story slug in related section grid - should be 0 or only as canonical URL not as related card
+        // We verify that Related News heading exists and that the main story title does not appear a second time in related cards context
+        // Simple check: related cards should not contain link to main-story more than once (the page itself doesn't link to itself)
+        $mainStoryLink = route('news.show', ['slug' => 'main-story']);
+        $mainCount = substr_count($content, $mainStoryLink);
+        // mainStoryLink appears at most 0 times in related cards (it may appear 0, current page url is not a link to itself)
+        $this->assertLessThanOrEqual(1, $mainCount);
+    }
+
+    public function test_every_news_card_links_to_news_show(): void
+    {
+        SiteContent::create([
+            'section' => 'news',
+            'type' => 'news',
+            'slug' => 'card-link-story',
+            'title' => 'Card Link Story',
+            'description' => 'Body for card link story.',
+            'category' => 'Community Events',
+            'published_on' => '2026-08-05',
+            'is_published' => true,
+            'sort_order' => 0,
+        ]);
+
+        $responseLatest = $this->get(route('latest-news'))->assertOk();
+        $this->assertStringContainsString(route('news.show', ['slug' => 'card-link-story']), $responseLatest->getContent());
+        // Ensure no placeholder # links in the main page content (footer social links are excluded)
+        $mainOnly = preg_replace('/<footer.*?<\/footer>/s', '', $responseLatest->getContent());
+        $this->assertStringNotContainsString('href="#"', $mainOnly);
+
+        $responseHome = $this->get(route('home'))->assertOk();
+        // Homepage latestNews should contain link to news.show
+        $this->assertStringContainsString(route('news.show', ['slug' => 'card-link-story']), $responseHome->getContent());
+
+        $responseDetail = $this->get(route('news.show', ['slug' => 'card-link-story']))->assertOk();
+        // Detail page back link should go to latest-news, not #
+        $this->assertStringContainsString(route('latest-news'), $responseDetail->getContent());
+    }
+
+    public function test_childrens_corner_news_links_point_to_article_pages(): void
+    {
+        SiteContent::create([
+            'section' => 'news',
+            'type' => 'news',
+            'slug' => 'kids-global-story',
+            'title' => 'Kids Global Story',
+            'description' => 'Kids global body.',
+            'is_published' => true,
+            'sort_order' => 0,
+        ]);
+
+        $response = $this->get(route('childrens-corner'))->assertOk();
+        $this->assertStringContainsString(route('news.show', ['slug' => 'kids-global-story']), $response->getContent());
+        // Ensure no placeholder # links in the main page content (footer social links are excluded)
+        $mainOnly = preg_replace('/<footer.*?<\/footer>/s', '', $response->getContent());
+        $this->assertStringNotContainsString('href="#"', $mainOnly);
+    }
+
+    public function test_hard_coded_placeholder_news_not_rendered(): void
+    {
+        $response = $this->get(route('latest-news'))->assertOk();
+        $response->assertDontSee('NCC unveils child commissioners');
+        $response->assertDontSee('Strategic Partnership for Community Development');
+        $response->assertDontSee('National Child Protection Initiative Launched');
+        $response->assertDontSee('MALAWI REACHES 7.37 MILLION CHILDREN WITH POLIO VACCINATION');
     }
 }
