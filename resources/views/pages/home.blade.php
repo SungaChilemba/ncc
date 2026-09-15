@@ -201,8 +201,8 @@
 																								</div>
 																								<!-- Read More -->
 																								@if ($featuredUpdate->button_text)
-																												<a href="{{ $featuredUpdate->button_link && $featuredUpdate->button_link !== "#" ? $featuredUpdate->button_link : route("news") }}"
-																																class="underline text-sm hover:text-gray-200">{{ $featuredUpdate->button_text }}</a>
+																												<a href="{{ $featuredUpdate->button_link && $featuredUpdate->button_link !== "#" ? $featuredUpdate->button_link : route('news.show', ['slug' => $featuredUpdate->slug]) }}"
+																				class="underline text-sm hover:text-gray-200">{{ $featuredUpdate->button_text }}</a>
 																								@endif
 																				</div>
 																</div>
@@ -252,7 +252,7 @@ mibextid=rS40aB7S9Ucbxw6v"
 																												</p>
 																								</div>
 																								@if ($s->button_text)
-																												<a href="{{ $s->button_link && $s->button_link !== "#" ? $s->button_link : route("news") }}"
+																												<a href="{{ $s->button_link && $s->button_link !== "#" ? $s->button_link : route('news.show', ['slug' => $s->slug]) }}"
 																																class="underline text-sm text-green-700 hover:text-green-900">{{ $s->button_text }}</a>
 																								@endif
 																				</div>
