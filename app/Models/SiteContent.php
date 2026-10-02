@@ -88,11 +88,19 @@ class SiteContent extends Model
 
     public function getImageUrlAttribute(): ?string
     {
+        if ($this->relationLoaded('mediaAsset') && $this->mediaAsset) {
+            return $this->mediaAsset->url;
+        }
+
         return $this->assetUrl($this->image_path);
     }
 
     public function getFileUrlAttribute(): ?string
     {
+        if ($this->relationLoaded('mediaAsset') && $this->mediaAsset) {
+            return $this->mediaAsset->url;
+        }
+
         return $this->assetUrl($this->file_path);
     }
 
