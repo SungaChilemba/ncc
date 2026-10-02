@@ -438,73 +438,8 @@
 								</div>
 				</section>
 
-				{{-- Sponsored Ads — only if CMS has Sponsored Ads cards, else fallback demo suppressed to avoid hard-coded ads; uses updated carousel if present --}}
-				@if ($sponsoredAds->isNotEmpty())
-								<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="{ activeSlide: 0, totalSlides: {{ $sponsoredAds->count() }}, perView() { return window.innerWidth >= 1024 ? 3 : (window.innerWidth >= 768 ? 2 : 1) }, get maxSlide() { return Math.max(0, this.totalSlides - this.perView()) }, next() { this.activeSlide = this.activeSlide >= this.maxSlide ? 0 : this.activeSlide + 1 }, prev() { this.activeSlide = this.activeSlide <= 0 ? this.maxSlide : this.activeSlide - 1 } }"
-												@resize.window="activeSlide=Math.min(activeSlide,maxSlide)">
-												<div class="flex items-center justify-between mb-6">
-																<div class="flex items-center space-x-2">
-																				<span class="h-2.5 w-2.5 rounded-full bg-orange-500 inline-block animate-pulse"></span>
-																				<h2 class="text-xs font-bold uppercase tracking-wider text-slate-500">Sponsored Ads</h2>
-																</div>
-												</div>
-												<div class="overflow-hidden">
-																<div class="flex transition-transform duration-300 ease-in-out"
-																				:style="`transform: translateX(-${activeSlide * (100 / perView())}%)`">
-																				@foreach ($sponsoredAds as $ad)
-																								<div class="w-full md:w-1/2 lg:w-1/3 shrink-0 px-3">
-																												<article
-																																class="bg-white rounded-xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col">
-																																<a href="{{ $ad->button_link ?: "#" }}" class="flex group flex-1 p-4 gap-4">
-																																				<div
-																																								class="w-24 h-24 sm:w-28 sm:h-28 shrink-0 rounded-lg overflow-hidden bg-slate-100 border border-slate-100">
-																																								@if ($ad->image_url)
-																																												<img src="{{ $ad->image_url }}?v={{ $ad->updated_at->timestamp }}"
-																																																alt="{{ $ad->title }}"
-																																																class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-																																																loading="lazy">
-																																								@endif
-																																				</div>
-																																				<div class="flex-1 flex flex-col justify-between">
-																																								<div>
-																																												<div class="flex items-center gap-2 text-xs mb-1.5 flex-wrap">
-																																																<span
-																																																				class="inline-flex items-center gap-1 font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded text-[11px]">FEATURED</span>
-																																												</div>
-																																												<h3
-																																																class="font-bold text-slate-800 text-sm leading-snug group-hover:text-orange-600 transition-colors line-clamp-2">
-																																																{{ $ad->title }}</h3>
-																																												<p class="text-xs text-slate-500 mt-1 line-clamp-2">{{ $ad->description }}</p>
-																																								</div>
-																																				</div>
-																																</a>
-																												</article>
-																								</div>
-																				@endforeach
-																</div>
-												</div>
-												<div class="flex items-center justify-center gap-3 mt-6">
-																<button @click="prev()"
-																				class="w-8 h-8 rounded-full border border-slate-200 bg-white text-slate-400 hover:text-slate-600 flex items-center justify-center shadow-sm"
-																				aria-label="Previous"><svg class="w-4 h-4" fill="none" stroke="currentColor"
-																								viewBox="0 0 24 24">
-																								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-																				</svg></button>
-																<div class="flex items-center gap-1.5">
-																				<template x-for="i in (totalSlides - perView() + 1)" :key="i">
-																								<button @click="activeSlide=i-1"
-																												:class="activeSlide === (i - 1) ? 'w-4 bg-orange-500' : 'w-2 bg-slate-200'"
-																												class="h-2 rounded-full transition-all"></button>
-																				</template>
-																</div>
-																<button @click="next()"
-																				class="w-8 h-8 rounded-full border border-slate-200 bg-white text-slate-400 hover:text-slate-600 flex items-center justify-center shadow-sm"
-																				aria-label="Next"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-																								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-																				</svg></button>
-												</div>
-								</section>
-				@endif
+				{{-- Sponsored Ads (CMS-driven carousel, shared with /latest-news) --}}
+				<x-sponsored-ads-carousel :ads="$sponsoredAds" />
 
 				{{-- Fallback generic CMS groups not covered above (e.g. admin-added custom categories) --}}
 				@php

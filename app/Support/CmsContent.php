@@ -125,6 +125,21 @@ class CmsContent
             ->get();
     }
 
+    public function sponsoredAds(?int $limit = null): Collection
+    {
+        $query = SiteContent::forSection('advertise')
+            ->ofType('card')
+            ->published()
+            ->where('category', 'Sponsored Ads')
+            ->ordered();
+
+        if ($limit !== null) {
+            $query->limit($limit);
+        }
+
+        return $query->get();
+    }
+
     public function bySlug(string $section, string $slug, ?string $type = null): ?SiteContent
     {
         return SiteContent::forSection($section)

@@ -309,6 +309,7 @@ class PageController extends Controller
             'featuredArticle' => $featuredArticle,
             'categories' => $categories,
             'latestArticles' => $articles,
+            'sponsoredAds' => $this->content->sponsoredAds(),
             'suppressCmsBlocks' => true,
         ]);
     }
