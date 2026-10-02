@@ -320,7 +320,7 @@
 												<!-- Background Image -->
 												<img src="{{ $featuredImage }}" alt="{{ $featuredArticle->title }}"
 																class="absolute inset-0 w-full h-full object-cover z-0 transition-transform duration-500 group-hover:scale-105"
-																onerror="this.src='https://via.placeholder.com/1200x600/1e293b/ffffff?text=Featured+News'" />
+																onerror="this.onerror=null; this.src='{{ asset('images/EBOLA.webp') }}'" />
 
 												<!-- Dark Gradient Overlay for Readability -->
 												<div class="absolute inset-0 bg-linear-to-t from-black/85 via-black/30 to-black/20 z-0"></div>

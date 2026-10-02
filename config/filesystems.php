@@ -41,7 +41,9 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            // Left relative on purpose: AppServiceProvider::boot() replaces it with the
+            // current request host for web requests. A relative value is always valid.
+            'url' => '/storage',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

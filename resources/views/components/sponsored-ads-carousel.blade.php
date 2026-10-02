@@ -7,14 +7,18 @@
                 'title' => $isModel ? $ad->title : ($ad['title'] ?? ''),
                 'description' => $isModel ? $ad->description : ($ad['description'] ?? ''),
                 'image' => $isModel
-                    ? ($ad->image_url ? $ad->image_url . '?v=' . $ad->updated_at->timestamp : asset('images/news1.png'))
-                    : ($ad['image'] ?? asset('images/news1.png')),
+                    ? ($ad->image_url ? $ad->image_url . '?v=' . $ad->updated_at->timestamp : asset('images/ad-promo-3.png'))
+                    : ($ad['image'] ?? asset('images/ad-promo-3.png')),
                 'is_featured' => $isModel ? (bool) data_get($ad->data, 'is_featured') : (bool) ($ad['is_featured'] ?? false),
                 'ends_at' => $isModel ? (data_get($ad->data, 'ends_at') ?? '') : ($ad['ends_at'] ?? ''),
                 'url' => $isModel ? ($ad->button_link ?: route('advertise')) : ($ad['url'] ?? route('advertise')),
             ];
         })
         ->values();
+
+    // Local fallback for the img onerror handler, so a broken upload degrades to a real
+    // local image instead of an unreachable third-party placeholder service.
+    $fallbackImage = asset('images/ad-promo-3.png');
 @endphp
 
 @if ($slides->isNotEmpty())
@@ -63,7 +67,7 @@
                                     <img src="{{ $ad['image'] }}" alt="{{ $ad['title'] }}"
                                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                          loading="lazy"
-                                         onerror="this.src='https://via.placeholder.com/150?text=Ad+Image'" />
+                                         onerror="this.onerror=null; this.src='{{ $fallbackImage }}'" />
                                 </div>
 
                                 <!-- Details -->
