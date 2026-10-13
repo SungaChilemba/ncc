@@ -36,6 +36,7 @@
 				<div x-data="{
 				    search: '',
 				    activeFilter: 'all',
+				    filtersOpen: false,
 				    modalOpen: false,
 				    modalResource: null,
 				    recentlyViewed: [],
@@ -80,6 +81,22 @@
 				            if (stored) this.recentlyViewed = JSON.parse(stored);
 				        } catch (e) { this.recentlyViewed = []; }
 				    },
+				    countForFilter(key) {
+    const term = this.search.trim().toLowerCase();
+    return this.resources.filter(c => {
+        const matchesCat = key === 'all' || c.categoryKey === key;
+        const matchesSearch = !term || c.title.toLowerCase().includes(term) || (c.description && c.description.toLowerCase().includes(term)) || (c.categoryLabel && c.categoryLabel.toLowerCase().includes(term));
+        return matchesCat && matchesSearch;
+    }).length;
+},
+clearFilters() {
+    this.search = '';
+    this.activeFilter = 'all';
+},
+get activeFilterLabel() {
+    const f = this.filters.find(f => f.key === this.activeFilter);
+    return f ? f.label : '';
+},
 				    get recentCards() {
 				        return this.recentlyViewed.map(slug => this.resources.find(c => c.slug === slug)).filter(Boolean);
 				    }
@@ -106,22 +123,64 @@
 												</div>
 								</div>
 
-								<!-- Search + Filters (updated UI) -->
-								<div class="flex flex-col mb-8 gap-4">
-												<div class="relative flex-1">
-																<i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-																<input type="text" placeholder="Search resources..." x-model="search"
-																				class="w-full border rounded-lg pl-11 pr-4 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-												</div>
-												<div class="flex flex-wrap gap-3">
-																<template x-for="filter in filters" :key="filter.key">
-																				<button type="button" @click="activeFilter = filter.key" :aria-pressed="activeFilter === filter.key"
-																								:class="activeFilter === filter.key ? 'bg-emerald-600 text-white border-emerald-600' : 'text-gray-600 hover:bg-emerald-50 hover:text-emerald-700'"
-																								class="px-4 py-2 border rounded-lg transition" x-text="filter.label">
-																				</button>
-																</template>
-												</div>
-								</div>
+<!-- Filters sidebar + Results (dashboard layout) -->
+<div class="grid gap-8 lg:grid-cols-[17rem_minmax(0,1fr)] lg:items-start">
+	<!-- Filters: mobile toggle + panel -->
+	<aside class="lg:sticky lg:top-24 lg:self-start">
+		<!-- Mobile filter toggle -->
+		<button type="button" @click="filtersOpen = !filtersOpen" :aria-expanded="filtersOpen"
+			class="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm lg:hidden">
+			<span class="inline-flex items-center gap-2">
+				<i class="fa-solid fa-sliders text-emerald-600"></i> Filters
+			</span>
+			<span class="inline-flex items-center gap-2">
+				<span x-show="activeFilter !== 'all'" x-cloak
+					class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700"
+					x-text="activeFilterLabel"></span>
+				<i class="fa-solid fa-chevron-down text-xs transition-transform" :class="filtersOpen ? 'rotate-180' : ''"></i>
+			</span>
+		</button>
+
+		<!-- Panel: collapsible on mobile, always visible from lg up -->
+		<div class="mt-4 lg:mt-0" :class="filtersOpen ? '' : 'hidden lg:block'">
+			<div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+				<div class="mb-4 flex items-center justify-between">
+					<h2 class="text-xs font-bold uppercase tracking-wider text-slate-500">Filters</h2>
+					<button type="button" x-show="search.length > 0 || activeFilter !== 'all'" x-cloak @click="clearFilters()"
+						class="text-xs font-semibold text-emerald-600 hover:text-emerald-700">Clear</button>
+				</div>
+				<!-- Search -->
+				<div class="relative mb-4">
+					<i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400"></i>
+					<input type="text" placeholder="Search resources..." x-model="search"
+						class="w-full rounded-lg border border-slate-200 py-2 pl-10 pr-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+				</div>
+				<!-- Filters stacked top-to-bottom -->
+				<nav class="space-y-1">
+					<template x-for="filter in filters" :key="filter.key">
+						<button type="button" @click="activeFilter = filter.key; filtersOpen = false" :aria-pressed="activeFilter === filter.key"
+							:class="activeFilter === filter.key ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:bg-emerald-50 hover:text-emerald-700'"
+							class="flex w-full items-center justify-between gap-2 rounded-lg px-3.5 py-2.5 text-left text-sm font-medium transition">
+							<span x-text="filter.label"></span>
+							<span class="rounded-full px-2 py-0.5 text-xs font-semibold"
+								:class="activeFilter === filter.key ? 'bg-white/25 text-white' : 'bg-slate-100 text-slate-500'"
+								x-text="countForFilter(filter.key)"></span>
+						</button>
+					</template>
+				</nav>
+			</div>
+		</div>
+	</aside>
+
+	<!-- Results column -->
+	<div>
+		<!-- Result summary -->
+		<p class="mb-4 text-sm text-gray-500">
+			<span class="font-semibold text-slate-700" x-text="filteredCards.length"></span>
+			<span x-text="filteredCards.length === 1 ? 'resource' : 'resources'"></span>
+			<span x-show="activeFilter !== 'all'"> in </span>
+			<span class="font-semibold text-emerald-700" x-show="activeFilter !== 'all'" x-text="activeFilterLabel"></span>
+		</p>
 
 								<!-- Empty when no CMS resources at all -->
 								<div x-show="resources.length === 0" class="rounded-lg border border-slate-200 bg-white p-8 text-center text-gray-500 mb-6" x-cloak>
@@ -129,7 +188,7 @@
 								</div>
 
 								<!-- Resource Cards (updated UI + CMS data) -->
-								<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+								<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
 												<template x-for="card in filteredCards" :key="card.slug">
 																<div :data-category="card.categoryKey" class="bg-white shadow rounded-lg p-6 flex flex-col">
 																				<span class="text-xs font-medium text-emerald-600 uppercase tracking-wide" x-text="card.categoryLabel"></span>
@@ -173,6 +232,8 @@
 								<div x-show="resources.length > 0 && filteredCards.length === 0" class="text-center py-16" x-cloak>
 												<i class="fa-solid fa-folder-open text-4xl text-gray-300 mb-4"></i>
 												<p class="text-gray-500">No resources match your search.</p>
+								</div>
+												</div>
 								</div>
 
 								{{-- Hidden raw file paths for backend test compatibility (assertSee raw "resource/..." ) --}}
