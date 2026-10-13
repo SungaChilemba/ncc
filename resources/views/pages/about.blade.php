@@ -181,8 +181,27 @@
 
     <section class="px-4 py-12 sm:px-6 lg:px-8" x-data="{ peopleTab: 'commissioners' }">
         <div class="mx-auto max-w-7xl">
-            <div class="mb-6 flex flex-wrap gap-4 border-b border-slate-200">
-                @foreach (["commissioners" => "Commissioners", "exOfficials" => "Ex-Officials", "management" => "Management"] as $key => $label)
+            @php
+                $peopleTabs = ["commissioners" => "Commissioners", "exOfficials" => "Ex-Officials", "management" => "Management"];
+            @endphp
+            <div class="mb-6 sm:hidden">
+                <label for="people-select" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">View group</label>
+                <div class="relative">
+                    <select
+                        id="people-select"
+                        x-model="peopleTab"
+                        class="w-full appearance-none rounded-lg border border-slate-300 bg-white px-4 py-3 pr-10 text-sm font-semibold text-slate-800 shadow-sm transition focus:border-green-700 focus:outline-none focus:ring-2 focus:ring-green-100"
+                    >
+                        @foreach ($peopleTabs as $key => $label)
+                            <option value="{{ $key }}">{{ $label }}</option>
+                        @endforeach
+                    </select>
+                    <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-400"></i>
+                </div>
+            </div>
+
+            <div class="mb-6 hidden flex-wrap gap-4 border-b border-slate-200 sm:flex">
+                @foreach ($peopleTabs as $key => $label)
                     <button
                         type="button"
                         @click="peopleTab = '{{ $key }}'"

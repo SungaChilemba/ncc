@@ -630,4 +630,19 @@ class PublicCmsContentTest extends TestCase
         $response->assertDontSee('National Child Protection Initiative Launched');
         $response->assertDontSee('MALAWI REACHES 7.37 MILLION CHILDREN WITH POLIO VACCINATION');
     }
+
+    public function test_about_people_section_uses_mobile_dropdown(): void
+    {
+        $response = $this->get(route('about'))->assertOk();
+
+        // Mobile dropdown bound to the same Alpine state as the desktop tabs.
+        $response->assertSee('id="people-select"', false);
+        $response->assertSee('x-model="peopleTab"', false);
+        $response->assertSee('<option value="commissioners">Commissioners</option>', false);
+        $response->assertSee('<option value="exOfficials">Ex-Officials</option>', false);
+        $response->assertSee('<option value="management">Management</option>', false);
+
+        // Desktop tab buttons remain for larger screens.
+        $response->assertSee('peopleTab === \'management\'', false);
+    }
 }
