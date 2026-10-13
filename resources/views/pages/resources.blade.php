@@ -37,6 +37,8 @@
 				    search: '',
 				    activeFilter: 'all',
 				    filtersOpen: false,
+				    page: 1,
+				    perPage: 4,
 				    modalOpen: false,
 				    modalResource: null,
 				    recentlyViewed: [],
@@ -51,7 +53,11 @@
 				        { key: 'stakeholder-tools', label: 'Stakeholder Tools' },
 				        { key: 'reports', label: 'Reports' }
 				    ],
-				    init() { this.loadRecentlyViewed(); },
+				    init() {
+				        this.loadRecentlyViewed();
+				        this.$watch('activeFilter', () => { this.page = 1; });
+				        this.$watch('search', () => { this.page = 1; });
+				    },
 				    get filteredCards() {
 				        return this.resources.filter(c => {
 				            const matchesFilter = this.activeFilter === 'all' || c.categoryKey === this.activeFilter || (!c.categoryKey && false);
@@ -59,6 +65,19 @@
 				            const matchesSearch = !term || c.title.toLowerCase().includes(term) || (c.description && c.description.toLowerCase().includes(term)) || (c.categoryLabel && c.categoryLabel.toLowerCase().includes(term));
 				            return matchesFilter && matchesSearch;
 				        });
+				    },
+				    get totalPages() {
+				        return Math.max(1, Math.ceil(this.filteredCards.length / this.perPage));
+				    },
+				    get paginatedCards() {
+				        const start = (this.page - 1) * this.perPage;
+				        return this.filteredCards.slice(start, start + this.perPage);
+				    },
+				    prevPage() {
+				        if (this.page > 1) this.page--;
+				    },
+				    nextPage() {
+				        if (this.page < this.totalPages) this.page++;
 				    },
 				    openPreview(card) {
 				        this.modalResource = card;
@@ -92,6 +111,7 @@
 clearFilters() {
     this.search = '';
     this.activeFilter = 'all';
+    this.page = 1;
 },
 get activeFilterLabel() {
     const f = this.filters.find(f => f.key === this.activeFilter);
@@ -185,7 +205,7 @@ get activeFilterLabel() {
 
 								<!-- Resource Cards (updated UI + CMS data) -->
 								<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-												<template x-for="card in filteredCards" :key="card.slug">
+												<template x-for="card in paginatedCards" :key="card.slug">
 																<div :data-category="card.categoryKey" class="bg-white shadow rounded-lg p-6 flex flex-col">
 																				<span class="text-xs font-medium text-emerald-600 uppercase tracking-wide" x-text="card.categoryLabel"></span>
 																				<h3 class="text-lg font-bold text-gray-800 mt-1 mb-2" x-text="card.title"></h3>
@@ -224,7 +244,25 @@ get activeFilterLabel() {
 												</template>
 								</div>
 
-								<!-- Empty state for search/filter no match (updated UI) -->
+								<!-- Pagination (4 per page, per category) -->
+<div x-show="totalPages > 1" x-cloak class="mt-8 flex items-center justify-center gap-3">
+	<button type="button" @click="prevPage()" :disabled="page === 1"
+		:class="page === 1 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-emerald-50 hover:text-emerald-700'"
+		class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition">
+		<i class="fa-solid fa-chevron-left text-xs"></i> Prev
+	</button>
+	<span class="text-sm text-gray-500">Page
+		<span class="font-semibold text-slate-700" x-text="page"></span> of
+		<span class="font-semibold text-slate-700" x-text="totalPages"></span>
+	</span>
+	<button type="button" @click="nextPage()" :disabled="page === totalPages"
+		:class="page === totalPages ? 'opacity-40 cursor-not-allowed' : 'hover:bg-emerald-50 hover:text-emerald-700'"
+		class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition">
+		Next <i class="fa-solid fa-chevron-right text-xs"></i>
+	</button>
+</div>
+
+<!-- Empty state for search/filter no match (updated UI) -->
 								<div x-show="resources.length > 0 && filteredCards.length === 0" class="text-center py-16" x-cloak>
 												<i class="fa-solid fa-folder-open text-4xl text-gray-300 mb-4"></i>
 												<p class="text-gray-500">No resources match your search.</p>
