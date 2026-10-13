@@ -15,7 +15,7 @@
 				</head>
 
 				<body class="min-h-screen bg-slate-50 text-slate-900">
-								<header class="sticky top-0 z-30 bg-white shadow-sm" x-data="{ open: false, latestOpen: false }">
+								<header class="sticky top-0 z-40 bg-white shadow-sm" x-data="{ open: false, latestOpen: false }">
 												<!-- Top Header Bar: Logo left, action items right -->
 												<div class="border-b border-emerald-800 bg-emerald-800">
 																<div class="mx-auto flex max-w-8xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">

@@ -91,9 +91,9 @@
 																				<!-- Text Overlay -->
 																				<div class="relative z-20 flex flex-col items-center justify-end h-full px-6 pb-16 text-center">
 																								<a :href="slide.link"
-																												class="inline-flex items-center gap-2 text-white text-2xl md:text-4xl font-extrabold tracking-tight hover:text-gray-200 transition-colors drop-shadow-md">
+																												class="text-white text-2xl md:text-4xl font-extrabold tracking-tight hover:text-gray-200 transition-colors drop-shadow-md">
 																												<span x-text="slide.title"></span>
-																												<svg class="w-6 h-6 md:w-8 md:h-8 stroke-current" fill="none" viewBox="0 0 24 24"
+																												<svg class="inline-block ml-2 w-6 h-6 md:w-8 md:h-8 stroke-current align-middle shrink-0" fill="none" viewBox="0 0 24 24"
 																																stroke-width="2.5">
 																																<path stroke-linecap="round" stroke-linejoin="round"
 																																				d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
@@ -340,9 +340,9 @@
 																<!-- Headline Link -->
 																<div class="max-w-3xl">
 																				<a href="{{ $featuredLink }}"
-																								class="inline-flex items-baseline gap-2 text-white text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight hover:text-gray-200 transition-colors drop-shadow-lg leading-tight">
+																								class="text-white text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight hover:text-gray-200 transition-colors drop-shadow-lg leading-tight">
 																								<span>{{ $featuredArticle->title }}</span>
-																								<svg class="w-6 h-6 md:w-8 md:h-8 stroke-current inline-block shrink-0 self-center" fill="none"
+																								<svg class="inline-block ml-2 w-6 h-6 md:w-8 md:h-8 stroke-current align-middle shrink-0" fill="none"
 																												viewBox="0 0 24 24" stroke-width="3">
 																												<path stroke-linecap="round" stroke-linejoin="round"
 																																d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
