@@ -47,7 +47,7 @@ return [
         ],
         'about' => [
             'label' => 'About',
-            'description' => 'Mandate, mission, vision, commissioners, leadership, and organization content.',
+            'description' => 'Mandate, mission, objectives, commissioners, leadership, and organization content.',
             'route' => 'about',
             'types' => ['hero', 'card', 'stat', 'cta'],
         ],

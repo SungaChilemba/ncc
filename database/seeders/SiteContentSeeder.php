@@ -345,39 +345,7 @@ class SiteContentSeeder extends Seeder
                 'accent_color' => 'green',
                 'sort_order' => 0,
             ],
-            [
-                'section' => 'about',
-                'type' => 'card',
-                'slug' => 'our-mandate',
-                'category' => 'Mandate, Mission & Vision',
-                'title' => 'Our Mandate',
-                'subtitle' => 'Protection',
-                'description' => 'Safeguarding children from abuse and exploitation. Monitoring child rights laws and conventions. Amplifying children’s voices in society.',
-                'image_path' => 'images/about-mandate.jpg',
-                'sort_order' => 1,
-            ],
-            [
-                'section' => 'about',
-                'type' => 'card',
-                'slug' => 'our-mission',
-                'category' => 'Mandate, Mission & Vision',
-                'title' => 'Our Mission',
-                'subtitle' => 'Policy & Law',
-                'description' => 'Coordinate, monitor, and strengthen accountability in all matters concerning children’s rights and welfare in Malawi.',
-                'image_path' => 'images/about-mission.jpg',
-                'sort_order' => 2,
-            ],
-            [
-                'section' => 'about',
-                'type' => 'card',
-                'slug' => 'our-vision',
-                'category' => 'Mandate, Mission & Vision',
-                'title' => 'Our Vision',
-                'subtitle' => 'Advocacy',
-                'description' => 'A Malawi where every child grows up safe, empowered, supported, and able to reach their full potential.',
-                'image_path' => 'images/about-vision.jpg',
-                'sort_order' => 3,
-            ],
+            ...$this->aboutStoryTabs(),
             ...$this->commissioners(),
             [
                 'section' => 'about',
@@ -508,6 +476,61 @@ class SiteContentSeeder extends Seeder
                 'sort_order' => 1,
             ],
         ];
+    }
+
+    /**
+     * Mandate, Mission and Objectives tabs shown at the top of the About page.
+     * Each tab renders its own background image and bullet list.
+     */
+    private function aboutStoryTabs(): array
+    {
+        $tabs = [
+            'our-mandate' => [
+                'title' => 'Our Mandate',
+                'image_path' => 'images/about-mandate.jpg',
+                'bullets' => [
+                    'To hold duty bearers of child services accountable for the discharge of their duties.',
+                    'To promote, coordinate and monitor the implementation of child rights and welfare programs.',
+                    'To provide oversight, advise and coordination on all child rights and welfare services.',
+                    'To provide an independent oversight, coordination, and policy guidance to ensure that all duty bearers in Malawi fulfil their obligations in protecting and promoting the rights and well-being of every child.',
+                ],
+            ],
+            'our-mission' => [
+                'title' => 'Our Mission',
+                'image_path' => 'images/about-mission.jpg',
+                'bullets' => [
+                    'To promote and protect the rights and welfare of children in Malawi.',
+                    'To safeguard the rights and welfare of children in Malawi.',
+                    'To promote, protect and uphold children’s rights and welfare through coordination and monitoring of child service providers.',
+                    'To make childcare and protection a national priority through coordinated efforts that ensure every child’s safety and well-being.',
+                ],
+            ],
+            'our-objectives' => [
+                'title' => 'Our Objectives',
+                'image_path' => 'images/about-vision.jpg',
+                'bullets' => [
+                    'To advocate for child rights and welfare.',
+                    'To advise Government and stakeholders on the development and review of legal and policy instruments for care and protection of children.',
+                    'To monitor implementation, compliance and enforcement of policies, laws, regulations and standards on children’s rights and welfare.',
+                    'To ensure multi-sectoral coordination and collaboration among stakeholders providing child-related services.',
+                    'To coordinate research and documentation for the effective and efficient delivery of child rights and welfare services.',
+                    'To promote resource mobilization and utilization for the delivery of child rights and welfare services.',
+                    'To promote fulfillment of treaty obligations as they relate to children and monitor implementation of concluding observations.',
+                ],
+            ],
+        ];
+
+        return array_map(fn ($tab, $slug) => [
+            'section' => 'about',
+            'type' => 'card',
+            'slug' => $slug,
+            'category' => 'Mandate, Mission & Objectives',
+            'title' => $tab['title'],
+            'description' => implode("\n", $tab['bullets']),
+            'image_path' => $tab['image_path'],
+            'data' => ['bullets' => $tab['bullets']],
+            'sort_order' => $index + 1,
+        ], $tabs, array_keys($tabs));
     }
 
     private function commissioners(): array

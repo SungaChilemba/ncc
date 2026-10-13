@@ -7,66 +7,89 @@
         $cards = $cmsCards ?? collect();
         $hero = $cmsHero ?? null;
         $stats = $cmsContent->get("stat", collect()) ?? collect();
-        $storyCards = $cards->where("category", "Mandate, Mission & Vision")->values();
+        $storyCards = $cards->whereIn("category", ["Mandate, Mission & Objectives", "Mandate, Mission & Vision"]);
+
+        $findStory = function (array $slugs) use ($storyCards, $cards) {
+            foreach ($slugs as $slug) {
+                $match = $storyCards->firstWhere("slug", $slug) ?? $cards->firstWhere("slug", $slug);
+
+                if ($match) {
+                    return $match;
+                }
+            }
+
+            return null;
+        };
+
         $storyTabs = [
-            "mandate" => $storyCards->firstWhere("slug", "our-mandate"),
-            "mission" => $storyCards->firstWhere("slug", "our-mission"),
-            "vision" => $storyCards->firstWhere("slug", "our-vision"),
+            "mandate" => [
+                "label" => "Our Mandate",
+                "icon" => "fa-shield-halved",
+                "item" => $findStory(["our-mandate"]),
+            ],
+            "mission" => [
+                "label" => "Our Mission",
+                "icon" => "fa-scale-balanced",
+                "item" => $findStory(["our-mission"]),
+            ],
+            "objectives" => [
+                "label" => "Our Objectives",
+                "icon" => "fa-bullseye",
+                "item" => $findStory(["our-objectives", "our-vision"]),
+            ],
         ];
-        $fallbackStory = $storyCards->first();
+
+        // Bullets come from the CMS (data.bullets) so the copy stays editable.
+        // Fall back to one bullet per line in the card description.
+        $storyBullets = function ($item): array {
+            if (! $item) {
+                return [];
+            }
+
+            $bullets = collect(data_get($item->data, "bullets", []))
+                ->map(fn ($bullet) => trim((string) $bullet))
+                ->filter()
+                ->values();
+
+            if ($bullets->isEmpty() && $item->description) {
+                $bullets = collect(preg_split("/\r\n|\r|\n/", $item->description))
+                    ->map(fn ($line) => trim($line))
+                    ->filter()
+                    ->values();
+            }
+
+            return $bullets->all();
+        };
+
+        $backgrounds = collect($storyTabs)
+            ->map(fn ($tab) => $tab["item"]?->image_url ? $tab["item"]->image_url . "?v=" . $tab["item"]->updated_at->timestamp : null)
+            ->filter()
+            ->all();
         $commissioners = $cards->where("category", "Commissioners")->values();
         $leadership = $cards->where("category", "Organogram")->values();
         $executive = $leadership->firstWhere("slug", "chief-executive-officer") ?? $leadership->first();
         $managers = $leadership->reject(fn ($item) => $executive && $item->is($executive))->values();
         $exOfficials = $cards->where("category", "Ex-Officials")->values();
-        $backgrounds = collect($storyTabs)
-            ->map(fn ($item) => $item?->image_url ? $item->image_url . "?v=" . $item->updated_at->timestamp : null)
-            ->filter()
-            ->all();
-        $featureIcons = [
-            "mandate" => "fa-shield-halved",
-            "mission" => "fa-scale-balanced",
-            "vision" => "fa-bullhorn",
-        ];
-        $featureLabels = [
-            "mandate" => "Protection",
-            "mission" => "Policy & Law",
-            "vision" => "Advocacy",
-        ];
-        $featureDescriptions = [
-            "mandate" => "Safeguarding children from abuse, neglect, trafficking, and exploitation.",
-            "mission" => "Coordinating policy, law, and institutional accountability for children.",
-            "vision" => "Amplifying children's voices and strengthening national child rights action.",
-        ];
     @endphp
 
     <section
-        class="relative overflow-hidden rounded-lg px-4 py-14 sm:px-6 lg:px-8"
+        class="relative overflow-hidden rounded-lg"
         x-data="{
             tab: 'mandate',
-            cycleInterval: null,
-            startCycle() {
-                this.stopCycle();
-                this.cycleInterval = setInterval(() => {
-                    this.tab = this.tab === 'mandate' ? 'mission' : this.tab === 'mission' ? 'vision' : 'mandate';
-                }, 8000);
-            },
-            stopCycle() {
-                if (this.cycleInterval) {
-                    clearInterval(this.cycleInterval);
-                    this.cycleInterval = null;
-                }
+            keys: ['mandate', 'mission', 'objectives'],
+            move(offset) {
+                const index = this.keys.indexOf(this.tab);
+                const key = this.keys[(index + offset + this.keys.length) % this.keys.length];
+                this.tab = key;
+                this.$nextTick(() => document.querySelector('[data-story-tab=' + key + ']')?.focus());
             }
         }"
-        x-init="startCycle()"
-        @mouseenter="stopCycle()"
-        @mouseleave="startCycle()"
     >
         <div class="absolute inset-0">
             @if ($hero?->image_url)
                 <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ $hero->image_url }}?v={{ $hero->updated_at->timestamp }}')"></div>
             @endif
-            @foreach (["mandate", "mission", "vision"] as $key)
+            @foreach ($storyTabs as $key => $tab)
                 @if (! empty($backgrounds[$key]))
                     <div
                         x-show="tab === '{{ $key }}'"
@@ -80,64 +103,78 @@
             <div class="absolute inset-0 bg-green-950/65"></div>
         </div>
 
-        <div class="relative z-10 mx-auto max-w-7xl">
-            <div class="mb-8 max-w-4xl text-white">
-                <p class="text-sm font-semibold uppercase tracking-wide text-green-100">{{ $hero?->subtitle ?: "Championing the Rights of Children in Malawi" }}</p>
-                <h1 class="mt-3 text-3xl font-bold md:text-5xl">{{ $hero?->title ?: "About Us" }}</h1>
-                @if ($hero?->description)
-                    <p class="mt-4 max-w-3xl text-base leading-7 text-white/90">{{ $hero->description }}</p>
-                @endif
-            </div>
-
-            <div class="rounded-lg border border-white/30 bg-white/95 p-5 shadow-lg backdrop-blur sm:p-8">
-                <div class="mb-8 flex flex-wrap items-center justify-center gap-3 border-b border-slate-200 pb-5">
-                    @foreach (["mandate" => "Our Mandate", "mission" => "Our Mission", "vision" => "Our Vision"] as $key => $label)
-                        <button
-                            type="button"
-                            @click="tab = '{{ $key }}'"
-                            :class="tab === '{{ $key }}' ? 'border-green-700 text-green-700' : 'border-transparent text-gray-600 hover:text-green-700'"
-                            class="border-b-4 px-4 py-3 font-semibold transition"
-                        >
-                            {{ $label }}
-                        </button>
-                    @endforeach
+        <div class="relative z-10 px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
+            <div class="mx-auto max-w-7xl">
+                <div class="max-w-3xl text-white">
+                    <p class="text-sm font-semibold uppercase tracking-wide text-green-100">{{ $hero?->subtitle ?: "Championing the Rights of Children in Malawi" }}</p>
+                    <h1 class="mt-3 text-3xl font-bold md:text-5xl">{{ $hero?->title ?: "About Us" }}</h1>
+                    @if ($hero?->description)
+                        <p class="mt-4 max-w-3xl text-base leading-7 text-white/90">{{ $hero->description }}</p>
+                    @endif
                 </div>
 
-                @foreach ($storyTabs as $key => $item)
-                    @php
-                        $tabItem = $item ?: $fallbackStory;
-                    @endphp
-                    @if ($tabItem)
-                        <div x-show="tab === '{{ $key }}'" x-cloak class="space-y-7">
-                            <div class="grid grid-cols-1 gap-5 md:grid-cols-3">
-                                @foreach (["mandate", "mission", "vision"] as $feature)
-                                    <div class="rounded-lg bg-slate-50 p-5 text-center shadow-sm">
-                                        <i class="fa-solid {{ $featureIcons[$feature] }} mb-4 text-3xl text-green-700"></i>
-                                        <h3 class="text-lg font-bold">{{ $featureLabels[$feature] }}</h3>
-                                        <p class="mt-2 text-sm leading-6 text-gray-600">{{ $featureDescriptions[$feature] }}</p>
-                                    </div>
-                                @endforeach
-                            </div>
-
-                            <div class="rounded-lg bg-slate-50 p-6 shadow-sm sm:p-8">
-                                <p class="text-sm font-semibold uppercase tracking-wide text-green-700">{{ $tabItem->subtitle }}</p>
-                                <h2 class="mt-2 text-2xl font-bold text-slate-950">{{ $tabItem->title }}</h2>
-                                @if ($tabItem->description)
-                                    <div class="mt-4 space-y-3 text-gray-700">
-                                        @foreach (preg_split("/\n\s*\n/", $tabItem->description) as $paragraph)
-                                            <p>{{ $paragraph }}</p>
-                                        @endforeach
-                                    </div>
-                                @endif
-                                <div class="mt-6 flex flex-wrap gap-3">
-                                    @foreach (["Child Protection", "Rights Monitoring", "Community Engagement", "Education Access", "Policy Reform"] as $tag)
-                                        <span class="rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-700">{{ $tag }}</span>
-                                    @endforeach
-                                </div>
-                            </div>
+                <div class="mt-8 overflow-hidden rounded-xl border border-white/30 bg-white/95 shadow-xl backdrop-blur">
+                    <div
+                        class="border-b border-slate-200 bg-slate-50/90 px-3 pt-3 sm:px-6"
+                        role="tablist"
+                        aria-label="Mandate, mission and objectives"
+                        @keydown.right.prevent="move(1)"
+                        @keydown.left.prevent="move(-1)"
+                    >
+                        <div class="grid grid-cols-3 gap-1 sm:flex sm:justify-center sm:gap-2">
+                            @foreach ($storyTabs as $key => $tab)
+                                <button
+                                    type="button"
+                                    role="tab"
+                                    id="story-tab-{{ $key }}"
+                                    data-story-tab="{{ $key }}"
+                                    aria-controls="story-panel-{{ $key }}"
+                                    :aria-selected="tab === '{{ $key }}'"
+                                    :tabindex="tab === '{{ $key }}' ? 0 : -1"
+                                    @click="tab = '{{ $key }}'"
+                                    :class="tab === '{{ $key }}' ? 'bg-green-700 text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-green-50 hover:text-green-800'"
+                                    class="w-full rounded-lg px-1 py-2.5 text-[13px] leading-tight font-semibold whitespace-nowrap transition sm:w-auto sm:px-6 sm:text-base"
+                                >
+                                    <span class="hidden sm:inline-block"><i class="fa-solid {{ $tab["icon"] }} sm:mr-2"></i></span>
+                                    {{ $tab["label"] }}
+                                </button>
+                            @endforeach
                         </div>
-                    @endif
-                @endforeach
+                    </div>
+
+                    <div class="px-4 py-6 sm:px-6 sm:py-8">
+                        @foreach ($storyTabs as $key => $tab)
+                            @php
+                                $bullets = $storyBullets($tab["item"]);
+                            @endphp
+                            <div
+                                id="story-panel-{{ $key }}"
+                                role="tabpanel"
+                                aria-labelledby="story-tab-{{ $key }}"
+                                x-show="tab === '{{ $key }}'"
+                                x-cloak
+                                x-transition:enter="transition ease-out duration-300 motion-reduce:transition-none"
+                                x-transition:enter-start="opacity-0 translate-y-2 motion-reduce:translate-y-0"
+                                x-transition:enter-end="opacity-100 translate-y-0"
+                            >
+                                @if (filled($bullets))
+                                    <ul class="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:gap-4">
+                                        @foreach ($bullets as $bullet)
+                                            <li class="flex gap-3 rounded-xl border border-slate-200 bg-slate-50/80 p-4 transition duration-300 hover:-translate-y-0.5 hover:border-green-600/40 hover:bg-white hover:shadow-md motion-reduce:transform-none motion-reduce:transition-none sm:gap-4 sm:p-5">
+                                                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-700 text-xs font-bold text-white tabular-nums sm:h-9 sm:w-9">
+                                                    {{ $loop->iteration }}
+                                                </span>
+                                                <p class="text-sm leading-6 text-slate-700 sm:text-base sm:leading-7">{{ $bullet }}</p>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @else
+                                    <p class="rounded-xl bg-slate-50 p-6 text-slate-600">Content for this section will be published shortly.</p>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
             </div>
         </div>
     </section>
