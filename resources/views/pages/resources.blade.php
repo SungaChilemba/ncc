@@ -103,10 +103,20 @@ get activeFilterLabel() {
 				}" x-init="init()" @keydown.escape.window="closeModal()" class="max-w-7xl mx-auto px-4 py-10">
 
 								<!-- Page Header (CMS-driven) -->
-								<h1 class="text-3xl font-bold text-emerald-700 mb-6">{{ $resourceHero?->title ?: "Resources" }}</h1>
-								<p class="text-gray-600 mb-8">
-												{{ $resourceHero?->description ?: "Browse official documents and guidelines. Use the search and filters to quickly find what you need." }}
-								</p>
+								<div class="grid gap-8 lg:grid-cols-[17rem_minmax(0,1fr)] lg:items-end mb-8">
+									<div>
+										<h1 class="text-3xl font-bold text-emerald-700">{{ $resourceHero?->title ?: "Resources" }}</h1>
+										<p class="mt-2 text-gray-600">
+											{{ $resourceHero?->description ?: "Browse Official Documents Here" }}
+										</p>
+									</div>
+									<!-- Search (moved out of the filters card) -->
+									<div class="relative w-full">
+										<i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+										<input type="text" placeholder="Search resources..." x-model="search"
+											class="w-full rounded-lg border border-slate-200 py-2.5 pl-11 pr-4 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+									</div>
+								</div>
 
 								<!-- Recently Viewed (updated UI) — tracks slug, localStorage -->
 								<div x-show="recentCards.length > 0" x-transition class="mb-8" x-cloak>
@@ -149,12 +159,6 @@ get activeFilterLabel() {
 					<button type="button" x-show="search.length > 0 || activeFilter !== 'all'" x-cloak @click="clearFilters()"
 						class="text-xs font-semibold text-emerald-600 hover:text-emerald-700">Clear</button>
 				</div>
-				<!-- Search -->
-				<div class="relative mb-4">
-					<i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400"></i>
-					<input type="text" placeholder="Search resources..." x-model="search"
-						class="w-full rounded-lg border border-slate-200 py-2 pl-10 pr-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
-				</div>
 				<!-- Filters stacked top-to-bottom -->
 				<nav class="space-y-1">
 					<template x-for="filter in filters" :key="filter.key">
@@ -174,14 +178,6 @@ get activeFilterLabel() {
 
 	<!-- Results column -->
 	<div>
-		<!-- Result summary -->
-		<p class="mb-4 text-sm text-gray-500">
-			<span class="font-semibold text-slate-700" x-text="filteredCards.length"></span>
-			<span x-text="filteredCards.length === 1 ? 'resource' : 'resources'"></span>
-			<span x-show="activeFilter !== 'all'"> in </span>
-			<span class="font-semibold text-emerald-700" x-show="activeFilter !== 'all'" x-text="activeFilterLabel"></span>
-		</p>
-
 								<!-- Empty when no CMS resources at all -->
 								<div x-show="resources.length === 0" class="rounded-lg border border-slate-200 bg-white p-8 text-center text-gray-500 mb-6" x-cloak>
 												No resources have been published yet.
