@@ -259,6 +259,8 @@
 @endsection
 
 @push("scripts")
+    {{-- Chart.js is only needed on this page; load it here instead of sitewide. --}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const ctx = document.getElementById("caseChart");
