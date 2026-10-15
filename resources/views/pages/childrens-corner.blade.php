@@ -139,13 +139,13 @@
                     ];
                 @endphp
 
-                <div class="mt-12 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                <div class="mt-12 grid gap-5 sm:grid-cols-2 md:grid-cols-3">
                     @foreach ($activities as $activity)
                         {{-- Outer wrapper owns the scroll-reveal transform; the inner card owns the hover lift. --}}
                         <div class="reveal">
-                            <div class="group flex h-full items-center gap-4 overflow-hidden rounded-2xl border border-slate-200 bg-linear-to-br from-white to-slate-50 p-4 shadow-sm transition duration-300 hover:-translate-y-1.5 hover:border-brand-200 hover:shadow-xl hover:shadow-brand-600/15 sm:gap-5 sm:p-5">
-                                <span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br text-white shadow-lg transition duration-300 group-hover:-rotate-3 group-hover:scale-110 group-hover:shadow-xl sm:h-[4.5rem] sm:w-[4.5rem] {{ $activityAccents[$loop->index % count($activityAccents)] }}">
-                                    <i class="{{ $activity->subtitle ?: "fa-solid fa-star" }} text-2xl sm:text-3xl" aria-hidden="true"></i>
+                            <div class="group flex h-full items-center gap-4 overflow-hidden rounded-2xl border border-slate-200 bg-linear-to-br from-white to-slate-50 p-4 shadow-sm transition duration-300 hover:-translate-y-1.5 hover:border-brand-200 hover:shadow-xl hover:shadow-brand-600/15 lg:gap-5 lg:p-5">
+                                <span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br text-white shadow-lg transition duration-300 group-hover:-rotate-3 group-hover:scale-110 group-hover:shadow-xl lg:h-[4.5rem] lg:w-[4.5rem] {{ $activityAccents[$loop->index % count($activityAccents)] }}">
+                                    <i class="{{ $activity->subtitle ?: "fa-solid fa-star" }} text-2xl lg:text-3xl" aria-hidden="true"></i>
                                 </span>
                                 <h3 class="min-w-0 flex-1 font-playful text-xl leading-tight font-semibold tracking-wide text-slate-900 transition duration-300 group-hover:text-brand-700 lg:text-2xl">
                                     {{ $activity->title }}
