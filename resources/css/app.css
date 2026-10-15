@@ -7,6 +7,9 @@
 @theme {
     --container-8xl: 90rem;
 
+    /* Playful, child-friendly display font for the Children's Corner activity cards. */
+    --font-playful: "Fredoka", "Baloo 2", ui-rounded, "Trebuchet MS", system-ui, sans-serif;
+
     /* Brand palette — single source of truth (matches site header emerald). */
     --color-brand-50: oklch(0.979 0.021 166.113);
     --color-brand-100: oklch(0.95 0.052 163.051);

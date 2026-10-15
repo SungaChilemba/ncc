@@ -126,20 +126,31 @@
                     </p>
                 </div>
 
-                <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+                @php
+                    // Playful per-card accent gradients (cycled); written out literally so Tailwind detects them.
+                    $activityAccents = [
+                        "from-amber-400 to-orange-500 shadow-amber-500/40",
+                        "from-sky-400 to-blue-500 shadow-sky-500/40",
+                        "from-rose-400 to-pink-500 shadow-rose-500/40",
+                        "from-violet-400 to-purple-500 shadow-violet-500/40",
+                        "from-emerald-400 to-teal-500 shadow-emerald-500/40",
+                        "from-cyan-400 to-sky-500 shadow-cyan-500/40",
+                        "from-fuchsia-400 to-purple-600 shadow-fuchsia-500/40",
+                    ];
+                @endphp
+
+                <div class="mt-12 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                     @foreach ($activities as $activity)
-                        <div class="reveal group rounded-2xl border border-slate-200 bg-white p-6 transition duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-lg">
-                            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-700 transition duration-300 group-hover:bg-brand-700 group-hover:text-white">
-                                <i class="{{ $activity->subtitle ?: "fa-solid fa-star" }} text-lg"></i>
+                        {{-- Outer wrapper owns the scroll-reveal transform; the inner card owns the hover lift. --}}
+                        <div class="reveal">
+                            <div class="group flex h-full items-center gap-4 overflow-hidden rounded-2xl border border-slate-200 bg-linear-to-br from-white to-slate-50 p-4 shadow-sm transition duration-300 hover:-translate-y-1.5 hover:border-brand-200 hover:shadow-xl hover:shadow-brand-600/15 sm:gap-5 sm:p-5">
+                                <span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br text-white shadow-lg transition duration-300 group-hover:-rotate-3 group-hover:scale-110 group-hover:shadow-xl sm:h-[4.5rem] sm:w-[4.5rem] {{ $activityAccents[$loop->index % count($activityAccents)] }}">
+                                    <i class="{{ $activity->subtitle ?: "fa-solid fa-star" }} text-2xl sm:text-3xl" aria-hidden="true"></i>
+                                </span>
+                                <h3 class="min-w-0 flex-1 font-playful text-xl leading-tight font-semibold tracking-wide text-slate-900 transition duration-300 group-hover:text-brand-700 lg:text-2xl">
+                                    {{ $activity->title }}
+                                </h3>
                             </div>
-                            <h3 class="mt-4 text-base font-bold text-slate-900">
-                                {{ $activity->title }}
-                            </h3>
-                            @if ($activity->description)
-                                <p class="mt-2 text-sm leading-6 text-slate-600">
-                                    {{ $activity->description }}
-                                </p>
-                            @endif
                         </div>
                     @endforeach
                 </div>
