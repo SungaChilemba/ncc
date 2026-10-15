@@ -34,53 +34,50 @@
         ])->filter(fn ($item) => $item["visible"])->values();
     @endphp
 
-    {{-- Hero: split layout with CMS-driven copy, action buttons, and fallback imagery. --}}
-    <section class="-mx-4 overflow-hidden bg-white sm:-mx-6 lg:-mx-8">
-        <div class="px-4 pt-12 pb-14 sm:px-6 lg:px-8">
-            <div class="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-2 lg:gap-14">
-                <div class="reveal text-center lg:text-left">
-                    <p class="text-sm font-semibold uppercase tracking-wider text-brand-700">
-                        For every child in Malawi
+    {{-- Hero: full-bleed image with the CMS copy overlaid on top of it. --}}
+    <section class="relative -mx-4 overflow-hidden bg-white sm:-mx-6 lg:-mx-8">
+        <img src="{{ $heroImage }}"
+             alt="{{ $hero?->alt_text ?: $hero?->title ?: "Children at an NCC activity" }}"
+             class="absolute inset-0 h-full w-full object-cover object-top"
+             fetchpriority="high" />
+
+        {{-- White fade keeps the centered dark copy legible wherever the image sits behind it. --}}
+        <div class="absolute inset-0 bg-linear-to-b from-white/85 via-white/75 to-white/85"></div>
+
+        <div class="relative z-10 mx-auto max-w-7xl px-4 pt-12 pb-14 sm:px-6 lg:px-8">
+            <div class="reveal mx-auto max-w-xl text-center lg:max-w-2xl">
+                <p class="text-sm font-semibold uppercase tracking-wider text-brand-700">
+                    For every child in Malawi
+                </p>
+                <h1 class="mt-3 text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
+                    {{ $hero?->title ?: "Child Rights Corner" }}
+                </h1>
+                @if ($hero?->description)
+                    <p class="mx-auto mt-5 max-w-xl text-base leading-7 text-slate-600">
+                        {{ $hero->description }}
                     </p>
-                    <h1 class="mt-3 text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
-                        {{ $hero?->title ?: "Child Rights Corner" }}
-                    </h1>
-                    @if ($hero?->description)
-                        <p class="mx-auto mt-5 max-w-xl text-base leading-7 text-slate-600 lg:mx-0">
-                            {{ $hero->description }}
-                        </p>
-                    @endif
+                @endif
 
-                    <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start">
-                        <a href="{{ route("reporting") }}"
-                           class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-urgent-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-urgent-700 focus:outline-none focus:ring-2 focus:ring-urgent-600 focus:ring-offset-2 sm:w-auto">
-                            <i class="fa-solid fa-shield-halved"></i>
-                            Report a Case Now
+                <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                    <a href="{{ route("reporting") }}"
+                       class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-urgent-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-urgent-700 focus:outline-none focus:ring-2 focus:ring-urgent-600 focus:ring-offset-2 sm:w-auto">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        Report a Case Now
+                    </a>
+                    @if ($navItems->isNotEmpty())
+                        <a href="#{{ $navItems->first()["id"] }}"
+                           class="inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-800 transition hover:border-brand-600 hover:text-brand-700 sm:w-auto">
+                            Explore
+                            <i class="fa-solid fa-arrow-down text-xs"></i>
                         </a>
-                        @if ($navItems->isNotEmpty())
-                            <a href="#{{ $navItems->first()["id"] }}"
-                               class="inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-800 transition hover:border-brand-600 hover:text-brand-700 sm:w-auto">
-                                Explore
-                                <i class="fa-solid fa-arrow-down text-xs"></i>
-                            </a>
-                        @endif
-                    </div>
-
-                    <div class="mt-8 flex flex-wrap items-center justify-center gap-3 text-sm lg:justify-start">
-                        <span class="inline-flex items-center gap-2 rounded-full bg-brand-50 px-4 py-1.5 font-semibold text-brand-800">
-                            <i class="fa-solid fa-phone"></i>
-                            Toll-free Child Helpline: 116
-                        </span>
-                    </div>
+                    @endif
                 </div>
 
-                <div class="reveal">
-                    <div class="overflow-hidden rounded-3xl bg-slate-100 shadow-xl ring-1 ring-slate-900/5">
-                        <img src="{{ $heroImage }}"
-                             alt="{{ $hero?->alt_text ?: $hero?->title ?: "Children at an NCC activity" }}"
-                             class="aspect-[4/3] w-full object-cover"
-                             fetchpriority="high" />
-                    </div>
+                <div class="mt-8 flex flex-wrap items-center justify-center gap-3 text-sm">
+                    <span class="inline-flex items-center gap-2 rounded-full bg-brand-50 px-4 py-1.5 font-semibold text-brand-800">
+                        <i class="fa-solid fa-phone"></i>
+                        Toll-free Child Helpline: 116
+                    </span>
                 </div>
             </div>
         </div>
