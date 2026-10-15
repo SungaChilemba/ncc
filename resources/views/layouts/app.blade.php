@@ -14,12 +14,21 @@
 
 				<body class="min-h-screen bg-slate-50 text-slate-900">
 								<header class="sticky top-0 z-40 bg-white shadow-sm" x-data="{ open: false, latestOpen: false }">
-												<!-- Top Header Bar: Logo left, action items right -->
+												<!-- Top Header Bar: brand + helpline left, action items right -->
 												<div class="border-b border-emerald-800 bg-emerald-800">
-																<div class="mx-auto flex max-w-8xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-																				<a href="{{ route("home") }}" class="flex shrink-0 items-center text-lg font-semibold text-white">
-																								<img src="{{ asset("images/NCClogo.png") }}" alt="NCC Logo" class="h-20 w-auto">
-																				</a>
+																<div class="mx-auto flex max-w-8xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:gap-4 lg:px-8">
+																				<!-- Brand + persistent helpline badge, shown on every page -->
+																				<div class="flex min-w-0 items-center gap-2 sm:gap-3 lg:gap-4">
+																								<a href="{{ route("home") }}" class="flex shrink-0 items-center text-lg font-semibold text-white">
+																												<img src="{{ asset("images/NCClogo.png") }}" alt="NCC Logo" class="h-20 w-auto">
+																								</a>
+
+																								<a href="tel:116"
+																												class="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1.5 text-[11px] font-semibold tracking-wide text-brand-800 shadow-sm transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-emerald-800 sm:gap-2 sm:px-3 sm:text-xs lg:px-3.5 lg:text-sm">
+																												<i class="fa-solid fa-phone text-brand-600" aria-hidden="true"></i>
+																												<span class="whitespace-nowrap">Child Helpline: <span class="font-bold">116</span></span>
+																								</a>
+																				</div>
 
 																				<!-- Desktop action items -->
 																				<div class="hidden items-center gap-3 lg:flex">

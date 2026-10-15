@@ -72,13 +72,6 @@
                         </a>
                     @endif
                 </div>
-
-                <div class="mt-8 flex flex-wrap items-center justify-center gap-3 text-sm">
-                    <span class="inline-flex items-center gap-2 rounded-full bg-brand-50 px-4 py-1.5 font-semibold text-brand-800">
-                        <i class="fa-solid fa-phone"></i>
-                        Toll-free Child Helpline: 116
-                    </span>
-                </div>
             </div>
         </div>
     </section>
