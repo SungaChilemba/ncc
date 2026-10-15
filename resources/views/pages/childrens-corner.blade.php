@@ -115,7 +115,7 @@
     {{-- Activities: modern card grid driven by CMS "Activities" cards. --}}
     @if ($activities->isNotEmpty())
         <section id="activities" class="-mx-4 bg-white px-4 py-16 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-            <div class="mx-auto max-w-7xl">
+            <div class="mx-auto max-w-6xl">
                 <div class="reveal mx-auto max-w-2xl text-center">
                     <span class="inline-block h-1 w-10 rounded-full bg-urgent-600"></span>
                     <h2 class="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
@@ -161,7 +161,7 @@
     {{-- Child Rights: numbered grid with a dark spotlight intro cell. --}}
     @if ($rights->isNotEmpty())
         <section id="child-rights" class="-mx-4 bg-slate-50 px-4 py-16 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-            <div class="mx-auto max-w-7xl">
+            <div class="mx-auto max-w-6xl">
                 <div class="reveal mx-auto max-w-2xl text-center">
                     <span class="inline-block h-1 w-10 rounded-full bg-urgent-600"></span>
                     <h2 class="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
