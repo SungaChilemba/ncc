@@ -454,8 +454,7 @@ class ContentController extends Controller
                 }
 
                 if ($status === 'all') {
-                    $query->where('type', '!=', 'submission');
-
+                    // Explicit status=all includes submissions; omitting status still hides them.
                     return;
                 }
 

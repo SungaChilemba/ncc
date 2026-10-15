@@ -520,17 +520,23 @@ class SiteContentSeeder extends Seeder
             ],
         ];
 
-        return array_map(fn ($tab, $slug) => [
-            'section' => 'about',
-            'type' => 'card',
-            'slug' => $slug,
-            'category' => 'Mandate, Mission & Objectives',
-            'title' => $tab['title'],
-            'description' => implode("\n", $tab['bullets']),
-            'image_path' => $tab['image_path'],
-            'data' => ['bullets' => $tab['bullets']],
-            'sort_order' => $index + 1,
-        ], $tabs, array_keys($tabs));
+        $slugs = array_keys($tabs);
+
+        return array_map(function ($slug, $index) use ($tabs) {
+            $tab = $tabs[$slug];
+
+            return [
+                'section' => 'about',
+                'type' => 'card',
+                'slug' => $slug,
+                'category' => 'Mandate, Mission & Objectives',
+                'title' => $tab['title'],
+                'description' => implode("\n", $tab['bullets']),
+                'image_path' => $tab['image_path'],
+                'data' => ['bullets' => $tab['bullets']],
+                'sort_order' => $index + 1,
+            ];
+        }, $slugs, array_keys($slugs));
     }
 
     private function commissioners(): array
