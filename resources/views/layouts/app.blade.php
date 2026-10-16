@@ -159,11 +159,11 @@
 																<div>
 																				<h3 class="font-bold text-white mb-4">Quick Links</h3>
 																				<ul class="space-y-2">
-																								<li><a href="{{ route("home") }}" class="hover:text-green-600">Home</a></li>
-																								<li><a href="{{ route("about") }}" class="hover:text-green-600">About Us</a></li>
-																								<li><a href="{{ route("what-we-do") }}" class="hover:text-green-600">What We Do</a></li>
-																								<li><a href="{{ route("resources") }}" class="hover:text-green-600">Resources</a></li>
-																								<li><a href="{{ route("advertise") }}" class="hover:text-green-600">Advertise</a></li>
+																								<li><a href="{{ route("home") }}" class="hover:text-brand-100">Home</a></li>
+																								<li><a href="{{ route("about") }}" class="hover:text-brand-100">About Us</a></li>
+																								<li><a href="{{ route("what-we-do") }}" class="hover:text-brand-100">What We Do</a></li>
+																								<li><a href="{{ route("resources") }}" class="hover:text-brand-100">Resources</a></li>
+																								<li><a href="{{ route("advertise") }}" class="hover:text-brand-100">Advertise</a></li>
 																				</ul>
 																</div>
 
@@ -171,11 +171,11 @@
 																<div>
 																				<h3 class="font-bold text-white mb-4">Help & Support</h3>
 																				<ul class="space-y-2">
-																								<li><a href="{{ route("reporting") }}" class="hover:text-green-600">Report a Case</a></li>
-																								<li><a href="{{ route("donate") }}" class="hover:text-green-600">Donate</a></li>
-																								<li><a href="{{ route("news") }}" class="hover:text-green-600">Check Case Studies</a></li>
-																								<li><a href="{{ route("resources") }}" class="hover:text-green-600">FAQs</a></li>
-																								<li><a href="mailto:nccmalawi@gmail.com" class="hover:text-green-600">Contact Us</a></li>
+																								<li><a href="{{ route("reporting") }}" class="hover:text-brand-100">Report a Case</a></li>
+																								<li><a href="{{ route("donate") }}" class="hover:text-brand-100">Donate</a></li>
+																								<li><a href="{{ route("news") }}" class="hover:text-brand-100">Check Case Studies</a></li>
+																								<li><a href="{{ route("resources") }}" class="hover:text-brand-100">FAQs</a></li>
+																								<li><a href="mailto:nccmalawi@gmail.com" class="hover:text-brand-100">Contact Us</a></li>
 																				</ul>
 																</div>
 
@@ -197,27 +197,27 @@
 
 												<!-- Bottom Section -->
 												<div
-																class="bg-slate-50 border-t border-green-200 mt-8  px-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-6">
+																class="bg-slate-50 border-t border-brand-200 mt-8  px-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-6">
 																<!-- Logo & Newsletter -->
 																<div class="flex flex-col md:flex-row items-center gap-6">
 																				<img src="{{ asset("images/ncc-logo.png") }}" alt="NCC Logo" class="h-16 w-auto">
 																				<form class="flex gap-2">
 																								<input type="email" placeholder="Enter your email to subscribe"
-																												class="border border-green-300 placeholder:text-green-700 text-black rounded px-3 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-green-500">
+																												class="border border-brand-300 placeholder:text-brand-700 text-black rounded px-3 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-brand-500">
 																								<button type="submit"
-																												class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Subscribe</button>
+																												class="bg-brand-700 text-white px-4 py-2 rounded hover:bg-brand-800">Subscribe</button>
 																				</form>
 																</div>
 
 																<!-- Helpline & Social -->
 																<div class="flex flex-col items-center gap-4 md:flex-row md:items-center md:justify-end md:text-right">
 																				<div>
-																								<p class="font-semibold text-green-700">Need Help? Call Our Helpline</p>
+																								<p class="font-semibold text-brand-700">Need Help? Call Our Helpline</p>
 																				</div>
 																				<div>
-																								<p class="text-base font-bold text-green-800">116</p>
+																								<p class="text-base font-bold text-brand-800">116</p>
 																				</div>
-																				<div class="flex items-center gap-4 text-green-700">
+																				<div class="flex items-center gap-4 text-brand-700">
 																								<a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
 																								<a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
 																								<a href="#" aria-label="Twitter"><i class="fa-brands fa-twitter"></i></a>
