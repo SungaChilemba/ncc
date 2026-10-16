@@ -622,6 +622,35 @@ class PublicCmsContentTest extends TestCase
         $this->assertStringNotContainsString('href="#"', $mainOnly);
     }
 
+    public function test_childrens_corner_news_shows_six_by_default_with_load_more(): void
+    {
+        foreach (range(1, 8) as $i) {
+            SiteContent::create([
+                'section' => 'news',
+                'type' => 'news',
+                'slug' => 'kids-bulk-story-' . $i,
+                'title' => 'Kids Bulk Story ' . $i,
+                'description' => 'Kids bulk body ' . $i . '.',
+                'is_published' => true,
+                'sort_order' => $i,
+            ]);
+        }
+
+        $response = $this->get(route('childrens-corner'))->assertOk();
+        $content = $response->getContent();
+
+        // All cards are server-rendered (SEO / no-JS friendly); Alpine reveals six at a time.
+        foreach (range(1, 8) as $i) {
+            $this->assertStringContainsString('Kids Bulk Story ' . $i, $content);
+            $this->assertStringContainsString(route('news.show', ['slug' => 'kids-bulk-story-' . $i]), $content);
+        }
+        $this->assertStringContainsString('newsVisible: 6', $content);
+        $this->assertStringContainsString('x-show="0 < newsVisible"', $content);
+        $this->assertStringContainsString('x-show="6 < newsVisible"', $content);
+        $this->assertStringContainsString('Load More', $content);
+        $this->assertStringContainsString('Show Less', $content);
+    }
+
     public function test_hard_coded_placeholder_news_not_rendered(): void
     {
         $response = $this->get(route('latest-news'))->assertOk();

@@ -297,7 +297,7 @@
     {{-- News & Updates: consistent grid cards linking to canonical article pages. --}}
     @if ($updates->isNotEmpty())
         <section id="news" class="-mx-4 bg-slate-50 px-4 py-16 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-            <div class="mx-auto max-w-7xl">
+            <div class="mx-auto max-w-7xl" x-data="{ newsVisible: 6, totalNews: {{ $updates->count() }}, loadMore() { this.newsVisible = Math.min(this.newsVisible + 3, this.totalNews) }, showLess() { this.newsVisible = 6 } }">
                 <div class="reveal mx-auto max-w-2xl text-center">
                     <span class="inline-block h-1 w-10 rounded-full bg-urgent-600"></span>
                     <h2 class="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
@@ -316,7 +316,9 @@
                                 ? $update->image_url . "?v=" . $update->updated_at->timestamp
                                 : asset("images/news1.png");
                         @endphp
-                        <article class="reveal group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+                        {{-- Outer wrapper owns the scroll-reveal transform; the inner card owns the hover lift. --}}
+                        <div class="reveal">
+                        <article x-show="{{ $loop->index }} < newsVisible" @if ($loop->index >= 6) x-cloak @endif class="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-300 hover:-translate-y-1 hover:shadow-lg">
                             <a href="{{ $url }}" class="block overflow-hidden" tabindex="-1" aria-hidden="true">
                                 <img src="{{ $image }}"
                                      alt="{{ $update->alt_text ?: $update->title }}"
@@ -363,8 +365,29 @@
                                 </a>
                             </div>
                         </article>
+                        </div>
                     @endforeach
                 </div>
+
+                @if ($updates->count() > 6)
+                    <div class="mt-10 text-center" x-show="newsVisible < totalNews">
+                        <button type="button" @click="loadMore()" :aria-expanded="newsVisible > 6"
+                                class="inline-flex items-center gap-2 rounded-full bg-brand-700 px-8 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-600 focus:ring-offset-2">
+                            Load More
+                            <i class="fa-solid fa-chevron-down text-xs" aria-hidden="true"></i>
+                        </button>
+                        <p class="mt-3 text-sm text-slate-500">
+                            Showing <span x-text="Math.min(newsVisible, totalNews)"></span> of <span x-text="totalNews"></span> stories
+                        </p>
+                    </div>
+                    <div class="mt-10 text-center" x-show="newsVisible > 6">
+                        <button type="button" @click="showLess()"
+                                class="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-8 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-brand-600 hover:text-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-600 focus:ring-offset-2">
+                            Show Less
+                            <i class="fa-solid fa-chevron-up text-xs" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                @endif
             </div>
         </section>
     @endif
