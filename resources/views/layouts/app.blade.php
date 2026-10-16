@@ -44,12 +44,12 @@
 																								</a>
 
 																								<a href="{{ route("reporting") }}"
-																												class="inline-flex items-center justify-center rounded-md bg-red-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+																												class="inline-flex items-center justify-center rounded-md bg-urgent-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-urgent-700 focus:outline-none focus:ring-2 focus:ring-urgent-500 focus:ring-offset-2">
 																												Report a Case Now
 																								</a>
 
 																								<a href="{{ route("donate") }}"
-																												class="inline-flex items-center justify-center rounded-md bg-red-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+																												class="inline-flex items-center justify-center rounded-md bg-urgent-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-urgent-700 focus:outline-none focus:ring-2 focus:ring-urgent-500 focus:ring-offset-2">
 																												Donate
 																								</a>
 																				</div>
@@ -123,11 +123,11 @@
 																								Child Rights Corner
 																				</a>
 																				<a href="{{ route("reporting") }}"
-																								class="inline-flex items-center justify-center rounded-md bg-red-600 px-4 py-2.5 text-center text-sm font-semibold text-white shadow-sm transition hover:bg-red-700">
+																								class="inline-flex items-center justify-center rounded-md bg-urgent-600 px-4 py-2.5 text-center text-sm font-semibold text-white shadow-sm transition hover:bg-urgent-700">
 																								Report a Case Now
 																				</a>
 																				<a href="{{ route("donate") }}"
-																								class="inline-flex items-center justify-center rounded-md bg-red-600 px-4 py-2.5 text-center text-sm font-semibold text-white shadow-sm transition hover:bg-red-700">
+																								class="inline-flex items-center justify-center rounded-md bg-urgent-600 px-4 py-2.5 text-center text-sm font-semibold text-white shadow-sm transition hover:bg-urgent-700">
 																								Donate
 																				</a>
 																</div>
