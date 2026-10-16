@@ -20,7 +20,7 @@
 				<body class="min-h-screen bg-slate-50 text-slate-900">
 								<header class="sticky top-0 z-40 bg-white shadow-sm" x-data="{ open: false, latestOpen: false }">
 												<!-- Top Header Bar: brand + helpline left, action items right -->
-												<div class="border-b border-emerald-800 bg-emerald-600">
+												<div class="border-b border-brand-800 bg-brand-600">
 																<div class="mx-auto flex max-w-8xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:gap-4 lg:px-8">
 																				<!-- Brand + persistent helpline badge, shown on every page -->
 																				<div class="flex min-w-0 items-center gap-2 sm:gap-3 lg:gap-4">
@@ -29,7 +29,7 @@
 																								</a>
 
 																								<a href="tel:116"
-																												class="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1.5 text-[11px] font-semibold tracking-wide text-brand-800 shadow-sm transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-emerald-800 sm:gap-2 sm:px-3 sm:text-xs lg:px-3.5 lg:text-sm">
+																												class="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1.5 text-[11px] font-semibold tracking-wide text-brand-800 shadow-sm transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-brand-800 sm:gap-2 sm:px-3 sm:text-xs lg:px-3.5 lg:text-sm">
 																												<i class="fa-solid fa-phone text-brand-600" aria-hidden="true"></i>
 																												<span class="whitespace-nowrap">Child Helpline: <span class="font-bold">116</span></span>
 																								</a>
@@ -38,7 +38,7 @@
 																				<!-- Desktop action items -->
 																				<div class="hidden items-center gap-3 lg:flex">
 																								<a href="{{ route("childrens-corner") }}"
-																												class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold uppercase tracking-wide text-slate-800 shadow-sm transition hover:border-emerald-600 hover:text-emerald-700">
+																												class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold uppercase tracking-wide text-slate-800 shadow-sm transition hover:border-brand-600 hover:text-brand-700">
 																												<i class="fa-solid fa-child mr-2 text-red-600"></i>
 																												Child Rights Corner
 																								</a>
@@ -57,7 +57,7 @@
 																				<!-- Mobile menu toggle -->
 																				<div class="flex items-center lg:hidden">
 																								<button type="button"
-																												class="inline-flex items-center justify-center rounded-md p-2 text-slate-500 transition hover:bg-slate-100 hover:text-emerald-700"
+																												class="inline-flex items-center justify-center rounded-md p-2 text-slate-500 transition hover:bg-slate-100 hover:text-brand-700"
 																												@click="open = !open" :aria-expanded="open" aria-label="Toggle navigation">
 																												<i class="fa-solid text-xl" :class="open ? 'fa-xmark' : 'fa-bars'"></i>
 																								</button>
@@ -69,11 +69,11 @@
 												<div class="hidden border-b border-slate-200 bg-white lg:block">
 																<div class="mx-auto flex max-w-8xl justify-end px-4 sm:px-6 lg:px-8">
 																				<nav class="flex items-center justify-end gap-8 py-3 text-sm font-medium text-slate-800">
-																								<a href="{{ route("home") }}" class="transition hover:text-emerald-700">Home</a>
-																								<a href="{{ route("about") }}" class="transition hover:text-emerald-700">About</a>
+																								<a href="{{ route("home") }}" class="transition hover:text-brand-700">Home</a>
+																								<a href="{{ route("about") }}" class="transition hover:text-brand-700">About</a>
 																								<div class="relative">
 																												<button @click="latestOpen = !latestOpen"
-																																class="flex items-center gap-1 transition hover:text-emerald-700 focus:outline-none">
+																																class="flex items-center gap-1 transition hover:text-brand-700 focus:outline-none">
 																																Latest <i class="fa-solid fa-chevron-down text-xs transition-transform"
 																																				:class="latestOpen ? 'rotate-180' : ''"></i>
 																												</button>
@@ -81,14 +81,14 @@
 																																class="absolute top-full left-0 mt-3 min-w-48 rounded-lg border border-slate-200 bg-white py-2 shadow-lg z-40"
 																																x-cloak>
 																																<a href="{{ route("latest-news") }}"
-																																				class="block px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50 hover:text-emerald-700">News</a>
+																																				class="block px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50 hover:text-brand-700">News</a>
 																																<a href="{{ route("news") }}"
-																																				class="block px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50 hover:text-emerald-700">Stories</a>
+																																				class="block px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50 hover:text-brand-700">Stories</a>
 																												</div>
 																								</div>
-																								<a href="{{ route("what-we-do") }}" class="transition hover:text-emerald-700">What we do</a>
-																								<a href="{{ route("resources") }}" class="transition hover:text-emerald-700">Resources</a>
-																								<a href="{{ route("advertise") }}" class="transition hover:text-emerald-700">Advertise</a>
+																								<a href="{{ route("what-we-do") }}" class="transition hover:text-brand-700">What we do</a>
+																								<a href="{{ route("resources") }}" class="transition hover:text-brand-700">Resources</a>
+																								<a href="{{ route("advertise") }}" class="transition hover:text-brand-700">Advertise</a>
 																				</nav>
 																</div>
 												</div>
@@ -96,11 +96,11 @@
 												<!-- Mobile collapsible menu -->
 												<div class="border-t border-slate-200 bg-white px-4 pb-5 lg:hidden" x-show="open" x-transition x-cloak>
 																<nav class="mt-4 flex flex-col gap-3 text-sm font-medium text-slate-700">
-																				<a href="{{ route("home") }}" class="py-1 transition hover:text-emerald-700">Home</a>
-																				<a href="{{ route("about") }}" class="py-1 transition hover:text-emerald-700">About</a>
+																				<a href="{{ route("home") }}" class="py-1 transition hover:text-brand-700">Home</a>
+																				<a href="{{ route("about") }}" class="py-1 transition hover:text-brand-700">About</a>
 																				<div>
 																								<button @click="latestOpen = !latestOpen"
-																												class="flex w-full items-center justify-between py-1 transition hover:text-emerald-700">
+																												class="flex w-full items-center justify-between py-1 transition hover:text-brand-700">
 																												<span class="flex items-center gap-1">Latest <i
 																																				class="fa-solid fa-chevron-down text-xs transition-transform"
 																																				:class="latestOpen ? 'rotate-180' : ''"></i></span>
@@ -108,17 +108,17 @@
 																								<div x-show="latestOpen" x-transition
 																												class="ml-4 mt-2 flex flex-col gap-2 border-l-2 border-slate-100 pl-4" x-cloak>
 																												<a href="{{ route("latest-news") }}"
-																																class="py-1 transition hover:text-emerald-700">News</a>
-																												<a href="{{ route("news") }}" class="py-1 transition hover:text-emerald-700">Stories</a>
+																																class="py-1 transition hover:text-brand-700">News</a>
+																												<a href="{{ route("news") }}" class="py-1 transition hover:text-brand-700">Stories</a>
 																								</div>
 																				</div>
-																				<a href="{{ route("what-we-do") }}" class="py-1 transition hover:text-emerald-700">What we do</a>
-																				<a href="{{ route("resources") }}" class="py-1 transition hover:text-emerald-700">Resources</a>
-																				<a href="{{ route("advertise") }}" class="py-1 transition hover:text-emerald-700">Advertise</a>
+																				<a href="{{ route("what-we-do") }}" class="py-1 transition hover:text-brand-700">What we do</a>
+																				<a href="{{ route("resources") }}" class="py-1 transition hover:text-brand-700">Resources</a>
+																				<a href="{{ route("advertise") }}" class="py-1 transition hover:text-brand-700">Advertise</a>
 																</nav>
 																<div class="mt-5 flex flex-col gap-3 border-t border-slate-100 pt-4">
 																				<a href="{{ route("childrens-corner") }}"
-																								class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold uppercase tracking-wide text-slate-800 shadow-sm transition hover:border-emerald-600 hover:text-emerald-700">
+																								class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold uppercase tracking-wide text-slate-800 shadow-sm transition hover:border-brand-600 hover:text-brand-700">
 																								<i class="fa-solid fa-child mr-2 text-red-600"></i>
 																								Child Rights Corner
 																				</a>
@@ -141,7 +141,7 @@
 												@endif
 								</main>
 
-								<footer class="bg-emerald-600 text-white pt-12 pb-6">
+								<footer class="bg-brand-600 text-white pt-12 pb-6">
 												<div class="max-w-8xl mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-5 gap-8">
 																<!-- Partnerships -->
 																<div>
