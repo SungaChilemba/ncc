@@ -241,34 +241,34 @@
 																								x-transition:enter-end="opacity-100 translate-y-0"
 																								x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
 																								x-transition:leave-end="opacity-0"
-																								class="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden">
+																								class="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition overflow-hidden">
 																								<a :href="item.link" class="block" x-show="!headingsOnly">
 																												<img :src="item.image" :alt="item.title" class="w-full h-48 object-cover">
 																								</a>
 																								<div class="p-6">
-																												<p class="text-sm text-gray-500 mb-2" x-text="(item.date ? item.date : '') + (item.date && item.location ? ' · ' : '') + item.location"></p>
-																												<h3 class="text-lg font-bold text-gray-900 mb-3">
-																																<a :href="item.link" class="hover:text-red-700" x-text="item.title"></a>
+																												<p class="text-sm text-slate-500 mb-2" x-text="(item.date ? item.date : '') + (item.date && item.location ? ' · ' : '') + item.location"></p>
+																												<h3 class="text-lg font-bold leading-snug text-slate-900 mb-3">
+																																<a :href="item.link" class="hover:text-brand-700" x-text="item.title"></a>
 																												</h3>
-																												<p class="text-gray-700 text-sm" x-text="item.excerpt" x-show="!headingsOnly"></p>
-																												<a :href="item.link" class="mt-3 inline-flex text-sm font-semibold text-green-700 hover:underline">Read More</a>
+																												<p class="text-slate-600 text-sm leading-6" x-text="item.excerpt" x-show="!headingsOnly"></p>
+																												<a :href="item.link" class="mt-3 inline-flex text-sm font-semibold text-brand-700 hover:underline">Read More</a>
 																								</div>
 																				</div>
 																</template>
 												</div>
-												<p x-show="newsItems.length === 0" class="col-span-full text-center text-gray-500 py-8">No news articles have been published yet.</p>
+												<p x-show="newsItems.length === 0" class="col-span-full text-center text-slate-500 py-8">No news articles have been published yet.</p>
 
 												<!-- Load More Button (per category, shown only when more than 3 cards exist) -->
 												<div class="mt-8 text-center" x-show="hasMore(tab)" x-transition>
 																<button @click="loadMore()"
-																				class="bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-md font-semibold transition duration-200">
+																				class="bg-brand-700 hover:bg-brand-800 text-white px-6 py-2 rounded-md font-semibold transition duration-200">
 																				Load More
 																</button>
 												</div>
 												<!-- Show Less Button -->
 												<div class="mt-8 text-center" x-show="shownCount(tab) > 3" x-transition>
 																<button @click="showLess()"
-																				class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md font-semibold transition duration-200">
+																				class="bg-white border border-slate-300 text-slate-700 hover:border-brand-600 hover:text-brand-700 px-6 py-2 rounded-md font-semibold transition duration-200">
 																				Show Less
 																</button>
 												</div>
