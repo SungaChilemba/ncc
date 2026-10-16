@@ -20,7 +20,7 @@
 				<body class="min-h-screen bg-slate-50 text-slate-900">
 								<header class="sticky top-0 z-40 bg-white shadow-sm" x-data="{ open: false, latestOpen: false }">
 												<!-- Top Header Bar: brand + helpline left, action items right -->
-												<div class="border-b border-emerald-800 bg-emerald-800">
+												<div class="border-b border-emerald-800 bg-emerald-600">
 																<div class="mx-auto flex max-w-8xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:gap-4 lg:px-8">
 																				<!-- Brand + persistent helpline badge, shown on every page -->
 																				<div class="flex min-w-0 items-center gap-2 sm:gap-3 lg:gap-4">
@@ -141,7 +141,7 @@
 												@endif
 								</main>
 
-								<footer class="bg-green-700 text-white pt-12 pb-6">
+								<footer class="bg-emerald-600 text-white pt-12 pb-6">
 												<div class="max-w-8xl mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-5 gap-8">
 																<!-- Partnerships -->
 																<div>
