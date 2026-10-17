@@ -131,6 +131,10 @@ class CmsContent
             ->ofType('card')
             ->published()
             ->where('category', 'Sponsored Ads')
+            ->where(function ($query) {
+                $query->whereNull('data->ends_at')
+                    ->orWhere('data->ends_at', '>=', now()->toDateString());
+            })
             ->ordered();
 
         if ($limit !== null) {

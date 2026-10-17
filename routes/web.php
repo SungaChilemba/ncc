@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\ContentController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\EnquiryController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\PageController;
 use App\Http\Middleware\AdminMiddleware;
@@ -45,6 +46,10 @@ Route::middleware([AdminMiddleware::class])->prefix('admin')->name('admin.')->gr
     Route::delete('/contents/{section}/{id}', [ContentController::class, 'destroy'])->name('contents.destroy');
     Route::post('/contents/{section}/{id}/toggle-publish', [ContentController::class, 'togglePublish'])->name('contents.toggle-publish');
     Route::post('/contents/{id}/upload-image', [ContentController::class, 'uploadImage'])->name('contents.upload-image');
+    Route::get('/enquiries/{id}/review', [EnquiryController::class, 'review'])->name('enquiries.review');
+    Route::post('/enquiries/{id}/approve', [EnquiryController::class, 'approve'])->name('enquiries.approve');
+    Route::post('/enquiries/{id}/reject', [EnquiryController::class, 'reject'])->name('enquiries.reject');
+    Route::post('/enquiries/{id}/renew', [EnquiryController::class, 'renew'])->name('enquiries.renew');
     Route::get('/media', [MediaController::class, 'index'])->name('media.index');
     Route::post('/media', [MediaController::class, 'store'])->name('media.store');
     Route::put('/media/{asset}', [MediaController::class, 'update'])->name('media.update');

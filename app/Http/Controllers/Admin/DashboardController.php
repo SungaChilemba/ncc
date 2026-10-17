@@ -6,9 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\ContentAudit;
 use App\Models\MediaAsset;
 use App\Models\SiteContent;
+use App\Support\AdEnquiries;
 
 class DashboardController extends Controller
 {
+    public function __construct(private readonly AdEnquiries $adEnquiries)
+    {
+    }
+
     public function index()
     {
         $sections = collect(config('cms.sections'))->map(function (array $definition, string $key) {
@@ -35,6 +40,11 @@ class DashboardController extends Controller
         $recent = SiteContent::latest()->take(6)->get();
         $audits = ContentAudit::latest()->take(6)->get();
 
-        return view('admin.dashboard', compact('stats', 'recent', 'sections', 'audits'));
+        $enquiries = [
+            'counts' => $this->adEnquiries->counts(),
+            'pending' => $this->adEnquiries->latestPending(5),
+        ];
+
+        return view('admin.dashboard', compact('stats', 'recent', 'sections', 'audits', 'enquiries'));
     }
 }

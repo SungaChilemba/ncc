@@ -28,6 +28,55 @@
         </div>
     </div>
 
+    <section class="mt-6 rounded-lg border border-slate-200 bg-white shadow-sm">
+        @php
+            $enquiryCounts = $enquiries['counts'] ?? [];
+            $pendingCount = $enquiryCounts['pending_review'] ?? 0;
+        @endphp
+        <div class="flex flex-col gap-3 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h2 class="flex items-center gap-2 text-lg font-semibold text-slate-950">
+                    Advert enquiries
+                    @if ($pendingCount)
+                        <span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800">{{ $pendingCount }} awaiting review</span>
+                    @endif
+                </h2>
+                <p class="text-sm text-slate-500">Approving an enquiry publishes it as a sponsored advert on /advertise.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 text-xs font-semibold">
+                <span class="rounded-full bg-green-50 px-2.5 py-1 text-green-700">{{ $enquiryCounts['approved'] ?? 0 }} live</span>
+                <span class="rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">{{ $enquiryCounts['expired'] ?? 0 }} expired</span>
+                <span class="rounded-full bg-red-50 px-2.5 py-1 text-red-700">{{ $enquiryCounts['rejected'] ?? 0 }} rejected</span>
+                <a href="{{ route('admin.contents.index', ['section' => 'advertise', 'status' => 'enquiries']) }}" class="rounded-md bg-green-700 px-3 py-1.5 text-white hover:bg-green-800">Open board</a>
+            </div>
+        </div>
+        <div class="divide-y divide-slate-100">
+            @forelse ($enquiries['pending'] ?? [] as $pendingEnquiry)
+                @php
+                    $pendingData = $pendingEnquiry->data ?? [];
+                @endphp
+                <div class="flex flex-col gap-2 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="min-w-0">
+                        <p class="truncate text-sm font-semibold text-slate-950">{{ $pendingData['company'] ?? $pendingEnquiry->title }}</p>
+                        <p class="mt-0.5 text-xs text-slate-500">
+                            {{ $pendingData['reference_number'] ?? '—' }}
+                            @if (! empty($pendingData['industry']))
+                                · {{ $pendingData['industry'] }}
+                            @endif
+                            @if (! empty($pendingData['budget']))
+                                · Budget {{ $pendingData['budget'] }}
+                            @endif
+                            · received {{ $pendingEnquiry->created_at?->diffForHumans() }}
+                        </p>
+                    </div>
+                    <a href="{{ route('admin.enquiries.review', $pendingEnquiry->id) }}" class="w-fit rounded-md border border-green-700 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50">Review</a>
+                </div>
+            @empty
+                <p class="px-5 py-8 text-sm text-slate-500">No enquiries are waiting for review.</p>
+            @endforelse
+        </div>
+    </section>
+
     <section class="mt-8">
         <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>

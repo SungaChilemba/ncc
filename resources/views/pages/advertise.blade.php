@@ -19,7 +19,10 @@
 								$sponsorshipCards = $cardsByCat
 								    ->get("Sponsorship Opportunities", collect())
 								    ->merge($cardsByCat->get("Opportunities", collect()));
-								$sponsoredAds = $cardsByCat->get("Sponsored Ads", collect());
+								$sponsoredAds = $cardsByCat->get("Sponsored Ads", collect())->reject(function ($ad) {
+								    $endsAt = data_get($ad->data, "ends_at");
+								    return $endsAt && $endsAt < now()->toDateString();
+								})->values();
 				@endphp
 				<style>
 								html {

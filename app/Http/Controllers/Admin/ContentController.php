@@ -7,6 +7,8 @@ use App\Models\ContentAudit;
 use App\Models\ContentRevision;
 use App\Models\MediaAsset;
 use App\Models\SiteContent;
+use App\Support\AdEnquiries;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -16,6 +18,10 @@ use Illuminate\Validation\Rules\File;
 
 class ContentController extends Controller
 {
+    public function __construct(private readonly AdEnquiries $adEnquiries)
+    {
+    }
+
     public function index(Request $request, string $section)
     {
         $sectionConfig = $this->sectionConfig($section);
@@ -25,8 +31,18 @@ class ContentController extends Controller
             ->paginate(12)
             ->withQueryString();
         $mediaAssets = MediaAsset::latest()->take(18)->get();
+        $enquiryStates = $section === 'advertise' ? $this->adEnquiries->counts() : null;
+        $currentReview = $this->reviewFilter($request);
 
-        return view('admin.contents.index', compact('contents', 'section', 'sectionConfig', 'typeOptions', 'mediaAssets'));
+        return view('admin.contents.index', compact(
+            'contents',
+            'section',
+            'sectionConfig',
+            'typeOptions',
+            'mediaAssets',
+            'enquiryStates',
+            'currentReview'
+        ));
     }
 
     public function store(Request $request, string $section)
@@ -430,6 +446,13 @@ class ContentController extends Controller
 
     private function contentQuery(Request $request, string $section)
     {
+        if ($section === 'advertise' && $request->string('status')->toString() === 'enquiries') {
+            return $this->adEnquiries
+                ->filter($this->reviewFilter($request))
+                ->when($request->filled('q'), fn (Builder $query) => $this->applySearch($query, $request->string('q')->toString()))
+                ->latest('id');
+        }
+
         return SiteContent::forSection($section)
             ->when($request->filled('type'), fn ($query) => $query->where('type', $request->string('type')->toString()))
             ->when($request->filled('status'), function ($query) use ($request, $section) {
@@ -464,16 +487,28 @@ class ContentController extends Controller
                 // Default "All" view should not show enquiries — only Enquiries tab does
                 $query->where('type', '!=', 'submission');
             })
-            ->when($request->filled('q'), function ($query) use ($request) {
-                $term = '%' . $request->string('q')->toString() . '%';
-
-                $query->where(function ($query) use ($term) {
-                    $query->where('title', 'like', $term)
-                        ->orWhere('subtitle', 'like', $term)
-                        ->orWhere('description', 'like', $term);
-                });
-            })
+            ->when($request->filled('q'), fn (Builder $query) => $this->applySearch($query, $request->string('q')->toString()))
             ->ordered();
+    }
+
+    private function reviewFilter(Request $request): ?string
+    {
+        $review = $request->string('review')->toString();
+
+        return in_array($review, AdEnquiries::FILTERS, true) ? $review : null;
+    }
+
+    private function applySearch(Builder $query, string $term): Builder
+    {
+        $like = '%' . $term . '%';
+
+        return $query->where(function (Builder $query) use ($like) {
+            $query->where('title', 'like', $like)
+                ->orWhere('subtitle', 'like', $like)
+                ->orWhere('description', 'like', $like)
+                ->orWhere('slug', 'like', $like)
+                ->orWhere('data', 'like', $like);
+        });
     }
 
     private function uniqueSlugRule(Request $request, string $section, ?int $ignoreId = null)

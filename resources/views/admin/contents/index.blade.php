@@ -3,6 +3,7 @@
 @php
     $currentStatus = request('status', 'all');
     $currentType = request('type', '');
+    $currentReview = $currentReview ?? request('review');
     $statusLinks = [
         'all' => 'All',
         'published' => 'Published',
@@ -14,6 +15,14 @@
         $statusLinks['private'] = 'Private';
         $statusLinks['enquiries'] = 'Enquiries';
     }
+
+    $isEnquiryBoard = $section === 'advertise' && $currentStatus === 'enquiries';
+    $enquiryPills = [
+        'pending_review' => ['label' => 'Pending', 'class' => 'bg-amber-50 text-amber-700'],
+        'approved' => ['label' => 'Live', 'class' => 'bg-green-50 text-green-700'],
+        'expired' => ['label' => 'Expired', 'class' => 'bg-slate-100 text-slate-600'],
+        'rejected' => ['label' => 'Rejected', 'class' => 'bg-red-50 text-red-700'],
+    ];
 @endphp
 
 @section('title', 'Manage ' . $sectionConfig['label'])
@@ -39,6 +48,20 @@
                     @endif
                 @endforeach
             </div>
+            @if ($isEnquiryBoard && ! empty($enquiryStates))
+                <div class="mt-3 flex flex-wrap items-center gap-2">
+                    @foreach (\App\Support\AdEnquiries::FILTERS as $reviewKey)
+                        @php
+                            $reviewActive = $reviewKey === 'all' ? ! $currentReview : $currentReview === $reviewKey;
+                        @endphp
+                        <a href="{{ route('admin.contents.index', ['section' => $section, 'status' => 'enquiries'] + ($reviewKey === 'all' ? [] : ['review' => $reviewKey]) + request()->except('section', 'status', 'review', 'page')) }}"
+                           class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold {{ $reviewActive ? 'border-green-700 bg-green-50 text-green-700' : 'border-slate-200 bg-white text-slate-600 hover:border-green-600 hover:text-green-700' }}">
+                            {{ \App\Support\AdEnquiries::LABELS[$reviewKey] ?? \Illuminate\Support\Str::headline($reviewKey) }}
+                            <span class="rounded-full bg-white px-1.5 text-[11px] text-slate-600">{{ $enquiryStates[$reviewKey] ?? 0 }}</span>
+                        </a>
+                    @endforeach
+                </div>
+            @endif
         </div>
 
         <form method="GET" action="{{ route('admin.contents.index', ['section' => $section]) }}" class="flex w-full flex-col gap-2 sm:flex-row lg:w-auto">
@@ -47,6 +70,9 @@
             @endif
             @if ($currentType)
                 <input type="hidden" name="type" value="{{ $currentType }}">
+            @endif
+            @if ($currentReview)
+                <input type="hidden" name="review" value="{{ $currentReview }}">
             @endif
             <input type="search" name="q" value="{{ request('q') }}" placeholder="Search {{ strtolower($sectionConfig['label']) }}" class="min-w-0 rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100 sm:w-72">
             <button type="submit" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-green-600 hover:text-green-700">Search</button>
@@ -66,6 +92,9 @@
         <form method="GET" action="{{ route('admin.contents.index', ['section' => $section]) }}" class="grid gap-2 sm:grid-cols-[12rem_12rem_auto]">
             @if (request('q'))
                 <input type="hidden" name="q" value="{{ request('q') }}">
+            @endif
+            @if ($isEnquiryBoard && $currentReview)
+                <input type="hidden" name="review" value="{{ $currentReview }}">
             @endif
             <select name="type" class="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm">
                 <option value="">All types</option>
@@ -111,14 +140,26 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse ($contents as $item)
+                        @php
+                            $isEnquiry = $item->type === 'submission';
+                            $itemData = $isEnquiry ? ($item->data ?? []) : [];
+                            $artwork = is_array($itemData['artwork'] ?? null) ? $itemData['artwork'] : null;
+                            $artworkIsImage = $artwork && str_starts_with((string) ($artwork['mime_type'] ?? ''), 'image/');
+                            $artworkUrl = $artwork['url'] ?? (($artwork['path'] ?? null) ? asset('storage/' . $artwork['path']) : null);
+                            $thumb = $item->image_url ?: ($artworkIsImage ? $artworkUrl : null);
+                            $enquiryPill = $isEnquiry ? ($enquiryPills[$item->enquiry_status] ?? null) : null;
+                            $submittedOn = ! empty($itemData['submitted_at'])
+                                ? \Illuminate\Support\Carbon::parse($itemData['submitted_at'])->format('j M Y')
+                                : $item->created_at?->format('j M Y');
+                        @endphp
                         <tr class="group align-top hover:bg-slate-50/70">
                             <td class="px-4 py-4">
                                 <input form="bulk-content-form" type="checkbox" name="ids[]" value="{{ $item->id }}" class="rounded border-slate-300 text-green-700 focus:ring-green-600" data-row-select>
                             </td>
                             <td class="min-w-[26rem] px-4 py-4">
                                 <div class="flex gap-3">
-                                    @if ($item->image_path)
-                                        <img src="{{ $item->image_url }}?v={{ $item->updated_at->timestamp }}" alt="{{ $item->alt_text ?: $item->title }}" class="h-14 w-20 rounded-md object-cover">
+                                    @if ($thumb)
+                                        <img src="{{ $thumb }}{{ $item->image_url ? '?v=' . $item->updated_at->timestamp : '' }}" alt="{{ $item->alt_text ?: $item->title }}" class="h-14 w-20 rounded-md object-cover">
                                     @else
                                         <div class="flex h-14 w-20 items-center justify-center rounded-md bg-slate-100 text-xs font-semibold text-slate-400">No image</div>
                                     @endif
@@ -132,36 +173,43 @@
                                         @if ($item->description)
                                             <p class="mt-1 max-w-2xl text-xs leading-5 text-slate-500">{{ str($item->description)->squish()->limit(120) }}</p>
                                         @endif
-                                        @if ($section === 'advertise' && $item->type === 'submission' && !empty($item->data))
-                                            <div class="mt-2 grid gap-1.5 rounded-md border border-amber-200 bg-amber-50/60 p-2.5 text-xs">
-                                                @if (!empty($item->data['contact_name']))
-                                                    <div class="flex flex-wrap gap-x-3"><span class="font-semibold text-slate-700">Contact:</span><span class="text-slate-800">{{ $item->data['contact_name'] }}</span>
-                                                        @if (!empty($item->data['contact_email']))
-                                                            <a href="mailto:{{ $item->data['contact_email'] }}" class="font-medium text-green-700 hover:underline">{{ $item->data['contact_email'] }}</a>
-                                                        @endif
-                                                        @if (!empty($item->data['contact_phone']))
-                                                            <a href="tel:{{ $item->data['contact_phone'] }}" class="text-slate-600">{{ $item->data['contact_phone'] }}</a>
-                                                        @endif
-                                                    </div>
+                                        @if ($isEnquiry && $section === 'advertise')
+                                            <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600">
+                                                @if (!empty($itemData['reference_number']))
+                                                    <span class="rounded border bg-white px-1.5 py-0.5 font-mono text-[11px] font-semibold text-slate-700">{{ $itemData['reference_number'] }}</span>
                                                 @endif
-                                                <div class="flex flex-wrap gap-x-3 gap-y-1 text-slate-600">
-                                                    @if (!empty($item->data['company']))<span>Company: <span class="font-medium text-slate-800">{{ $item->data['company'] }}</span></span>@endif
-                                                    @if (!empty($item->data['industry']))<span>· {{ $item->data['industry'] }}</span>@endif
-                                                    @if (!empty($item->data['budget']))<span>· Budget: {{ $item->data['budget'] }}</span>@endif
-                                                    @if (!empty($item->data['start_date']))<span>· Start: {{ \Carbon\Carbon::parse($item->data['start_date'])->format('j M Y') }}</span>@endif
-                                                    @if (!empty($item->data['preferred_contact']))<span>· Pref: {{ $item->data['preferred_contact'] }}</span>@endif
-                                                    @if (!empty($item->data['reference_number']))<span class="ml-auto rounded bg-white px-1.5 py-0.5 font-mono text-[11px] font-semibold text-slate-700 border">{{ $item->data['reference_number'] }}</span>@endif
-                                                </div>
-                                                @if (!empty($item->data['artwork']['url'] ?? $item->data['artwork']['path'] ?? null))
-                                                    <div class="flex items-center gap-2">
-                                                        <span class="font-semibold text-slate-700">Artwork:</span>
-                                                        <a href="{{ $item->data['artwork']['url'] ?? Storage::disk('public')->url($item->data['artwork']['path']) }}" target="_blank" class="text-green-700 hover:underline truncate max-w-[18rem]">{{ $item->data['artwork']['original_name'] ?? basename($item->data['artwork']['path']) }}</a>
-                                                        @if (!empty($item->data['artwork']['size']))<span class="text-slate-400">({{ round($item->data['artwork']['size']/1024) }} KB)</span>@endif
-                                                    </div>
+                                                @if (!empty($itemData['industry']))<span>{{ $itemData['industry'] }}</span>@endif
+                                                @if (!empty($itemData['budget']))<span>Budget: {{ $itemData['budget'] }}</span>@endif
+                                                @if (!empty($itemData['start_date']))<span>Starts {{ \Illuminate\Support\Carbon::parse($itemData['start_date'])->format('j M Y') }}</span>@endif
+                                                @if (!empty($itemData['ends_at']))
+                                                    <span class="{{ $item->enquiry_status === 'expired' ? 'font-semibold text-red-700' : '' }}">Runs until {{ \Illuminate\Support\Carbon::parse($itemData['ends_at'])->format('j M Y') }}</span>
                                                 @endif
                                             </div>
+                                            <div class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-amber-200 bg-amber-50/60 px-2 py-1.5 text-xs">
+                                                <span class="font-semibold text-slate-600">Private:</span>
+                                                <span class="font-medium text-slate-800">{{ $itemData['contact_name'] ?? '—' }}</span>
+                                                @if (!empty($itemData['contact_email']))
+                                                    <a href="mailto:{{ $itemData['contact_email'] }}" class="font-medium text-green-700 hover:underline">{{ $itemData['contact_email'] }}</a>
+                                                @endif
+                                                @if (!empty($itemData['contact_phone']))
+                                                    <a href="tel:{{ $itemData['contact_phone'] }}" class="text-slate-600 hover:underline">{{ $itemData['contact_phone'] }}</a>
+                                                @endif
+                                                @if (!empty($itemData['preferred_contact']))
+                                                    <span class="text-slate-500">via {{ $itemData['preferred_contact'] }}</span>
+                                                @endif
+                                                @if ($artwork && ! $artworkIsImage && $artworkUrl)
+                                                    <a href="{{ $artworkUrl }}" target="_blank" rel="noopener" class="ml-auto max-w-[14rem] truncate text-green-700 hover:underline">{{ $artwork['original_name'] ?? 'Artwork file' }}</a>
+                                                @endif
+                                            </div>
+                                            @if (!empty($itemData['rejection_reason']))
+                                                <p class="mt-1.5 text-xs text-red-700"><span class="font-semibold">Rejected:</span> {{ \Illuminate\Support\Str::limit($itemData['rejection_reason'], 110) }}</p>
+                                            @endif
                                         @endif
                                         <div class="mt-2 flex flex-wrap gap-x-2 gap-y-1 text-xs font-semibold opacity-100 transition group-hover:opacity-100 md:opacity-0">
+                                            @if ($isEnquiry && $section === 'advertise')
+                                                <a href="{{ route('admin.enquiries.review', $item->id) }}" class="rounded bg-green-700 px-2 py-0.5 text-white hover:bg-green-800">Review</a>
+                                                <span class="text-slate-300">|</span>
+                                            @endif
                                             <a href="{{ route('admin.contents.edit', ['section' => $section, 'id' => $item->id] + request()->query()) }}" class="text-green-700 hover:underline">Edit</a>
                                             <span class="text-slate-300">|</span>
                                             <a href="{{ route('admin.contents.preview', ['section' => $section, 'id' => $item->id]) }}" class="text-blue-700 hover:underline">Draft Preview</a>
@@ -185,10 +233,12 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-4 py-4 text-slate-600">{{ config('cms.types.' . $item->type, ucfirst($item->type)) }}</td>
+                            <td class="px-4 py-4 text-slate-600">{{ $isEnquiry && $section === 'advertise' ? 'Ad Enquiry' : config('cms.types.' . $item->type, ucfirst($item->type)) }}</td>
                             <td class="px-4 py-4 text-slate-600">{{ $item->category ?: '-' }}</td>
                             <td class="px-4 py-4 text-slate-600">
-                                @if ($item->published_on)
+                                @if ($isEnquiry)
+                                    {{ $submittedOn ?: '-' }}
+                                @elseif ($item->published_on)
                                     {{ $item->published_on->format('j M Y') }}
                                 @elseif ($item->published_at)
                                     {{ $item->published_at->format('j M Y') }}
@@ -197,12 +247,20 @@
                                 @endif
                             </td>
                             <td class="px-4 py-4">
-                                <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $item->type === 'submission' ? 'bg-slate-100 text-slate-700' : ($item->is_published ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700') }}">
-                                    {{ $item->type === 'submission' ? 'Private' : ($item->is_published ? 'Published' : 'Draft') }}
-                                </span>
+                                @if ($isEnquiry && $enquiryPill)
+                                    <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $enquiryPill['class'] }}">{{ $enquiryPill['label'] }}</span>
+                                @else
+                                    <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $isEnquiry ? 'bg-slate-100 text-slate-700' : ($item->is_published ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700') }}">
+                                        {{ $isEnquiry ? 'Private' : ($item->is_published ? 'Published' : 'Draft') }}
+                                    </span>
+                                @endif
                             </td>
                             <td class="px-4 py-4">
-                                <input form="reorder-content-form" type="number" name="orders[{{ $item->id }}]" min="0" value="{{ $item->sort_order }}" class="w-20 rounded-md border border-slate-300 px-2 py-1 text-sm">
+                                @if ($isEnquiry)
+                                    <span class="text-xs text-slate-400">—</span>
+                                @else
+                                    <input form="reorder-content-form" type="number" name="orders[{{ $item->id }}]" min="0" value="{{ $item->sort_order }}" class="w-20 rounded-md border border-slate-300 px-2 py-1 text-sm">
+                                @endif
                             </td>
                         </tr>
                     @empty

@@ -95,6 +95,18 @@ class SiteContent extends Model
         return $this->assetUrl($this->image_path);
     }
 
+    public function getEnquiryStatusAttribute(): string
+    {
+        $status = data_get($this->data, 'status') ?: 'pending_review';
+        $endsAt = data_get($this->data, 'ends_at');
+
+        if ($status === 'approved' && $endsAt && $endsAt < now()->toDateString()) {
+            return 'expired';
+        }
+
+        return $status;
+    }
+
     public function getFileUrlAttribute(): ?string
     {
         if ($this->media_asset_id) {

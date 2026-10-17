@@ -2,6 +2,10 @@
     $slides = collect($ads ?? [])
         ->map(function ($ad) {
             $isModel = $ad instanceof \App\Models\SiteContent;
+            $rawEndsAt = (string) ($isModel ? (data_get($ad->data, 'ends_at') ?? '') : ($ad['ends_at'] ?? ''));
+            $endsLabel = preg_match('/^\d{4}-\d{2}-\d{2}$/', $rawEndsAt)
+                ? \Illuminate\Support\Carbon::parse($rawEndsAt)->format('j M Y')
+                : $rawEndsAt;
 
             return [
                 'title' => $isModel ? $ad->title : ($ad['title'] ?? ''),
@@ -10,7 +14,7 @@
                     ? ($ad->image_url ? $ad->image_url . '?v=' . $ad->updated_at->timestamp : asset('images/ad-promo-3.png'))
                     : ($ad['image'] ?? asset('images/ad-promo-3.png')),
                 'is_featured' => $isModel ? (bool) data_get($ad->data, 'is_featured') : (bool) ($ad['is_featured'] ?? false),
-                'ends_at' => $isModel ? (data_get($ad->data, 'ends_at') ?? '') : ($ad['ends_at'] ?? ''),
+                'ends_at' => $endsLabel,
                 'url' => $isModel ? ($ad->button_link ?: route('advertise')) : ($ad['url'] ?? route('advertise')),
             ];
         })
