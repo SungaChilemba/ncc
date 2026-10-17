@@ -293,21 +293,37 @@ mibextid=rS40aB7S9Ucbxw6v"
 												<h2 class="text-xl md:text-xl font-bold text-brand-800 mb-6">LATEST NEWS</h2>
 												<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
 																@forelse(($latestNews ?? collect())->take(3) as $article)
-																				<article class="bg-white rounded-lg shadow-md overflow-hidden">
-																								<a href="{{ $article->public_url }}" class="block">
-																												<img src="{{ $article->image_path ? $article->image_url . '?v=' . $article->updated_at->timestamp : asset('images/news1.png') }}" alt="{{ $article->alt_text ?: $article->title }}" class="w-full h-40 object-cover">
+																				<article class="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+																								<a href="{{ $article->public_url }}" class="block overflow-hidden" tabindex="-1" aria-hidden="true">
+																												<img src="{{ $article->image_path ? $article->image_url . '?v=' . $article->updated_at->timestamp : asset('images/news1.png') }}" alt="{{ $article->alt_text ?: $article->title }}" class="aspect-[16/10] w-full object-cover transition duration-500 group-hover:scale-105">
 																								</a>
-																								<div class="p-4">
-																												<h3 class="font-bold text-slate-900 mb-2">{{ $article->title }}</h3>
-																												@if ($article->published_on || $article->location)
-																																<p class="text-sm text-slate-500 mb-2">
-																																				{{ $article->published_on?->format('j F Y') }}@if($article->published_on && $article->location) | @endif{{ $article->location }}
-																																</p>
-																												@endif
+																								<div class="flex flex-1 flex-col p-6">
+																												<div class="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
+																																@if ($article->published_on)
+																																				<span class="inline-flex items-center gap-1">
+																																								<i class="fa-regular fa-calendar text-slate-400"></i>
+																																								{{ $article->published_on->format('d M Y') }}
+																																				</span>
+																																@endif
+																																@if ($article->location)
+																																				<span class="inline-flex items-center gap-1">
+																																								<i class="fa-solid fa-location-dot text-slate-400"></i>
+																																								{{ strtoupper($article->location) }}
+																																				</span>
+																																@endif
+																																@if (!empty($article->category))
+																																				<span class="rounded-full bg-brand-50 px-2.5 py-0.5 text-brand-700">
+																																								{{ $article->category }}
+																																				</span>
+																																@endif
+																												</div>
+																												<h3 class="mt-3 line-clamp-2 text-lg font-bold leading-snug text-slate-900">
+																																<a href="{{ $article->public_url }}" class="transition group-hover:text-brand-700">{{ $article->title }}</a>
+																												</h3>
 																												@if ($article->description)
-																																<p class="text-slate-600 text-sm">{{ str($article->description)->limit(120) }}</p>
+																																<p class="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">{{ $article->description }}</p>
 																												@endif
-																												<a href="{{ $article->public_url }}" class="inline-block mt-2 text-sm font-semibold text-brand-700 hover:underline">Read More ></a>
+																												<a href="{{ $article->public_url }}" class="mt-auto inline-flex items-center gap-1.5 pt-4 text-sm font-semibold text-brand-700 transition group-hover:gap-2.5">Read More <i class="fa-solid fa-arrow-right text-xs"></i></a>
 																								</div>
 																				</article>
 																@empty
@@ -320,21 +336,37 @@ mibextid=rS40aB7S9Ucbxw6v"
 												@if (($latestNews ?? collect())->count() > 3)
 																<div x-show="showMoreNews" class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
 																				@foreach(($latestNews ?? collect())->slice(3) as $article)
-																								<article class="bg-white rounded-lg shadow-md overflow-hidden">
-																												<a href="{{ $article->public_url }}" class="block">
-																																<img src="{{ $article->image_path ? $article->image_url . '?v=' . $article->updated_at->timestamp : asset('images/news1.png') }}" alt="{{ $article->alt_text ?: $article->title }}" class="w-full h-40 object-cover">
+																								<article class="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+																												<a href="{{ $article->public_url }}" class="block overflow-hidden" tabindex="-1" aria-hidden="true">
+																																<img src="{{ $article->image_path ? $article->image_url . '?v=' . $article->updated_at->timestamp : asset('images/news1.png') }}" alt="{{ $article->alt_text ?: $article->title }}" class="aspect-[16/10] w-full object-cover transition duration-500 group-hover:scale-105">
 																												</a>
-																												<div class="p-4">
-																																<h3 class="font-bold text-slate-900 mb-2">{{ $article->title }}</h3>
-																																@if ($article->published_on || $article->location)
-																																				<p class="text-sm text-slate-500 mb-2">
-																																								{{ $article->published_on?->format('j F Y') }}@if($article->published_on && $article->location) | @endif{{ $article->location }}
-																																				</p>
-																																@endif
+																												<div class="flex flex-1 flex-col p-6">
+																																<div class="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
+																																				@if ($article->published_on)
+																																								<span class="inline-flex items-center gap-1">
+																																												<i class="fa-regular fa-calendar text-slate-400"></i>
+																																												{{ $article->published_on->format('d M Y') }}
+																																								</span>
+																																				@endif
+																																				@if ($article->location)
+																																								<span class="inline-flex items-center gap-1">
+																																												<i class="fa-solid fa-location-dot text-slate-400"></i>
+																																												{{ strtoupper($article->location) }}
+																																								</span>
+																																				@endif
+																																				@if (!empty($article->category))
+																																								<span class="rounded-full bg-brand-50 px-2.5 py-0.5 text-brand-700">
+																																												{{ $article->category }}
+																																								</span>
+																																				@endif
+																																</div>
+																																<h3 class="mt-3 line-clamp-2 text-lg font-bold leading-snug text-slate-900">
+																																				<a href="{{ $article->public_url }}" class="transition group-hover:text-brand-700">{{ $article->title }}</a>
+																																</h3>
 																																@if ($article->description)
-																																				<p class="text-slate-600 text-sm">{{ str($article->description)->limit(120) }}</p>
+																																				<p class="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">{{ $article->description }}</p>
 																																@endif
-																																<a href="{{ $article->public_url }}" class="inline-block mt-2 text-sm font-semibold text-brand-700 hover:underline">Read More ></a>
+																																<a href="{{ $article->public_url }}" class="mt-auto inline-flex items-center gap-1.5 pt-4 text-sm font-semibold text-brand-700 transition group-hover:gap-2.5">Read More <i class="fa-solid fa-arrow-right text-xs"></i></a>
 																												</div>
 																								</article>
 																				@endforeach
