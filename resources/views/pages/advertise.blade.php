@@ -238,6 +238,11 @@
                                 headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
                                 body: data
                             });
+                            const contentType = res.headers.get('content-type') || '';
+                            if (!contentType.includes('application/json')) {
+                                this.errors = { _form: ['The server returned an unexpected response (status ' + res.status + '). Please try again.'] };
+                                this.submitting = false; return;
+                            }
                             const json = await res.json();
                             if (!res.ok) {
                                 if (json.errors) {
@@ -275,7 +280,7 @@
                             @endif
                         </div>
                     @endif
-                    <div x-show="success" x-transition class="mb-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800" x-cloak>
+                    <div x-show="success" class="mb-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800" x-cloak>
                         <span x-text="'Inquiry received — reference ' + reference + '. NCC board will review within 5–7 days.'"></span>
                     </div>
                     <div x-show="errors._form" class="mb-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700" x-cloak>
