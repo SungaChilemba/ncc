@@ -8,8 +8,10 @@
 								$hero = $cmsHero ?? null;
 								$allCards = $cmsCards ?? collect();
 								$cardsByCat = $allCards->groupBy(fn($item) => $item->category ?: "Content");
-								$stats = $cmsContent->get("stat", collect()) ?? collect();
 								$ctas = $cmsCtas ?? collect();
+								// Hero data passed from PageController::advertise() (heroAds, heroStats, sponsoredAds).
+								$heroAds = collect($heroAds ?? []);
+								$heroStats = collect($heroStats ?? []);
 								// Helpers for specific group lookups (fallback to "Opportunities" seeder group + new admin categories)
 								$whyPartnerCards = $cardsByCat
 								    ->get("Why Partner With NCC", collect())
@@ -19,10 +21,45 @@
 								$sponsorshipCards = $cardsByCat
 								    ->get("Sponsorship Opportunities", collect())
 								    ->merge($cardsByCat->get("Opportunities", collect()));
-								$sponsoredAds = $cardsByCat->get("Sponsored Ads", collect())->reject(function ($ad) {
-								    $endsAt = data_get($ad->data, "ends_at");
-								    return $endsAt && $endsAt < now()->toDateString();
-								})->values();
+								$sponsoredAds = $sponsoredAds
+								    ?? $cardsByCat->get("Sponsored Ads", collect())->reject(function ($ad) {
+								        $endsAt = data_get($ad->data, "ends_at");
+								        return $endsAt && $endsAt < now()->toDateString();
+								    })->values();
+
+								// Build the hero carousel: slide 0 is the default hero, followed by up to 3
+								// published, non-expired sponsored adverts rendered at full hero size.
+								$defaultHeroImage = asset("images/newsbanner.png");
+								$adFallbackImage = asset("images/ad-promo-3.png");
+
+								$heroSlides = collect([
+								    [
+								        "type" => "hero",
+								        "image" => $hero?->image_url
+								            ? $hero->image_url . "?v=" . $hero->updated_at->timestamp
+								            : $defaultHeroImage,
+								        "fallback" => $defaultHeroImage,
+								        "eyebrow" => $hero?->subtitle,
+								        "title" => $hero?->title,
+								        "description" => $hero?->description,
+								        "ends_at" => null,
+								        "button_text" => $hero?->button_text,
+								        "button_url" => $hero?->button_url ?: ($hero?->button_text ? "#inquiry-form" : null),
+								    ],
+								    ...$heroAds->map(fn($ad) => [
+								        "type" => "ad",
+								        "image" => $ad->image_url
+								            ? $ad->image_url . "?v=" . $ad->updated_at->timestamp
+								            : $adFallbackImage,
+								        "fallback" => $adFallbackImage,
+								        "eyebrow" => $ad->subtitle ?: "Sponsored",
+								        "title" => $ad->title,
+								        "description" => $ad->description,
+								        "ends_at" => data_get($ad->data, "ends_at"),
+								        "button_text" => $ad->button_text,
+								        "button_url" => $ad->button_link ?: route("advertise"),
+								    ])->values(),
+								]);
 				@endphp
 				<style>
 								html {
@@ -30,63 +67,161 @@
 								}
 				</style>
 
-				{{-- Hero Banner — CMS-driven with updated fallback (70vh, overlay, stats, CTA) --}}
-				<section class="relative w-full h-[70vh] bg-cover bg-center overflow-hidden"
-								style="background-image: url('{{ $hero?->image_url ? $hero->image_url . "?v=" . $hero->updated_at->timestamp : asset("images/BannerImage.png") }}');">
-								<div class="absolute inset-0 z-0 bg-black/50"></div>
-								@if ($hero?->image_url)
-												<div class="absolute inset-0 z-0 bg-green-900/20"></div>
-								@endif
-								<div class="relative z-10 flex flex-col justify-center items-center h-full text-center text-white px-6">
-												<h3 class="text-sm uppercase tracking-widest mb-2 font-bold">
-																{{ $hero?->subtitle ? $hero->subtitle : "Partner & Advertise with NCC" }}</h3>
-												<h1 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-8 max-w-4xl">
-																@if ($hero?->title)
-																				{{ $hero->title }}
-																@else
-																				Align Your Brand with <span class="text-yellow-400">Child Protection & Social Impact in Malawi</span>
-																@endif
-												</h1>
-												<p class="max-w-2xl text-lg mb-10">
-																{{ $hero?->description ?: "Reach communities across Malawi while supporting the rights and welfare of children." }}
-												</p>
+				{{-- Hero carousel — default hero image, then up to 3 published sponsored ads at full hero size --}}
+				@if ($heroSlides->isNotEmpty())
+				<section
+								x-data="{
+												active: 0,
+												total: {{ $heroSlides->count() }},
+												paused: false,
+												timer: null,
+												reduced: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+												init() {
+																if (!this.reduced) this.start();
+												},
+												start() {
+																if (this.total < 2 || this.reduced) return;
+																this.stop();
+																this.timer = setInterval(() => { if (!this.paused) this.next(); }, 6000);
+												},
+												stop() {
+																if (this.timer) { clearInterval(this.timer); this.timer = null; }
+												},
+												next() { this.active = (this.active + 1) % this.total; },
+												prev() { this.active = (this.active - 1 + this.total) % this.total; }
+								}"
+								@mouseenter="paused = true" @mouseleave="paused = false"
+								@focusin="paused = true" @focusout="paused = false"
+								class="relative h-[70vh] min-h-[24rem] w-full overflow-hidden bg-slate-900"
+								role="region" aria-roledescription="carousel" aria-label="Advertise with NCC"
+								aria-live="polite"
+				>
+								@foreach ($heroSlides as $index => $slide)
+												<div
+																class="absolute inset-0 transition-opacity duration-700 ease-out"
+																:class="active === {{ $index }} ? 'opacity-100 z-10' : 'opacity-0 z-0'"
+																:style="reduced ? 'transition-duration: 0ms' : ''"
+																:aria-hidden="active === {{ $index }} ? 'false' : 'true'"
+																role="group" aria-roledescription="slide"
+																aria-label="{{ $index + 1 }} of {{ $heroSlides->count() }}"
+												>
+																<img src="{{ $slide['image'] }}" alt="{{ $slide['title'] ?? '' }}"
+																				class="absolute inset-0 h-full w-full object-cover"
+																				loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
+																				onerror="this.onerror=null; this.src='{{ $slide['fallback'] }}'">
+																<div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/55 to-black/40"></div>
 
-												{{-- Stats — use CMS stats if present else fallback to updated static (28/2k/6k) --}}
-												<div class="flex flex-col sm:flex-row justify-center gap-8 sm:gap-14 mb-10">
-																@if ($stats->isNotEmpty())
-																				@foreach ($stats->take(3) as $stat)
-																								<div class="flex flex-col items-center">
-																												<i class="fas fa-check-circle text-yellow-400 text-2xl mb-1"></i>
-																												<p class="font-semibold">{{ $stat->title }}
-																																{{ $stat->description ? " " . $stat->description : "" }}</p>
-																								</div>
-																				@endforeach
-																@else
-																				<div class="flex flex-col items-center">
-																								<i class="fas fa-map-marker-alt text-yellow-400 text-2xl mb-1"></i>
-																								<p class="font-semibold">28 Districts Reached</p>
-																				</div>
-																				<div class="flex flex-col items-center">
-																								<i class="fas fa-users text-yellow-400 text-2xl mb-1"></i>
-																								<p class="font-semibold">2,000+ Families Supported</p>
-																				</div>
-																				<div class="flex flex-col items-center">
-																								<i class="fas fa-hand-holding-heart text-yellow-400 text-2xl mb-1"></i>
-																								<p class="font-semibold">6,000+ Community Members</p>
-																				</div>
-																@endif
+																<div class="relative z-10 flex h-full flex-col items-center justify-center px-6 pb-16 text-center text-white">
+																				@if (!empty($slide['eyebrow']))
+																								<p class="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-yellow-400 sm:text-sm">{{ $slide['eyebrow'] }}</p>
+																				@endif
+																				@if (!empty($slide['title']))
+																								@if (($slide['type'] ?? 'hero') === 'hero')
+																								<h1 class="mb-5 max-w-4xl text-3xl font-bold sm:text-4xl md:text-5xl">{{ $slide['title'] }}</h1>
+																								@else
+																								<h2 class="mb-5 max-w-4xl text-3xl font-bold sm:text-4xl md:text-5xl">{{ $slide['title'] }}</h2>
+																								@endif
+																				@endif
+																				@if (!empty($slide['description']))
+																								<p class="mb-6 max-w-2xl text-base leading-relaxed sm:text-lg">{{ $slide['description'] }}</p>
+																				@endif
+																				@if (!empty($slide['ends_at']))
+																								<p class="mb-6 text-sm font-semibold text-white/90">Ends {{ \Illuminate\Support\Carbon::parse($slide['ends_at'])->format('j M Y') }}</p>
+																				@endif
+																				@if (!empty($slide['button_text']))
+																								<a href="{{ $slide['button_url'] ?: '#inquiry-form' }}"
+																								class="rounded-lg bg-green-600 px-6 py-3 font-semibold text-white shadow transition hover:bg-green-700">{{ $slide['button_text'] }}</a>
+																				@endif
+																</div>
 												</div>
+								@endforeach
 
-												<a href="#inquiry-form"
-																class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg shadow transition">
-																Start Your Partnership
-												</a>
-												@if ($ctas->isNotEmpty() && $ctas->first()->button_text)
-																<a href="{{ $ctas->first()->button_link ?: "#inquiry-form" }}"
-																				class="mt-3 text-sm text-white/90 underline hover:text-white">{{ $ctas->first()->button_text }}</a>
-												@endif
+								@if ($heroSlides->count() > 1)
+												<button type="button" @click="prev()" aria-label="Previous slide"
+																class="absolute left-4 top-1/2 z-30 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white transition hover:bg-black/60 focus:outline-none focus:ring-2 focus:ring-white">
+																<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+																				<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+																</svg>
+												</button>
+												<button type="button" @click="next()" aria-label="Next slide"
+																class="absolute right-4 top-1/2 z-30 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white transition hover:bg-black/60 focus:outline-none focus:ring-2 focus:ring-white">
+																<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+																				<path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+																</svg>
+												</button>
+
+												<div class="absolute bottom-6 left-1/2 z-30 flex -translate-x-1/2 gap-2">
+																@foreach ($heroSlides as $index => $slide)
+																				<button type="button" @click="active = {{ $index }}"
+																:aria-current="active === {{ $index }} ? 'true' : 'false'"
+																aria-label="Go to slide {{ $index + 1 }}"
+																:class="active === {{ $index }} ? 'w-8 bg-white' : 'w-3 bg-white/50 hover:bg-white/80'"
+																class="h-3 rounded-full transition-all duration-300 focus:outline-none"></button>
+																@endforeach
+												</div>
+								@endif
+				</section>
+				@endif
+
+				{{-- Hero statistics — backend-derived counts with count-up and reveal animation --}}
+				@if ($heroStats->isNotEmpty())
+				<section class="w-full bg-slate-50 px-6 pb-16 pt-12">
+								<div
+												x-data="{
+																items: @js($heroStats->values()),
+																display: [],
+																init() {
+																				this.display = this.items.map((s) => s.value ?? 0);
+																				if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
+																				const obs = new IntersectionObserver((entries) => {
+																								entries.forEach((e) => {
+																												if (e.isIntersecting) { obs.disconnect(); this.run(); }
+																								});
+																				}, { threshold: 0.3 });
+																				obs.observe(this.$el);
+																},
+																run() {
+																				const start = performance.now();
+																				const duration = 1300;
+																				const tick = (now) => {
+																								const p = Math.min(1, (now - start) / duration);
+																								const eased = 1 - Math.pow(1 - p, 3);
+																								this.display = this.items.map((s) => Math.round((s.value ?? 0) * eased));
+																								if (p < 1) requestAnimationFrame(tick);
+																								else this.display = this.items.map((s) => s.value ?? 0);
+																				};
+																				requestAnimationFrame(tick);
+																},
+																format(i) {
+																				const item = this.items[i];
+																				if (item.value === null) return item.raw;
+																				return Number(this.display[i] ?? item.value).toLocaleString() + (item.suffix || '');
+																}
+												}"
+												class="mx-auto max-w-5xl"
+								>
+												<div class="reveal grid grid-cols-1 gap-4 sm:grid-cols-3">
+																@foreach ($heroStats as $index => $stat)
+																				<div class="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+																								<span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-50 text-green-700">
+																								<i class="fas {{ $stat['icon'] }} text-xl" aria-hidden="true"></i>
+																								</span>
+																								<div>
+																								<p class="text-3xl font-bold tabular-nums text-slate-900">
+																								@if ($stat['value'] !== null)
+																								<span x-text="format({{ $index }})">{{ number_format($stat['value']) }}{{ $stat['suffix'] }}</span>
+																								@else
+																								<span>{{ $stat['raw'] }}</span>
+																								@endif
+																								</p>
+																								<p class="mt-0.5 text-sm font-medium text-slate-600">{{ $stat['label'] }}</p>
+																								</div>
+																				</div>
+																@endforeach
+												</div>
 								</div>
 				</section>
+				@endif
 
 				{{-- Why Partner With NCC — CMS cards group "Why Partner" else fallback static 3 --}}
 				<section class="w-full bg-white py-16 px-6 md:px-12">

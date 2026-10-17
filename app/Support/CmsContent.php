@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\SiteContent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 class CmsContent
@@ -83,6 +84,7 @@ class CmsContent
             if (data_get($item->data, 'featured') === true) {
                 return true;
             }
+
             return false;
         });
 
@@ -102,6 +104,7 @@ class CmsContent
             if (is_array($placements) && (in_array('hero', $placements, true) || in_array('featured', $placements, true))) {
                 return true;
             }
+
             return false;
         });
 
@@ -127,21 +130,60 @@ class CmsContent
 
     public function sponsoredAds(?int $limit = null): Collection
     {
-        $query = SiteContent::forSection('advertise')
-            ->ofType('card')
-            ->published()
-            ->where('category', 'Sponsored Ads')
-            ->where(function ($query) {
-                $query->whereNull('data->ends_at')
-                    ->orWhere('data->ends_at', '>=', now()->toDateString());
-            })
-            ->ordered();
+        $query = $this->liveSponsoredAdsQuery()->ordered();
 
         if ($limit !== null) {
             $query->limit($limit);
         }
 
         return $query->get();
+    }
+
+    /**
+     * Selection rule for the /advertise hero carousel: adverts flagged
+     * is_featured take the first slots (most recent first), then any remaining
+     * slots are filled with the most recent non-featured adverts. Expired and
+     * unpublished adverts are never eligible.
+     */
+    public function heroSponsoredAds(int $limit = 3): Collection
+    {
+        return $this->liveSponsoredAdsQuery()
+            ->get()
+            ->sort(function (SiteContent $a, SiteContent $b) {
+                $featured = (int) (bool) data_get($b->data, 'is_featured')
+                    <=> (int) (bool) data_get($a->data, 'is_featured');
+
+                if ($featured !== 0) {
+                    return $featured;
+                }
+
+                return $this->recencyTimestamp($b) <=> $this->recencyTimestamp($a);
+            })
+            ->take($limit)
+            ->values();
+    }
+
+    /**
+     * Published, non-expired sponsored adverts across the advertise section.
+     */
+    protected function liveSponsoredAdsQuery(): Builder
+    {
+        return SiteContent::forSection('advertise')
+            ->ofType('card')
+            ->published()
+            ->where('category', 'Sponsored Ads')
+            ->where(function (Builder $query) {
+                $query->whereNull('data->ends_at')
+                    ->orWhere('data->ends_at', '>=', now()->toDateString());
+            });
+    }
+
+    /**
+     * Best-available timestamp used to order hero adverts by recency.
+     */
+    protected function recencyTimestamp(SiteContent $ad): int
+    {
+        return ($ad->published_at ?? $ad->updated_at ?? $ad->created_at)?->getTimestamp() ?? 0;
     }
 
     public function bySlug(string $section, string $slug, ?string $type = null): ?SiteContent
@@ -159,6 +201,6 @@ class CmsContent
             return asset($fallback);
         }
 
-        return $hero->image_url . '?v=' . $hero->updated_at->timestamp;
+        return $hero->image_url.'?v='.$hero->updated_at->timestamp;
     }
 }

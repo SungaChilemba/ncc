@@ -91,7 +91,7 @@ return [
             'label' => 'Advertise',
             'description' => 'Advertising packages, calls to action, and partner-facing copy.',
             'route' => 'advertise',
-            'types' => ['hero', 'card', 'cta', 'submission'],
+            'types' => ['hero', 'card', 'stat', 'cta', 'submission'],
         ],
     ],
 ];

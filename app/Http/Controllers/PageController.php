@@ -2,19 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SiteContent;
 use App\Models\MediaAsset;
+use App\Models\SiteContent;
 use App\Support\CmsContent;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\File;
 
 class PageController extends Controller
 {
-    public function __construct(private readonly CmsContent $content)
-    {
-    }
+    public function __construct(private readonly CmsContent $content) {}
 
     public function home()
     {
@@ -150,7 +149,7 @@ class PageController extends Controller
         $uploadedEvidence = [];
 
         foreach ($request->file('evidence', []) as $file) {
-            $path = $file->store('evidence/' . Str::lower($reference), 'public');
+            $path = $file->store('evidence/'.Str::lower($reference), 'public');
 
             $asset = MediaAsset::create([
                 'disk' => 'public',
@@ -183,7 +182,7 @@ class PageController extends Controller
         return redirect()
             ->route('reporting')
             ->with('report_tab', 'evidence')
-            ->with('evidence_status', count($uploadedEvidence) . ' evidence file(s) attached to ' . $reference . '.')
+            ->with('evidence_status', count($uploadedEvidence).' evidence file(s) attached to '.$reference.'.')
             ->with('evidence_reference', $reference);
     }
 
@@ -199,7 +198,76 @@ class PageController extends Controller
 
     public function advertise()
     {
-        return $this->show('advertise', 'pages.advertise');
+        return $this->show('advertise', 'pages.advertise', [
+            'heroAds' => $this->content->heroSponsoredAds(3),
+            'heroStats' => $this->advertiseHeroStats(),
+            'sponsoredAds' => $this->content->sponsoredAds(),
+        ]);
+    }
+
+    /**
+     * Hero statistics for the advertise page. Admin-authored "stat" blocks
+     * take precedence; otherwise the values are live counts derived from the
+     * advertise section. Zero-value computed stats are dropped so the hero
+     * renders nothing rather than empty placeholders.
+     */
+    private function advertiseHeroStats(): Collection
+    {
+        $cmsStats = $this->content->type('advertise', 'stat');
+
+        if ($cmsStats->isNotEmpty()) {
+            return $cmsStats->take(3)->map(fn (SiteContent $stat) => $this->normaliseHeroStat(
+                (string) ($stat->title ?? ''),
+                $stat->description,
+                data_get($stat->data, 'icon'),
+            ))->values();
+        }
+
+        $liveAds = $this->content->sponsoredAds();
+
+        $enquiries = SiteContent::forSection('advertise')
+            ->ofType('submission')
+            ->where('category', 'Ad Inquiries');
+
+        $enquiryCount = (clone $enquiries)->count();
+
+        $approvedPartners = (clone $enquiries)
+            ->where('data->status', 'approved')
+            ->get()
+            ->pluck('data.company')
+            ->filter()
+            ->unique()
+            ->count();
+
+        return collect([
+            $this->normaliseHeroStat($liveAds->count(), 'Live partner adverts', 'fa-rectangle-ad'),
+            $this->normaliseHeroStat($enquiryCount, 'Partner enquiries received', 'fa-envelope-open-text'),
+            $this->normaliseHeroStat($approvedPartners, 'Approved partners', 'fa-handshake'),
+        ])->filter(fn (array $stat) => $stat['value'] === null || $stat['value'] > 0)->values();
+    }
+
+    /**
+     * Normalise a stat label/value into a count-up-friendly shape. "1,249+"
+     * becomes value 1249 with suffix "+"; non-numeric values keep the raw text.
+     */
+    private function normaliseHeroStat(string|int $value, ?string $label, ?string $icon): array
+    {
+        $raw = trim((string) $value);
+        $numeric = null;
+        $suffix = '';
+
+        if (preg_match('/^([0-9][0-9,\.]*)(.*)$/', $raw, $matches)) {
+            $numeric = (int) str_replace([',', '.'], '', $matches[1]);
+            $suffix = trim($matches[2]);
+        }
+
+        return [
+            'value' => $numeric,
+            'suffix' => $suffix,
+            'raw' => $raw,
+            'label' => filled($label) ? $label : $raw,
+            'icon' => $icon ?: 'fa-circle-check',
+        ];
     }
 
     public function storeAdvertiseInquiry(Request $request)
@@ -224,7 +292,7 @@ class PageController extends Controller
 
         if ($request->hasFile('artwork')) {
             $file = $request->file('artwork');
-            $path = $file->store('advertise-inquiries/' . Str::lower($reference), 'public');
+            $path = $file->store('advertise-inquiries/'.Str::lower($reference), 'public');
             $asset = MediaAsset::create([
                 'disk' => 'public',
                 'path' => $path,
@@ -247,7 +315,7 @@ class PageController extends Controller
             'section' => 'advertise',
             'type' => 'submission',
             'slug' => Str::lower($reference),
-            'title' => $validated['company'] . " — {$reference}",
+            'title' => $validated['company']." — {$reference}",
             'subtitle' => $validated['industry'],
             'category' => 'Ad Inquiries',
             'description' => $validated['objectives'],
@@ -283,14 +351,14 @@ class PageController extends Controller
 
         return redirect()
             ->route('advertise')
-            ->with('inquiry_status', 'Inquiry received — reference ' . $reference . '. NCC board will review within 5–7 days.')
+            ->with('inquiry_status', 'Inquiry received — reference '.$reference.'. NCC board will review within 5–7 days.')
             ->with('inquiry_reference', $reference);
     }
 
     private function newAdvertiseReference(): string
     {
         do {
-            $reference = 'AD-' . now()->year . '-' . random_int(10000, 99999);
+            $reference = 'AD-'.now()->year.'-'.random_int(10000, 99999);
         } while (SiteContent::where('section', 'advertise')->where('slug', Str::lower($reference))->exists());
 
         return $reference;
@@ -373,17 +441,17 @@ class PageController extends Controller
     private function newReportReference(): string
     {
         do {
-            $reference = 'NCC-' . now()->year . '-' . random_int(10000, 99999);
+            $reference = 'NCC-'.now()->year.'-'.random_int(10000, 99999);
         } while (SiteContent::where('section', 'reporting')->where('slug', Str::lower($reference))->exists());
 
         return $reference;
     }
 
-    public function show(string $section, string $view)
+    public function show(string $section, string $view, array $extra = [])
     {
         abort_unless(array_key_exists($section, config('cms.sections')), 404);
 
-        return view($view, [
+        return view($view, array_merge([
             'cmsContent' => $this->content->forSection($section),
             'cmsHero' => $this->content->first($section, 'hero'),
             'cmsCards' => $this->content->type($section, 'card'),
@@ -392,6 +460,6 @@ class PageController extends Controller
             'cmsResources' => $this->content->type($section, 'resource'),
             'cmsGallery' => $this->content->type($section, 'gallery'),
             'suppressCmsBlocks' => true,
-        ]);
+        ], $extra));
     }
 }
