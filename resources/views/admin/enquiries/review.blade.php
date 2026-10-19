@@ -286,7 +286,7 @@
 
                     <label class="flex items-start gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
                         <input type="checkbox" name="is_featured" value="1" @checked(old('is_featured', $ad ? ($ad->data['is_featured'] ?? false) : false)) class="mt-0.5 rounded border-slate-300 text-green-700 focus:ring-green-600">
-                        <span>Feature in the hero carousel</span>
+                        <span>Feature in the hero carousel (shows the campaign image full-width; adverts stay in the sponsored ads carousel either way)</span>
                     </label>
 
                     <fieldset>

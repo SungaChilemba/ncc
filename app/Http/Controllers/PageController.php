@@ -6,7 +6,6 @@ use App\Models\MediaAsset;
 use App\Models\SiteContent;
 use App\Support\CmsContent;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\File;
@@ -200,38 +199,36 @@ class PageController extends Controller
     {
         return $this->show('advertise', 'pages.advertise', [
             'heroAds' => $this->content->heroSponsoredAds(3),
-            'heroStats' => $this->advertiseHeroStats(),
+            'heroStat' => $this->advertisePartnersStat(),
             'sponsoredAds' => $this->content->sponsoredAds(),
         ]);
     }
 
     /**
-     * Hero statistics for the advertise page. Admin-authored "stat" blocks
-     * take precedence; otherwise the values are live counts derived from the
-     * advertise section. Zero-value computed stats are dropped so the hero
-     * renders nothing rather than empty placeholders.
+     * The single "Partners" start card shown inside the hero, beside the CTA.
+     * An admin-authored "stat" block that refers to partners takes precedence;
+     * otherwise the value is a live count of approved ad partners. The value
+     * keeps its count-up animation.
      */
-    private function advertiseHeroStats(): Collection
+    private function advertisePartnersStat(): array
     {
-        $cmsStats = $this->content->type('advertise', 'stat');
+        $cmsStat = $this->content->type('advertise', 'stat')
+            ->first(fn (SiteContent $stat) => str_contains(
+                Str::lower((string) ($stat->title ?? '').' '.($stat->description ?? '')),
+                'partner',
+            ));
 
-        if ($cmsStats->isNotEmpty()) {
-            return $cmsStats->take(3)->map(fn (SiteContent $stat) => $this->normaliseHeroStat(
-                (string) ($stat->title ?? ''),
-                $stat->description,
-                data_get($stat->data, 'icon'),
-            ))->values();
+        if ($cmsStat) {
+            return $this->normaliseHeroStat(
+                (string) ($cmsStat->title ?? ''),
+                $cmsStat->description ?: 'Partners',
+                data_get($cmsStat->data, 'icon'),
+            );
         }
 
-        $liveAds = $this->content->sponsoredAds();
-
-        $enquiries = SiteContent::forSection('advertise')
+        $approvedPartners = SiteContent::forSection('advertise')
             ->ofType('submission')
-            ->where('category', 'Ad Inquiries');
-
-        $enquiryCount = (clone $enquiries)->count();
-
-        $approvedPartners = (clone $enquiries)
+            ->where('category', 'Ad Inquiries')
             ->where('data->status', 'approved')
             ->get()
             ->pluck('data.company')
@@ -239,11 +236,7 @@ class PageController extends Controller
             ->unique()
             ->count();
 
-        return collect([
-            $this->normaliseHeroStat($liveAds->count(), 'Live partner adverts', 'fa-rectangle-ad'),
-            $this->normaliseHeroStat($enquiryCount, 'Partner enquiries received', 'fa-envelope-open-text'),
-            $this->normaliseHeroStat($approvedPartners, 'Approved partners', 'fa-handshake'),
-        ])->filter(fn (array $stat) => $stat['value'] === null || $stat['value'] > 0)->values();
+        return $this->normaliseHeroStat($approvedPartners, 'Partners', 'fa-handshake');
     }
 
     /**

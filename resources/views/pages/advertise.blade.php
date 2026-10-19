@@ -9,9 +9,9 @@
 								$allCards = $cmsCards ?? collect();
 								$cardsByCat = $allCards->groupBy(fn($item) => $item->category ?: "Content");
 								$ctas = $cmsCtas ?? collect();
-								// Hero data passed from PageController::advertise() (heroAds, heroStats, sponsoredAds).
+								// Hero data passed from PageController::advertise() (heroAds, heroStat, sponsoredAds).
 								$heroAds = collect($heroAds ?? []);
-								$heroStats = collect($heroStats ?? []);
+								$heroStat = $heroStat ?? null;
 								// Helpers for specific group lookups (fallback to "Opportunities" seeder group + new admin categories)
 								$whyPartnerCards = $cardsByCat
 								    ->get("Why Partner With NCC", collect())
@@ -28,9 +28,16 @@
 								    })->values();
 
 								// Build the hero carousel: slide 0 is the default hero, followed by up to 3
-								// published, non-expired sponsored adverts rendered at full hero size.
+								// sponsored adverts an admin explicitly chose for the hero. Sponsored slides are
+								// artwork-only — the campaign copy is baked into the image, so no text overlays it.
 								$defaultHeroImage = asset("images/newsbanner.png");
 								$adFallbackImage = asset("images/ad-promo-3.png");
+
+								// CTA copy is CMS-driven, with a neutral fallback label.
+								$heroCta = [
+								    "text" => $hero?->button_text ?: "Start partnership",
+								    "url" => $hero?->button_url ?: "#inquiry-form",
+								];
 
 								$heroSlides = collect([
 								    [
@@ -39,12 +46,10 @@
 								            ? $hero->image_url . "?v=" . $hero->updated_at->timestamp
 								            : $defaultHeroImage,
 								        "fallback" => $defaultHeroImage,
+								        "alt" => $hero?->title,
 								        "eyebrow" => $hero?->subtitle,
 								        "title" => $hero?->title,
 								        "description" => $hero?->description,
-								        "ends_at" => null,
-								        "button_text" => $hero?->button_text,
-								        "button_url" => $hero?->button_url ?: ($hero?->button_text ? "#inquiry-form" : null),
 								    ],
 								    ...$heroAds->map(fn($ad) => [
 								        "type" => "ad",
@@ -52,12 +57,10 @@
 								            ? $ad->image_url . "?v=" . $ad->updated_at->timestamp
 								            : $adFallbackImage,
 								        "fallback" => $adFallbackImage,
-								        "eyebrow" => $ad->subtitle ?: "Sponsored",
-								        "title" => $ad->title,
-								        "description" => $ad->description,
-								        "ends_at" => data_get($ad->data, "ends_at"),
-								        "button_text" => $ad->button_text,
-								        "button_url" => $ad->button_link ?: route("advertise"),
+								        "alt" => $ad->title,
+								        "eyebrow" => null,
+								        "title" => null,
+								        "description" => null,
 								    ])->values(),
 								]);
 				@endphp
@@ -67,7 +70,7 @@
 								}
 				</style>
 
-				{{-- Hero carousel — default hero image, then up to 3 published sponsored ads at full hero size --}}
+				{{-- Hero carousel — default hero image, then up to 3 admin-chosen sponsored ads --}}
 				@if ($heroSlides->isNotEmpty())
 				<section
 								x-data="{
@@ -92,45 +95,88 @@
 								}"
 								@mouseenter="paused = true" @mouseleave="paused = false"
 								@focusin="paused = true" @focusout="paused = false"
-								class="relative h-[70vh] min-h-[24rem] w-full overflow-hidden bg-slate-900"
+								class="relative min-h-[80vh] w-full overflow-hidden bg-slate-900"
 								role="region" aria-roledescription="carousel" aria-label="Advertise with NCC"
-								aria-live="polite"
 				>
 								@foreach ($heroSlides as $index => $slide)
 												<div
-																class="absolute inset-0 transition-opacity duration-700 ease-out"
+																class="absolute inset-0 transition-opacity duration-700 ease-out motion-reduce:transition-none"
 																:class="active === {{ $index }} ? 'opacity-100 z-10' : 'opacity-0 z-0'"
 																:style="reduced ? 'transition-duration: 0ms' : ''"
 																:aria-hidden="active === {{ $index }} ? 'false' : 'true'"
 																role="group" aria-roledescription="slide"
 																aria-label="{{ $index + 1 }} of {{ $heroSlides->count() }}"
 												>
-																<img src="{{ $slide['image'] }}" alt="{{ $slide['title'] ?? '' }}"
+																<img src="{{ $slide['image'] }}" alt="{{ $slide['alt'] ?? '' }}"
 																				class="absolute inset-0 h-full w-full object-cover"
 																				loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
 																				onerror="this.onerror=null; this.src='{{ $slide['fallback'] }}'">
 																<div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/55 to-black/40"></div>
 
-																<div class="relative z-10 flex h-full flex-col items-center justify-center px-6 pb-16 text-center text-white">
+																<div class="relative z-10 flex h-full min-h-[80vh] flex-col items-center justify-center gap-6 px-6 pb-24 pt-16 text-center text-white">
 																				@if (!empty($slide['eyebrow']))
-																								<p class="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-yellow-400 sm:text-sm">{{ $slide['eyebrow'] }}</p>
+																								<p class="text-xs font-bold uppercase tracking-[0.2em] text-yellow-400 sm:text-sm">{{ $slide['eyebrow'] }}</p>
 																				@endif
 																				@if (!empty($slide['title']))
-																								@if (($slide['type'] ?? 'hero') === 'hero')
-																								<h1 class="mb-5 max-w-4xl text-3xl font-bold sm:text-4xl md:text-5xl">{{ $slide['title'] }}</h1>
-																								@else
-																								<h2 class="mb-5 max-w-4xl text-3xl font-bold sm:text-4xl md:text-5xl">{{ $slide['title'] }}</h2>
-																								@endif
+																								<h1 class="max-w-4xl text-3xl font-bold sm:text-4xl md:text-5xl">{{ $slide['title'] }}</h1>
 																				@endif
 																				@if (!empty($slide['description']))
-																								<p class="mb-6 max-w-2xl text-base leading-relaxed sm:text-lg">{{ $slide['description'] }}</p>
+																								<p class="max-w-2xl text-base leading-relaxed sm:text-lg">{{ $slide['description'] }}</p>
 																				@endif
-																				@if (!empty($slide['ends_at']))
-																								<p class="mb-6 text-sm font-semibold text-white/90">Ends {{ \Illuminate\Support\Carbon::parse($slide['ends_at'])->format('j M Y') }}</p>
-																				@endif
-																				@if (!empty($slide['button_text']))
-																								<a href="{{ $slide['button_url'] ?: '#inquiry-form' }}"
-																								class="rounded-lg bg-green-600 px-6 py-3 font-semibold text-white shadow transition hover:bg-green-700">{{ $slide['button_text'] }}</a>
+
+																				{{-- Slide 0 only: the "Partners" start card beside the CTA. --}}
+																				@if ($index === 0)
+																								<div class="mt-2 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+																												@if ($heroStat && ($heroStat['label'] ?? '') !== '')
+																																<div class="reveal"
+																																x-data="{
+																																				target: {{ (int) ($heroStat['value'] ?? 0) }},
+																																				suffix: @js($heroStat['suffix'] ?? ''),
+																																				display: 0,
+																																				init() {
+																																								this.display = this.target;
+																																								if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
+																																								this.display = 0;
+																																								const obs = new IntersectionObserver((entries) => {
+																																								entries.forEach((e) => { if (e.isIntersecting) { obs.disconnect(); this.run(); } });
+																																								}, { threshold: 0.4 });
+																																								obs.observe(this.$el);
+																																				},
+																																				run() {
+																																								const start = performance.now();
+																																								const duration = 1300;
+																																								const tick = (now) => {
+																																								const p = Math.min(1, (now - start) / duration);
+																																								const eased = 1 - Math.pow(1 - p, 3);
+																																								this.display = Math.round(this.target * eased);
+																																								if (p < 1) requestAnimationFrame(tick); else this.display = this.target;
+																																								};
+																																								requestAnimationFrame(tick);
+																																				}
+																																}"
+																																class="flex min-w-[15rem] items-center gap-4 rounded-xl border border-white/20 bg-white/10 p-5 text-left shadow-sm backdrop-blur"
+																																>
+																																<span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white/15 text-white">
+																																<i class="fas {{ $heroStat['icon'] }} text-xl" aria-hidden="true"></i>
+																																</span>
+																																<div>
+																																<p class="text-3xl font-bold tabular-nums">
+																																<span x-text="display.toLocaleString() + suffix">{{ number_format($heroStat['value'] ?? 0) }}{{ $heroStat['suffix'] ?? '' }}</span>
+																																</p>
+																																<p class="mt-0.5 text-sm font-medium text-white/80">{{ $heroStat['label'] }}</p>
+																																</div>
+																																</div>
+																												@endif
+																												<a href="{{ $heroCta['url'] }}"
+																												class="inline-flex items-center justify-center rounded-lg bg-green-600 px-6 py-3 font-semibold text-white shadow transition hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-transparent">
+																																{{ $heroCta['text'] }}
+																												</a>
+																								</div>
+																				@else
+																								<a href="{{ $heroCta['url'] }}"
+																								class="inline-flex items-center justify-center rounded-lg bg-green-600 px-6 py-3 font-semibold text-white shadow transition hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-white">
+																																{{ $heroCta['text'] }}
+																								</a>
 																				@endif
 																</div>
 												</div>
@@ -160,66 +206,6 @@
 																@endforeach
 												</div>
 								@endif
-				</section>
-				@endif
-
-				{{-- Hero statistics — backend-derived counts with count-up and reveal animation --}}
-				@if ($heroStats->isNotEmpty())
-				<section class="w-full bg-slate-50 px-6 pb-16 pt-12">
-								<div
-												x-data="{
-																items: @js($heroStats->values()),
-																display: [],
-																init() {
-																				this.display = this.items.map((s) => s.value ?? 0);
-																				if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
-																				const obs = new IntersectionObserver((entries) => {
-																								entries.forEach((e) => {
-																												if (e.isIntersecting) { obs.disconnect(); this.run(); }
-																								});
-																				}, { threshold: 0.3 });
-																				obs.observe(this.$el);
-																},
-																run() {
-																				const start = performance.now();
-																				const duration = 1300;
-																				const tick = (now) => {
-																								const p = Math.min(1, (now - start) / duration);
-																								const eased = 1 - Math.pow(1 - p, 3);
-																								this.display = this.items.map((s) => Math.round((s.value ?? 0) * eased));
-																								if (p < 1) requestAnimationFrame(tick);
-																								else this.display = this.items.map((s) => s.value ?? 0);
-																				};
-																				requestAnimationFrame(tick);
-																},
-																format(i) {
-																				const item = this.items[i];
-																				if (item.value === null) return item.raw;
-																				return Number(this.display[i] ?? item.value).toLocaleString() + (item.suffix || '');
-																}
-												}"
-												class="mx-auto max-w-5xl"
-								>
-												<div class="reveal grid grid-cols-1 gap-4 sm:grid-cols-3">
-																@foreach ($heroStats as $index => $stat)
-																				<div class="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-																								<span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-50 text-green-700">
-																								<i class="fas {{ $stat['icon'] }} text-xl" aria-hidden="true"></i>
-																								</span>
-																								<div>
-																								<p class="text-3xl font-bold tabular-nums text-slate-900">
-																								@if ($stat['value'] !== null)
-																								<span x-text="format({{ $index }})">{{ number_format($stat['value']) }}{{ $stat['suffix'] }}</span>
-																								@else
-																								<span>{{ $stat['raw'] }}</span>
-																								@endif
-																								</p>
-																								<p class="mt-0.5 text-sm font-medium text-slate-600">{{ $stat['label'] }}</p>
-																								</div>
-																				</div>
-																@endforeach
-												</div>
-								</div>
 				</section>
 				@endif
 
@@ -263,7 +249,7 @@
 																				<div class="bg-gray-50 rounded-lg shadow p-6 hover:shadow-lg transition">
 																								<i class="fas fa-users text-green-600 text-3xl mb-4"></i>
 																								<h3 class="text-xl font-semibold text-gray-800 mb-2">Community Reach</h3>
-																								<p class="text-gray-600">NCC’s initiatives span 28 districts, connecting your brand with thousands
+																								<p class="text-gray-600">NCC's initiatives span 28 districts, connecting your brand with thousands
 																												of families and local leaders.</p>
 																				</div>
 																				<div class="bg-gray-50 rounded-lg shadow p-6 hover:shadow-lg transition">
@@ -286,7 +272,7 @@
 								<div class="max-w-6xl mx-auto text-center">
 												<h2 class="text-3xl md:text-4xl font-bold text-green-700 mb-6">Sponsorship Opportunities</h2>
 												<p class="text-gray-700 max-w-3xl mx-auto mb-12">
-																Choose from a range of advertising formats designed to maximize your brand’s visibility while supporting
+																Choose from a range of advertising formats designed to maximize your brand's visibility while supporting
 																child protection initiatives.
 												</p>
 												<div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
@@ -470,6 +456,7 @@
                             <input type="text" id="budget" name="budget" x-model="budget" placeholder="e.g. MWK 500,000"
                                 class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" :class="errors.budget ? 'border-red-400' : ''">
                             <template x-if="errors.budget"><p class="mt-1 text-sm text-red-600" x-text="errors.budget[0]"></p></template>
+                            @error('budget')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
                         <div>
                             <label for="artwork" class="block text-sm font-semibold text-slate-800">Upload Proposed Ad Artwork</label>
@@ -502,12 +489,14 @@
                                     <input type="email" id="contact_email" name="contact_email" x-model="contact_email" required
                                         class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" :class="errors.contact_email ? 'border-red-400' : ''">
                                     <template x-if="errors.contact_email"><p class="mt-1 text-sm text-red-600" x-text="errors.contact_email[0]"></p></template>
+                                    @error('contact_email')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                                 </div>
                                 <div>
                                     <label for="contact_phone" class="block text-sm font-semibold text-slate-800">Phone Number</label>
                                     <input type="tel" id="contact_phone" name="contact_phone" x-model="contact_phone" placeholder="+265 ..." required
                                         class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" :class="errors.contact_phone ? 'border-red-400' : ''">
                                     <template x-if="errors.contact_phone"><p class="mt-1 text-sm text-red-600" x-text="errors.contact_phone[0]"></p></template>
+                                    @error('contact_phone')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                                 </div>
                             </div>
                             <div>
@@ -526,11 +515,12 @@
                                     <option>WhatsApp</option>
                                 </select>
                                 <template x-if="errors.preferred_contact"><p class="mt-1 text-sm text-red-600" x-text="errors.preferred_contact[0]"></p></template>
+                                @error('preferred_contact')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                             </div>
                             <div class="flex items-center gap-2">
                                 <input type="checkbox" id="agreement" name="agreement" x-model="agreement" value="1" required
                                     class="h-5 w-5 rounded border-slate-300 text-green-600 focus:ring-green-600">
-                                <label for="agreement" class="text-sm text-slate-700">I confirm my campaign complies with NCC’s safeguarding guidelines.</label>
+                                <label for="agreement" class="text-sm text-slate-700">I confirm my campaign complies with NCC's safeguarding guidelines.</label>
                             </div>
                             <template x-if="errors.agreement"><p class="text-sm text-red-600" x-text="errors.agreement[0]"></p></template>
                             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

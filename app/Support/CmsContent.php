@@ -140,27 +140,28 @@ class CmsContent
     }
 
     /**
-     * Selection rule for the /advertise hero carousel: adverts flagged
-     * is_featured take the first slots (most recent first), then any remaining
-     * slots are filled with the most recent non-featured adverts. Expired and
-     * unpublished adverts are never eligible.
+     * Selection rule for the /advertise hero carousel: only adverts an admin
+     * explicitly flagged is_featured are eligible. Nothing is filled in
+     * automatically, so an advert stays out of the hero until it is chosen.
+     * The most recently published selection fills the available slots.
+     * Expired and unpublished adverts are never eligible.
      */
     public function heroSponsoredAds(int $limit = 3): Collection
     {
         return $this->liveSponsoredAdsQuery()
             ->get()
-            ->sort(function (SiteContent $a, SiteContent $b) {
-                $featured = (int) (bool) data_get($b->data, 'is_featured')
-                    <=> (int) (bool) data_get($a->data, 'is_featured');
-
-                if ($featured !== 0) {
-                    return $featured;
-                }
-
-                return $this->recencyTimestamp($b) <=> $this->recencyTimestamp($a);
-            })
+            ->filter(fn (SiteContent $ad) => $this->isHeroAdvert($ad))
+            ->sort(fn (SiteContent $a, SiteContent $b) => $this->recencyTimestamp($b) <=> $this->recencyTimestamp($a))
             ->take($limit)
             ->values();
+    }
+
+    /**
+     * Whether an admin explicitly opted this advert into the hero carousel.
+     */
+    public function isHeroAdvert(SiteContent $ad): bool
+    {
+        return data_get($ad->data, 'is_featured') === true;
     }
 
     /**
