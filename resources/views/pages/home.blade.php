@@ -3,104 +3,137 @@
 @section("title", "Home")
 
 @section("content")
-				<style>
-								@keyframes heroFade1 {
-
-												0%,
-												25% {
-																opacity: 1;
-												}
-
-												33%,
-												91% {
-																opacity: 0;
-												}
-
-												100% {
-																opacity: 1;
-												}
-								}
-
-								@keyframes heroFade2 {
-
-												0%,
-												33% {
-																opacity: 0;
-												}
-
-												36%,
-												64% {
-																opacity: 1;
-												}
-
-												71%,
-												100% {
-																opacity: 0;
-												}
-								}
-
-								@keyframes heroFade3 {
-
-												0%,
-												71% {
-																opacity: 0;
-												}
-
-												75%,
-												94% {
-																opacity: 1;
-												}
-
-												100% {
-																opacity: 0;
-												}
-								}
-
-								.hero-slide {
-												position: absolute;
-												inset: 0;
-												background-size: cover;
-												background-position: center;
-												animation-duration: 9s;
-												animation-iteration-count: infinite;
-												animation-timing-function: ease-in-out;
-								}
-
-								.hero-slide-1 {
-												animation-name: heroFade1;
-								}
-
-								.hero-slide-2 {
-												animation-name: heroFade2;
-								}
-
-								.hero-slide-3 {
-												animation-name: heroFade3;
-								}
-				</style>
+				@php
+								$heroSlides = collect([
+												[
+																"type" => "hero",
+																"image" => $heroImage ?: asset("images/NCChero.jpg"),
+																"fallback" => asset("images/NCChero.jpg"),
+																"alt" => $hero?->title,
+																"eyebrow" => $hero?->subtitle,
+																"title" => $hero?->title ?: "Our Children, Our Responsibility",
+																"description" => $hero?->description,
+																"button_url" => $hero?->button_url ?: route("reporting"),
+																"button_text" => $hero?->button_text ?: "Report a Case Now",
+												],
+												[
+																"type" => "slide",
+																"image" => asset("images/nccNews1.jpg"),
+																"fallback" => asset("images/nccNews1.jpg"),
+																"alt" => "NCC News",
+																"eyebrow" => null,
+																"title" => "Our Children, Our Responsibility",
+																"description" => "Safeguarding children’s rights and dignity.",
+																"button_url" => route("reporting"),
+																"button_text" => "Report a Case Now",
+												],
+												[
+																"type" => "slide",
+																"image" => asset("images/nccCeleb.jpg"),
+																"fallback" => asset("images/nccCeleb.jpg"),
+																"alt" => "NCC Celebrations",
+																"eyebrow" => null,
+																"title" => "Our Children, Our Responsibility",
+																"description" => "Safeguarding children’s rights and dignity.",
+																"button_url" => route("reporting"),
+																"button_text" => "Report a Case Now",
+												],
+								]);
+				@endphp
 				<!-- Hero Section -->
-				<section class="relative h-[70vh] flex items-center justify-center text-center text-white overflow-hidden">
-								<div class="hero-slide hero-slide-1" style="background-image: url('{{ $heroImage }}');"></div>
-								<div class="hero-slide hero-slide-2" style="background-image: url('{{ asset("images/nccNews1.jpg") }}');"></div>
-								<div class="hero-slide hero-slide-3" style="background-image: url('{{ asset("images/nccCeleb.jpg") }}');"></div>
-								<div class="bg-black/50 absolute inset-0 z-10"></div>
-								<div class="relative z-20 px-4">
-												<h1 class="text-3xl md:text-5xl font-bold animate-bounce">{{ $hero?->title ?: "Our Children, Our Responsibility" }}</h1>
-												<p class="mt-4 text-lg md:text-xl">{{ $hero?->subtitle ?: "Safeguarding children’s rights and dignity." }}</p>
-												@if ($hero?->description)
-																<p class="mx-auto mt-3 max-w-3xl text-sm md:text-base">{{ $hero->description }}</p>
-												@endif
-												<div class="mt-6 flex flex-col md:flex-row gap-4 justify-center">
-																<a href="{{ $hero?->button_url ?: route("reporting") }}"
-																				class="bg-urgent-600 hover:bg-urgent-700 text-white px-4 py-2 rounded-lg font-semibold text-sm">
-																				{{ $hero?->button_text ?: "Report a Case Now" }}
-																</a>
-																<a href="{{ route("what-we-do") }}" class="border border-white px-4 py-2 rounded-lg font-semibold text-sm">
-																				Work With Us
-																</a>
+				@if ($heroSlides->isNotEmpty())
+				<section
+								x-data="{
+												active: 0,
+												total: {{ $heroSlides->count() }},
+												paused: false,
+												timer: null,
+												reduced: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+												init() {
+																if (!this.reduced) this.start();
+												},
+												start() {
+																if (this.total < 2 || this.reduced) return;
+																this.stop();
+																this.timer = setInterval(() => { if (!this.paused) this.next(); }, 6000);
+												},
+												stop() {
+																if (this.timer) { clearInterval(this.timer); this.timer = null; }
+												},
+												next() { this.active = (this.active + 1) % this.total; },
+												prev() { this.active = (this.active - 1 + this.total) % this.total; }
+								}"
+								@mouseenter="paused = true" @mouseleave="paused = false"
+								@focusin="paused = true" @focusout="paused = false"
+								class="relative h-[70vh] w-full overflow-hidden bg-slate-900"
+								role="region" aria-roledescription="carousel" aria-label="National Children's Commission"
+				>
+								@foreach ($heroSlides as $index => $slide)
+												<div
+																class="absolute inset-0 transition-opacity duration-700 ease-out motion-reduce:transition-none"
+																:class="active === {{ $index }} ? 'opacity-100 z-10' : 'opacity-0 z-0'"
+																:style="reduced ? 'transition-duration: 0ms' : ''"
+																:aria-hidden="active === {{ $index }} ? 'false' : 'true'"
+																role="group" aria-roledescription="slide"
+																aria-label="{{ $index + 1 }} of {{ $heroSlides->count() }}"
+												>
+																<img src="{{ $slide['image'] }}" alt="{{ $slide['alt'] ?? '' }}"
+																				class="absolute inset-0 h-full w-full object-cover"
+																				loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
+																				onerror="this.onerror=null; this.src='{{ $slide['fallback'] }}'">
+																<div class="absolute inset-0 bg-black/50"></div>
+
+																<div class="relative z-10 flex h-full items-center justify-center px-4 text-center text-white">
+																				<div>
+																								@if (!empty($slide['eyebrow']))
+																												<p class="text-xs font-bold uppercase tracking-[0.2em] text-yellow-400 sm:text-sm mb-2">{{ $slide['eyebrow'] }}</p>
+																								@endif
+																								@if (!empty($slide['title']))
+																												<h1 class="text-3xl md:text-5xl font-bold">{{ $slide['title'] }}</h1>
+																								@endif
+																								@if (!empty($slide['description']))
+																												<p class="mt-4 text-lg md:text-xl">{{ $slide['description'] }}</p>
+																								@endif
+																								<div class="mt-6 flex flex-col md:flex-row gap-4 justify-center">
+																												<a href="{{ $slide['button_url'] }}"
+																																class="bg-urgent-600 hover:bg-urgent-700 text-white px-4 py-2 rounded-lg font-semibold text-sm">
+																																{{ $slide['button_text'] }}
+																												</a>
+																												<a href="{{ route("what-we-do") }}" class="border border-white px-4 py-2 rounded-lg font-semibold text-sm">
+																																Work With Us
+																												</a>
+																								</div>
+																				</div>
+																</div>
 												</div>
-								</div>
+								@endforeach
+
+								@if ($heroSlides->count() > 1)
+												<button type="button" @click="prev()" aria-label="Previous slide"
+																class="absolute left-4 top-1/2 z-30 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white transition hover:bg-black/60 focus:outline-none focus:ring-2 focus:ring-white">
+																<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+																				<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+																</svg>
+												</button>
+												<button type="button" @click="next()" aria-label="Next slide"
+																class="absolute right-4 top-1/2 z-30 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white transition hover:bg-black/60 focus:outline-none focus:ring-2 focus:ring-white">
+																<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+																				<path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+																</svg>
+												</button>
+
+												<div class="absolute bottom-6 left-1/2 z-30 flex -translate-x-1/2 gap-2">
+																@foreach ($heroSlides as $index => $slide)
+																				<button type="button" @click="active = {{ $index }}"
+																				:aria-current="active === {{ $index }} ? 'true' : 'false'"
+																				aria-label="Go to slide {{ $index + 1 }}"
+																				:class="active === {{ $index }} ? 'w-8 bg-white' : 'w-3 bg-white/50 hover:bg-white/80'"
+																				class="h-3 rounded-full transition-all duration-300 focus:outline-none"></button>
+																@endforeach
+												</div>
+								@endif
 				</section>
+				@endif
 
 				<!-- Mission & Impact Section -->
 				<section class="py-16 px-6 md:px-12 bg-white">
