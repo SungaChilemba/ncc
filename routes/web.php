@@ -5,6 +5,8 @@ use App\Http\Controllers\Admin\ContentController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EnquiryController;
 use App\Http\Controllers\Admin\MediaController;
+use App\Http\Controllers\Admin\NewsletterController as AdminNewsletterController;
+use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\PageController;
 use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Support\Facades\Route;
@@ -14,18 +16,19 @@ Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/what-we-do', [PageController::class, 'whatWeDo'])->name('what-we-do');
 Route::get('/childrens-corner', [PageController::class, 'childrensCorner'])->name('childrens-corner');
 Route::get('/reporting', [PageController::class, 'reporting'])->name('reporting');
-Route::post('/reporting', [PageController::class, 'storeReport'])->name('reporting.store');
-Route::post('/reporting/evidence', [PageController::class, 'storeEvidence'])->name('reporting.evidence.store');
+Route::post('/reporting', [PageController::class, 'storeReport'])->middleware('throttle:10,1')->name('reporting.store');
+Route::post('/reporting/evidence', [PageController::class, 'storeEvidence'])->middleware('throttle:10,1')->name('reporting.evidence.store');
 Route::get('/resources', [PageController::class, 'resources'])->name('resources');
 Route::get('/resources/{slug}/download', [PageController::class, 'downloadResource'])->name('resources.download');
 Route::get('/resources/{slug}', [PageController::class, 'resourceDetail'])->name('resources.show');
 Route::get('/donate', [PageController::class, 'donate'])->name('donate');
 Route::get('/advertise', [PageController::class, 'advertise'])->name('advertise');
-Route::post('/advertise/inquire', [PageController::class, 'storeAdvertiseInquiry'])->name('advertise.inquire');
+Route::post('/advertise/inquire', [PageController::class, 'storeAdvertiseInquiry'])->middleware('throttle:10,1')->name('advertise.inquire');
 Route::get('/latest-news', [PageController::class, 'latestNews'])->name('latest-news');
-Route::get('/news', function () { return redirect()->route('latest-news', [], 301); })->name('news');
+Route::redirect('/news', '/latest-news', 301)->name('news');
 Route::get('/news/{slug}', [PageController::class, 'newsArticle'])->name('news.show');
 Route::get('/checkout', [PageController::class, 'checkout'])->name('checkout');
+Route::post('/newsletter', [NewsletterController::class, 'store'])->middleware('throttle:10,1')->name('newsletter.store');
 
 
 Route::get('/admin/login', [AuthController::class, 'showLoginForm'])->name('admin.login');
@@ -54,4 +57,8 @@ Route::middleware([AdminMiddleware::class])->prefix('admin')->name('admin.')->gr
     Route::post('/media', [MediaController::class, 'store'])->name('media.store');
     Route::put('/media/{asset}', [MediaController::class, 'update'])->name('media.update');
     Route::delete('/media/{asset}', [MediaController::class, 'destroy'])->name('media.destroy');
+
+    Route::get('/newsletter', [AdminNewsletterController::class, 'index'])->name('newsletter.index');
+    Route::get('/newsletter/export', [AdminNewsletterController::class, 'export'])->name('newsletter.export');
+    Route::delete('/newsletter/{subscriber}', [AdminNewsletterController::class, 'destroy'])->name('newsletter.destroy');
 });

@@ -201,12 +201,24 @@
 																<!-- Logo & Newsletter -->
 																<div class="flex flex-col md:flex-row items-center gap-6">
 																				<img src="{{ asset("images/ncc-logo.png") }}" alt="NCC Logo" class="h-16 w-auto">
-																				<form class="flex gap-2">
-																								<input type="email" placeholder="Enter your email to subscribe"
+																				<form method="POST" action="{{ route("newsletter.store") }}" class="flex flex-col gap-2 sm:flex-row">
+																												@csrf
+																												<label for="newsletter-email" class="sr-only">Email address</label>
+																								<input type="email" name="email" value="{{ old("email") }}" required autocomplete="email" placeholder="Enter your email to subscribe"
 																												class="border border-brand-300 placeholder:text-brand-700 text-black rounded px-3 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-brand-500">
 																								<button type="submit"
 																												class="bg-brand-700 text-white px-4 py-2 rounded hover:bg-brand-800">Subscribe</button>
+																				<div class="hidden" aria-hidden="true">
+																								<label for="newsletter-website">Website</label>
+																								<input id="newsletter-website" type="text" name="website" tabindex="-1" autocomplete="off">
+																				</div>
 																				</form>
+																				@error("email")
+																								<p class="mt-2 text-sm font-semibold text-red-700">{{ $message }}</p>
+																				@enderror
+																				@if (session("newsletter_status"))
+																								<p class="mt-2 text-sm font-semibold text-green-800" role="status">{{ session("newsletter_status") }}</p>
+																				@endif
 																</div>
 
 																<!-- Helpline & Social -->

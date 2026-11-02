@@ -256,6 +256,16 @@
             </div>
         </div>
     </section>
+
+    @php
+        // Reporting instructions are rendered in the sidebar above; show any
+        // other published CMS cards rather than dropping them.
+        $remainingCards = ($cmsCards ?? collect())
+            ->reject(fn ($card) => $workflowCards->contains("id", $card->id))
+            ->values();
+    @endphp
+
+    @include("partials.cms-public-blocks", ["cmsCards" => $remainingCards])
 @endsection
 
 @push("scripts")

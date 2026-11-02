@@ -23,11 +23,13 @@ class MediaController extends Controller
             ->when($request->filled('q'), function ($query) use ($request) {
                 $term = '%' . $request->string('q')->toString() . '%';
 
-                $query->where('original_name', 'like', $term)
-                    ->orWhere('alt_text', 'like', $term)
-                    ->orWhere('caption', 'like', $term)
-                    ->orWhere('description', 'like', $term)
-                    ->orWhere('path', 'like', $term);
+                $query->where(function ($query) use ($term) {
+                    $query->where('original_name', 'like', $term)
+                        ->orWhere('alt_text', 'like', $term)
+                        ->orWhere('caption', 'like', $term)
+                        ->orWhere('description', 'like', $term)
+                        ->orWhere('path', 'like', $term);
+                });
             })
             ->latest()
             ->paginate(24)

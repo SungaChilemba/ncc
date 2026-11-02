@@ -376,6 +376,22 @@
         </section>
     @endif
 
+    @php
+        // Cards already rendered by the bespoke sections above. Anything left
+        // over is still published CMS content and must not be silently dropped.
+        $claimedCardIds = collect($storyTabs)
+            ->pluck("item")
+            ->filter()
+            ->pluck("id")
+            ->merge($commissioners->pluck("id"))
+            ->merge($leadership->pluck("id"))
+            ->merge($exOfficials->pluck("id"));
+
+        $remainingCards = $cards->reject(fn ($card) => $claimedCardIds->contains($card->id))->values();
+    @endphp
+
+    @include("partials.cms-public-blocks", ["cmsCards" => $remainingCards])
+
     <section class="px-4 py-12 sm:px-6 lg:px-8">
         <div class="mx-auto flex max-w-7xl flex-col justify-center gap-4 md:flex-row">
             <a href="{{ route("childrens-corner") }}" class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-6 py-3 text-center font-bold uppercase text-gray-800 transition hover:border-green-700 hover:text-green-700">

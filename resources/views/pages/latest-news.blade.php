@@ -37,7 +37,7 @@
         return ['value' => Str::slug($c), 'label' => strtoupper($c)];
     })->values();
 
-    $firstCategory = $categoriesForAlpine->first()['value'] ?? '';
+    $firstCategory = data_get($categoriesForAlpine->first(), 'value', '');
 
     $newsItemsForAlpine = $articles->map(function ($a) {
         return [

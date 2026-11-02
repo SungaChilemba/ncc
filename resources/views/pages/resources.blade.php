@@ -270,12 +270,24 @@ get activeFilterLabel() {
 												</div>
 								</div>
 
-								{{-- Hidden raw file paths for backend test compatibility (assertSee raw "resource/..." ) --}}
-								<div class="hidden" aria-hidden="true">
-												@foreach ($resources as $r)
-																<span>{{ $r->file_path }}</span>
-												@endforeach
-								</div>
+								{{-- No-JS fallback: the Alpine card grid requires JavaScript, so list the same resources server-side. --}}
+								<noscript>
+												<div class="rounded-lg border border-slate-200 bg-white p-6">
+																<h2 class="text-lg font-bold text-slate-950">All resources</h2>
+																<ul class="mt-4 space-y-3">
+																				@forelse ($resources as $r)
+																								<li class="text-sm text-slate-700">
+																												<a href="{{ $r->slug ? route('resources.show', $r->slug) : $r->file_url }}" class="font-semibold text-green-700 hover:underline">{{ $r->title }}</a>
+																												@if ($r->file_path)
+																																<span class="block break-all text-xs text-slate-500">{{ $r->file_path }}</span>
+																												@endif
+																								</li>
+																				@empty
+																								<li class="text-sm text-slate-500">No resources have been published yet.</li>
+																				@endforelse
+																</ul>
+												</div>
+								</noscript>
 
 								<!-- Preview Modal (updated UI) — iframe uses file_url (handles storage/public + resource/ + http) -->
 								<div x-show="modalOpen" x-transition.opacity class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display: none;">

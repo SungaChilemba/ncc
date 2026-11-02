@@ -23,6 +23,7 @@
             <nav class="flex gap-2 overflow-x-auto px-5 pb-4 lg:block lg:space-y-1 lg:overflow-visible">
                 <a href="{{ route('admin.dashboard') }}" class="block rounded-md px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.dashboard') ? 'bg-green-50 text-green-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' }}">Dashboard</a>
                 <a href="{{ route('admin.media.index') }}" class="block rounded-md px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.media.*') ? 'bg-green-50 text-green-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' }}">Media Library</a>
+                <a href="{{ route('admin.newsletter.index') }}" class="block rounded-md px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.newsletter.*') ? 'bg-green-50 text-green-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' }}">Newsletter</a>
                 @foreach (config('cms.sections') as $key => $managedSection)
                     <a href="{{ route('admin.contents.index', ['section' => $key]) }}" class="block whitespace-nowrap rounded-md px-3 py-2 text-sm font-semibold {{ request()->route('section') === $key ? 'bg-green-50 text-green-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' }}">
                         {{ $managedSection['label'] }}

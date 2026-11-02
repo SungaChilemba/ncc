@@ -5,9 +5,22 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    /**
+     * Maximum failed attempts before the login form is temporarily locked.
+     */
+    private const MAX_ATTEMPTS = 5;
+
+    /**
+     * Lockout duration in seconds.
+     */
+    private const DECAY_SECONDS = 60;
+
     public function showLoginForm()
     {
         return view('admin.login');
@@ -20,11 +33,23 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
+        $throttleKey = Str::transliterate(Str::lower($credentials['email']).'|'.$request->ip());
+
+        if (RateLimiter::tooManyAttempts($throttleKey, self::MAX_ATTEMPTS)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+
+            throw ValidationException::withMessages([
+                'email' => "Too many login attempts. Please try again in {$seconds} seconds.",
+            ]);
+        }
+
         if (Auth::attempt($credentials, $request->filled('remember'))) {
+            RateLimiter::clear($throttleKey);
             $request->session()->regenerate();
 
-            if (!Auth::user()->is_admin) {
+            if (! Auth::user()->canManageCms()) {
                 Auth::logout();
+
                 return back()->withErrors([
                     'email' => 'You do not have admin access.',
                 ]);
@@ -32,6 +57,8 @@ class AuthController extends Controller
 
             return redirect()->intended(route('admin.dashboard'));
         }
+
+        RateLimiter::hit($throttleKey, self::DECAY_SECONDS);
 
         return back()->withErrors([
             'email' => 'The provided credentials do not match our records.',
