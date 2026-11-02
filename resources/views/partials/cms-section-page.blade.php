@@ -1,6 +1,9 @@
 @php
     $hero = $cmsHero ?? null;
     $cards = ($cmsCards ?? collect())->groupBy(fn ($item) => $item->category ?: 'Content');
+
+    // The "Thanks to our supporters" group renders directly below the hero section.
+    $cards = $cards->sortBy(fn ($items, $group) => strtolower((string) $group) === 'thanks to our supporters' ? 0 : 1);
     $stats = $cmsContent->get('stat', collect()) ?? collect();
     $ctas = $cmsCtas ?? collect();
 @endphp
@@ -38,12 +41,13 @@
 </section>
 
 @foreach ($cards as $group => $items)
-    <section class="bg-white px-4 py-10 sm:px-6 lg:px-8">
-        <div class="mx-auto max-w-7xl">
-            <div class="mb-6 flex items-center gap-3">
-                <span class="h-1 w-10 rounded-full bg-red-700"></span>
-                <h2 class="text-2xl font-bold text-gray-950">{{ $group }}</h2>
-            </div>
+    @if (! str_contains(strtolower((string) $group), 'faq'))
+        <section class="bg-white px-4 py-10 sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-7xl">
+                <div class="mb-6 flex items-center gap-3">
+                    <span class="h-1 w-10 rounded-full bg-red-700"></span>
+                    <h2 class="text-2xl font-bold text-gray-950">{{ $group }}</h2>
+                </div>
             <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
                 @foreach ($items as $card)
                     <article class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
@@ -85,6 +89,17 @@
             </div>
         </div>
     </section>
+    @endif
+@endforeach
+
+{{-- FAQs render after the other content groups, just before the footer area. --}}
+@foreach ($cards as $group => $items)
+    @if (str_contains(strtolower((string) $group), 'faq'))
+        @include("partials.faq-accordion", [
+            "faqs" => $items,
+            "title" => $group,
+        ])
+    @endif
 @endforeach
 
 @if ($ctas->isNotEmpty())

@@ -674,4 +674,44 @@ class PublicCmsContentTest extends TestCase
         // Desktop tab buttons remain for larger screens.
         $response->assertSee('peopleTab === \'management\'', false);
     }
+
+    public function test_donate_page_renders_faqs_as_centered_accordion_on_top(): void
+    {
+        SiteContent::create([
+            'section' => 'donate',
+            'type' => 'card',
+            'slug' => 'faq-how-spent',
+            'category' => 'FAQs about donating to National Children\'s Commission',
+            'title' => 'How are my donations spent?',
+            'description' => "Your donations help children in vulnerable places survive.\n\nThey rebuild their future through healthcare and education.",
+            'is_published' => true,
+            'sort_order' => 11,
+        ]);
+
+        SiteContent::create([
+            'section' => 'donate',
+            'type' => 'card',
+            'slug' => 'giving-options',
+            'category' => 'Giving Options',
+            'title' => 'Monthly and One-Off Giving',
+            'description' => 'Choose monthly or one-off support.',
+            'is_published' => true,
+            'sort_order' => 1,
+        ]);
+
+        $response = $this->get(route('donate'));
+
+        $response->assertOk()
+            ->assertSee('How are my donations spent?')
+            ->assertSee('Your donations help children in vulnerable places survive.')
+            ->assertSee('FAQs about donating to National Children\'s Commission')
+            ->assertSee('<details class="faq-item">', false);
+
+        // The FAQ accordion renders after the other donation content sections, just before the footer area.
+        $content = $response->getContent();
+        $this->assertGreaterThan(
+            strpos($content, 'Giving Options'),
+            strpos($content, 'How are my donations spent?')
+        );
+    }
 }

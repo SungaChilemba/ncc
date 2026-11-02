@@ -88,3 +88,20 @@ section[id] {
 [x-cloak] {
     display: none !important;
 }
+
+/* FAQ accordion: native disclosure markers are hidden and the chevron rotates when open. */
+.faq-item > summary::-webkit-details-marker {
+    display: none;
+}
+
+.faq-item > summary {
+    list-style: none;
+}
+
+.faq-item > summary .faq-chevron {
+    transition: transform 200ms ease;
+}
+
+.faq-item[open] > summary .faq-chevron {
+    transform: rotate(180deg);
+}
