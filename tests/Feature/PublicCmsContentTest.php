@@ -714,4 +714,25 @@ class PublicCmsContentTest extends TestCase
             strpos($content, 'How are my donations spent?')
         );
     }
+
+    public function test_donate_page_renders_watch_story_video_preview(): void
+    {
+        SiteContent::create([
+            'section' => 'donate',
+            'type' => 'card',
+            'slug' => 'watch-our-story',
+            'category' => 'Watch Our Story',
+            'title' => 'Watch Our Story',
+            'description' => 'https://www.youtube.com/embed/WMNEL8-INig',
+            'is_published' => true,
+            'sort_order' => 10,
+        ]);
+
+        $response = $this->get(route('donate'));
+
+        $response->assertOk()
+            ->assertSee('Watch Our Story')
+            ->assertSee('<iframe', false)
+            ->assertSee('https://www.youtube.com/embed/WMNEL8-INig?rel=0', false);
+    }
 }

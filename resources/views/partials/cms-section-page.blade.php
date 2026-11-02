@@ -41,7 +41,35 @@
 </section>
 
 @foreach ($cards as $group => $items)
+    @php
+        $watchStoryCard = $items->first();
+        $watchSource = $watchStoryCard?->data['youtube_url'] ?? $watchStoryCard?->data['video_url'] ?? $watchStoryCard?->description;
+        $watchId = '';
+        if ($watchSource) {
+            if (preg_match('/[?&]v=([\w-]{6,})/', (string) $watchSource, $watchMatch)) {
+                $watchId = $watchMatch[1];
+            } elseif (preg_match('/\/(?:embed|shorts|live)\/([\w-]{6,})/', (string) $watchSource, $watchMatch)) {
+                $watchId = $watchMatch[1];
+            }
+        }
+        $watchEmbedUrl = $watchId ? 'https://www.youtube.com/embed/'.$watchId : null;
+    @endphp
     @if (! str_contains(strtolower((string) $group), 'faq'))
+        @if (strtolower((string) $group) === 'watch our story')
+            <section class="bg-white px-4 py-12 sm:px-6 lg:px-8">
+                <div class="mx-auto max-w-3xl">
+                    <div class="mb-8 text-center">
+                        <span class="mx-auto block h-1 w-10 rounded-full bg-red-700"></span>
+                        <h2 class="mt-4 text-2xl font-bold text-gray-950">{{ $group }}</h2>
+                    </div>
+                    @if ($watchEmbedUrl)
+                        <div class="relative mx-auto aspect-video w-full max-w-2xl overflow-hidden rounded-lg shadow-sm">
+                            <iframe class="absolute inset-0 h-full w-full" src="{{ $watchEmbedUrl }}?rel=0" title="{{ $group }}" frameborder="0" allowfullscreen loading="lazy"></iframe>
+                        </div>
+                    @endif
+                </div>
+            </section>
+        @else
         <section class="bg-white px-4 py-10 sm:px-6 lg:px-8">
             <div class="mx-auto max-w-7xl">
                 <div class="mb-6 flex items-center gap-3">
@@ -89,6 +117,7 @@
             </div>
         </div>
     </section>
+        @endif
     @endif
 @endforeach
 
