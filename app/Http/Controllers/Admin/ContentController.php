@@ -66,6 +66,7 @@ class ContentController extends Controller
             'published_on' => ['nullable', 'date'],
             'description' => ['nullable', 'string'],
             'data_json' => ['nullable', 'json'],
+            'hero_featured' => ['nullable', 'boolean'],
             'alt_text' => ['nullable', 'string', 'max:255'],
             'media_asset_id' => ['nullable', 'integer', 'exists:media_assets,id'],
             'image' => ['nullable', File::image()->types(['jpg', 'jpeg', 'png', 'webp'])->max('3mb')],
@@ -161,6 +162,7 @@ class ContentController extends Controller
             'published_on' => ['nullable', 'date'],
             'description' => ['nullable', 'string'],
             'data_json' => ['nullable', 'json'],
+            'hero_featured' => ['nullable', 'boolean'],
             'alt_text' => ['nullable', 'string', 'max:255'],
             'media_asset_id' => ['nullable', 'integer', 'exists:media_assets,id'],
             'image' => ['nullable', File::image()->types(['jpg', 'jpeg', 'png', 'webp'])->max('3mb')],
@@ -562,6 +564,14 @@ class ContentController extends Controller
         } elseif (! empty($data['slug'])) {
             $data['slug'] = Str::slug($data['slug']);
         }
+
+        if (($data['section'] ?? null) === 'advertise') {
+            $existingData = is_array($data['data'] ?? null) ? $data['data'] : [];
+            $existingData['is_featured'] = filter_var($data['hero_featured'] ?? false, FILTER_VALIDATE_BOOLEAN);
+            $data['data'] = $existingData;
+        }
+
+        unset($data['hero_featured']);
 
         return $data;
     }

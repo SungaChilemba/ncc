@@ -147,6 +147,16 @@
                         <p class="text-xs text-slate-500">Used by commissioner cards when the category is Commissioners.</p>
                     </div>
 
+@if ($section === 'advertise')
+                    <div class="space-y-2 rounded-md border border-slate-200 bg-slate-50 p-3">
+                        <label class="inline-flex items-center gap-2 text-sm font-semibold text-slate-700">
+                            <input type="checkbox" name="hero_featured" value="1" @checked(old('hero_featured', $editingItem?->data['is_featured'] ?? false)) class="rounded border-slate-300 text-green-600 focus:ring-green-600">
+                            Feature this advert on the /advertise hero carousel
+                        </label>
+                        <p class="text-xs text-slate-500">Only flagged adverts appear in the hero. Expired and unpublished adverts are never shown.</p>
+                    </div>
+@endif
+
                     <details class="rounded-md border border-slate-200 bg-slate-50 p-3">
                         <summary class="cursor-pointer text-sm font-semibold text-slate-700">Advanced JSON</summary>
                         <textarea id="data_json" name="data_json" rows="8" placeholder='{"items":[{"label":"Example","value":"100"}]}' class="mt-3 w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-xs leading-5 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100">{{ old('data_json', $editingItem?->data ? json_encode($editingItem->data, JSON_PRETTY_PRINT) : '') }}</textarea>
