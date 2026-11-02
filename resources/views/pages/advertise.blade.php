@@ -184,25 +184,25 @@
 
 								@if ($heroSlides->count() > 1)
 												<button type="button" @click="prev()" aria-label="Previous slide"
-																class="absolute left-4 top-1/2 z-30 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white transition hover:bg-black/60 focus:outline-none focus:ring-2 focus:ring-white">
+																class="absolute left-4 top-1/2 z-50 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/80 focus:outline-none focus:ring-2 focus:ring-white">
 																<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 																				<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
 																</svg>
 												</button>
 												<button type="button" @click="next()" aria-label="Next slide"
-																class="absolute right-4 top-1/2 z-30 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white transition hover:bg-black/60 focus:outline-none focus:ring-2 focus:ring-white">
+																class="absolute right-4 top-1/2 z-50 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/80 focus:outline-none focus:ring-2 focus:ring-white">
 																<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 																				<path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
 																</svg>
 												</button>
 
-												<div class="absolute bottom-6 left-1/2 z-30 flex -translate-x-1/2 gap-2">
+												<div class="absolute bottom-6 left-1/2 z-50 flex -translate-x-1/2 gap-2">
 																@foreach ($heroSlides as $index => $slide)
 																				<button type="button" @click="active = {{ $index }}"
 																:aria-current="active === {{ $index }} ? 'true' : 'false'"
 																aria-label="Go to slide {{ $index + 1 }}"
-																:class="active === {{ $index }} ? 'w-8 bg-white' : 'w-3 bg-white/50 hover:bg-white/80'"
-																class="h-3 rounded-full transition-all duration-300 focus:outline-none"></button>
+																:class="active === {{ $index }} ? 'w-8 bg-white' : 'w-3 bg-white/70 hover:bg-white'"
+																class="h-3 rounded-full transition-all duration-300 focus:outline-none shadow"></button>
 																@endforeach
 												</div>
 								@endif
