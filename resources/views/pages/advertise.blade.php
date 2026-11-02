@@ -126,7 +126,7 @@
 
 																				{{-- Slide 0 only: the "Partners" start card beside the CTA. --}}
 																				@if ($index === 0)
-																								<div class="mt-2 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+																								<div class="mt-2 flex flex-col items-center gap-4 sm:flex-col sm:justify-center">
 																												@if ($heroStat && ($heroStat['label'] ?? '') !== '')
 																																<div class="reveal"
 																																x-data="{
