@@ -4,8 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\SiteContent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PublicCmsContentTest extends TestCase
@@ -126,7 +124,7 @@ class PublicCmsContentTest extends TestCase
             'type' => 'news',
             'slug' => 'visible-news-card',
             'title' => 'Visible News Card',
-            'description' => str_repeat('Visible news body excerpt text. ', 16) . 'FULL ARTICLE TAIL SHOULD ONLY SHOW ON DETAIL.',
+            'description' => str_repeat('Visible news body excerpt text. ', 16).'FULL ARTICLE TAIL SHOULD ONLY SHOW ON DETAIL.',
             'category' => 'Child Protection',
             'location' => 'Lilongwe',
             'published_on' => '2026-08-06',
@@ -330,9 +328,9 @@ class PublicCmsContentTest extends TestCase
             SiteContent::create([
                 'section' => $section,
                 'type' => 'hero',
-                'slug' => $section . '-hero',
-                'title' => strtoupper($section) . ' Hero',
-                'description' => 'Hero content for ' . $section,
+                'slug' => $section.'-hero',
+                'title' => strtoupper($section).' Hero',
+                'description' => 'Hero content for '.$section,
                 'is_published' => true,
                 'sort_order' => 0,
             ]);
@@ -340,10 +338,10 @@ class PublicCmsContentTest extends TestCase
             SiteContent::create([
                 'section' => $section,
                 'type' => 'card',
-                'slug' => $section . '-card',
+                'slug' => $section.'-card',
                 'category' => 'CMS Group',
-                'title' => strtoupper($section) . ' Card',
-                'description' => 'Card content for ' . $section,
+                'title' => strtoupper($section).' Card',
+                'description' => 'Card content for '.$section,
                 'is_published' => true,
                 'sort_order' => 1,
             ]);
@@ -353,86 +351,6 @@ class PublicCmsContentTest extends TestCase
         $this->get(route('reporting'))->assertOk()->assertSee('REPORTING Hero')->assertSee('REPORTING Card');
         $this->get(route('donate'))->assertOk()->assertSee('DONATE Hero')->assertSee('DONATE Card');
         $this->get(route('advertise'))->assertOk()->assertSee('ADVERTISE Hero')->assertSee('ADVERTISE Card');
-    }
-
-    public function test_reporting_form_submission_is_stored_as_cms_submission(): void
-    {
-        $response = $this->post(route('reporting.store'), [
-            'child_age' => 12,
-            'child_name' => 'Mock Child',
-            'district' => 'Lilongwe',
-            'village' => 'Area 25',
-            'gender' => 'Female',
-            'violation_type' => 'Neglect',
-            'incident_date' => '2026-08-30',
-            'description' => 'Mock report created during submission testing.',
-            'reporter_name' => 'Mock Reporter',
-            'preferred_contact' => '+265 999 000 000',
-        ]);
-
-        $response
-            ->assertRedirect(route('reporting'))
-            ->assertSessionHas('report_reference');
-
-        $submission = SiteContent::where('section', 'reporting')
-            ->where('type', 'submission')
-            ->where('category', 'Case Submissions')
-            ->first();
-
-        $this->assertNotNull($submission);
-        $this->assertFalse($submission->is_published);
-        $this->assertSame('Neglect', $submission->subtitle);
-        $this->assertSame('Lilongwe', $submission->location);
-        $this->assertSame('Mock report created during submission testing.', $submission->description);
-        $this->assertSame('received', $submission->data['status']);
-        $this->assertSame(12, $submission->data['child_age']);
-        $this->assertSame('Mock Child', $submission->data['child_name']);
-        $this->assertSame('Mock Reporter', $submission->data['reporter_name']);
-    }
-
-    public function test_reporting_evidence_upload_is_attached_to_cms_submission(): void
-    {
-        Storage::fake('public');
-
-        $submission = SiteContent::create([
-            'section' => 'reporting',
-            'type' => 'submission',
-            'slug' => 'ncc-2026-12345',
-            'title' => 'Report NCC-2026-12345',
-            'subtitle' => 'Neglect',
-            'category' => 'Case Submissions',
-            'location' => 'Lilongwe',
-            'description' => 'Existing mock report for evidence upload.',
-            'data' => [
-                'reference_number' => 'NCC-2026-12345',
-                'status' => 'received',
-            ],
-            'is_published' => false,
-            'sort_order' => 0,
-        ]);
-
-        $response = $this->post(route('reporting.evidence.store'), [
-            'reference_number' => 'NCC-2026-12345',
-            'evidence' => [
-                UploadedFile::fake()->create('mock-evidence.pdf', 128, 'application/pdf'),
-            ],
-        ]);
-
-        $response
-            ->assertRedirect(route('reporting'))
-            ->assertSessionHas('evidence_status');
-
-        $submission->refresh();
-
-        $this->assertSame(1, $submission->data['evidence_count']);
-        $this->assertSame('mock-evidence.pdf', $submission->data['evidence'][0]['original_name']);
-        $this->assertSame('application/pdf', $submission->data['evidence'][0]['mime_type']);
-
-        Storage::disk('public')->assertExists($submission->data['evidence'][0]['path']);
-        $this->assertDatabaseHas('media_assets', [
-            'path' => $submission->data['evidence'][0]['path'],
-            'original_name' => 'mock-evidence.pdf',
-        ]);
     }
 
     public function test_childrens_corner_renders_cms_activity_right_gallery_and_news(): void
@@ -628,9 +546,9 @@ class PublicCmsContentTest extends TestCase
             SiteContent::create([
                 'section' => 'news',
                 'type' => 'news',
-                'slug' => 'kids-bulk-story-' . $i,
-                'title' => 'Kids Bulk Story ' . $i,
-                'description' => 'Kids bulk body ' . $i . '.',
+                'slug' => 'kids-bulk-story-'.$i,
+                'title' => 'Kids Bulk Story '.$i,
+                'description' => 'Kids bulk body '.$i.'.',
                 'is_published' => true,
                 'sort_order' => $i,
             ]);
@@ -641,8 +559,8 @@ class PublicCmsContentTest extends TestCase
 
         // All cards are server-rendered (SEO / no-JS friendly); Alpine reveals six at a time.
         foreach (range(1, 8) as $i) {
-            $this->assertStringContainsString('Kids Bulk Story ' . $i, $content);
-            $this->assertStringContainsString(route('news.show', ['slug' => 'kids-bulk-story-' . $i]), $content);
+            $this->assertStringContainsString('Kids Bulk Story '.$i, $content);
+            $this->assertStringContainsString(route('news.show', ['slug' => 'kids-bulk-story-'.$i]), $content);
         }
         $this->assertStringContainsString('newsVisible: 6', $content);
         $this->assertStringContainsString('x-show="0 < newsVisible"', $content);

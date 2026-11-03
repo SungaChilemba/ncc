@@ -5,7 +5,7 @@
 @section("content")
 				@php
 								$suppressCmsBlocks = true;
-								$resourceHero = $cmsHero ?? null;
+								$resourceHero = ($cmsHeroes ?? collect())->first() ?? ($cmsHero ?? null);
 								$resources = ($cmsResources ?? collect())->values();
 								$categories = $resources->pluck("category")->filter()->unique()->values();
 

@@ -15,9 +15,7 @@ use Illuminate\Validation\Rule;
 
 class EnquiryController extends Controller
 {
-    public function __construct(private readonly AdEnquiries $enquiries)
-    {
-    }
+    public function __construct(private readonly AdEnquiries $enquiries) {}
 
     public function review(int $id)
     {
@@ -129,7 +127,7 @@ class EnquiryController extends Controller
 
         return redirect()
             ->route('admin.contents.index', ['section' => 'advertise', 'status' => 'enquiries', 'review' => 'approved'])
-            ->with('status', 'Advert renewed until ' . Carbon::parse($endsAt)->format('j M Y') . '.');
+            ->with('status', 'Advert renewed until '.Carbon::parse($endsAt)->format('j M Y').'.');
     }
 
     private function enquiry(int $id): SiteContent
@@ -146,7 +144,7 @@ class EnquiryController extends Controller
 
     private function storeAd(SiteContent $enquiry, array $validated): SiteContent
     {
-        $reference = data_get($enquiry->data, 'reference_number') ?: ('AD-' . $enquiry->id);
+        $reference = data_get($enquiry->data, 'reference_number') ?: ('AD-'.$enquiry->id);
         $published = ($validated['publish_mode'] ?? 'published') === 'published';
 
         $attributes = [
@@ -200,12 +198,12 @@ class EnquiryController extends Controller
 
     private function uniqueAdSlug(string $title, string $reference): string
     {
-        $base = Str::slug($title . '-' . $reference) ?: Str::slug($reference);
+        $base = Str::slug($title.'-'.$reference) ?: Str::slug($reference);
         $slug = $base;
         $suffix = 2;
 
         while (SiteContent::where('section', 'advertise')->where('slug', $slug)->exists()) {
-            $slug = $base . '-' . $suffix++;
+            $slug = $base.'-'.$suffix++;
         }
 
         return $slug;
@@ -222,6 +220,7 @@ class EnquiryController extends Controller
         foreach ($extra as $key => $value) {
             if (is_null($value)) {
                 unset($data[$key]);
+
                 continue;
             }
 

@@ -5,7 +5,7 @@
 @section("content")
 				@php
 								$suppressCmsBlocks = true;
-								$hero = $cmsHero ?? null;
+								$hero = ($cmsHeroes ?? collect())->first() ?? ($cmsHero ?? null);
 								$allCards = $cmsCards ?? collect();
 								$cardsByCat = $allCards->groupBy(fn($item) => $item->category ?: "Content");
 								$ctas = $cmsCtas ?? collect();

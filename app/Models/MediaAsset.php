@@ -22,14 +22,14 @@ class MediaAsset extends Model
     public function getHumanSizeAttribute(): string
     {
         if ($this->size >= 1048576) {
-            return number_format($this->size / 1048576, 1) . ' MB';
+            return number_format($this->size / 1048576, 1).' MB';
         }
 
         if ($this->size >= 1024) {
-            return number_format($this->size / 1024, 1) . ' KB';
+            return number_format($this->size / 1024, 1).' KB';
         }
 
-        return $this->size . ' B';
+        return $this->size.' B';
     }
 
     public function getUrlAttribute(): string

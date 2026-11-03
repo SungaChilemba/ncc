@@ -53,11 +53,9 @@ class DeploymentReadinessTest extends TestCase
 
     public function test_editor_role_can_log_in_to_the_admin_area(): void
     {
-        $editor = User::factory()->create([
+        $editor = $this->userWithRole('cms_editor', [
             'email' => 'editor@example.com',
             'password' => 'password',
-            'is_admin' => false,
-            'role' => 'editor',
         ]);
 
         $this->post('/admin/login', [
@@ -73,8 +71,6 @@ class DeploymentReadinessTest extends TestCase
         User::factory()->create([
             'email' => 'viewer@example.com',
             'password' => 'password',
-            'is_admin' => false,
-            'role' => 'viewer',
         ]);
 
         $this->post('/admin/login', [

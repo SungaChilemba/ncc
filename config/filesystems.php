@@ -49,6 +49,18 @@ return [
             'report' => false,
         ],
 
+        /*
+        | Case evidence. Private by design: no public symlink and no `serve`
+        | option. Files are streamed through an authorised controller.
+        */
+        'report_evidence' => [
+            'driver' => 'local',
+            'root' => storage_path('app/report-evidence'),
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

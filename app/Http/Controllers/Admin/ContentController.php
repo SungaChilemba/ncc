@@ -18,9 +18,7 @@ use Illuminate\Validation\Rules\File;
 
 class ContentController extends Controller
 {
-    public function __construct(private readonly AdEnquiries $adEnquiries)
-    {
-    }
+    public function __construct(private readonly AdEnquiries $adEnquiries) {}
 
     public function index(Request $request, string $section)
     {
@@ -249,7 +247,7 @@ class ContentController extends Controller
         $this->audit($content, $content->is_published ? 'published' : 'unpublished');
 
         return redirect()->route('admin.contents.index', ['section' => $section])
-            ->with('status', 'Content ' . ($content->is_published ? 'published' : 'unpublished') . ' successfully.');
+            ->with('status', 'Content '.($content->is_published ? 'published' : 'unpublished').' successfully.');
     }
 
     public function destroy(Request $request, string $section, int $id)
@@ -284,7 +282,7 @@ class ContentController extends Controller
         $this->audit($content, 'image_uploaded');
 
         return response()->json([
-            'url' => asset('storage/' . $path),
+            'url' => asset('storage/'.$path),
         ]);
     }
 
@@ -306,6 +304,7 @@ class ContentController extends Controller
                 $this->deleteStoredAsset($content->file_path);
                 $this->audit($content, 'deleted');
                 $content->delete();
+
                 continue;
             }
 
@@ -315,6 +314,7 @@ class ContentController extends Controller
                     'published_at' => null,
                 ]);
                 $this->audit($content, 'publish_blocked');
+
                 continue;
             }
 
@@ -326,7 +326,7 @@ class ContentController extends Controller
         }
 
         return redirect()->route('admin.contents.index', ['section' => $section])
-            ->with('status', $contents->count() . ' content item(s) processed.');
+            ->with('status', $contents->count().' content item(s) processed.');
     }
 
     public function reorder(Request $request, string $section)
@@ -485,7 +485,7 @@ class ContentController extends Controller
 
                 $query->where('is_published', $status === 'published');
             })
-            ->when(!$request->filled('status'), function ($query) {
+            ->when(! $request->filled('status'), function ($query) {
                 // Default "All" view should not show enquiries — only Enquiries tab does
                 $query->where('type', '!=', 'submission');
             })
@@ -502,7 +502,7 @@ class ContentController extends Controller
 
     private function applySearch(Builder $query, string $term): Builder
     {
-        $like = '%' . $term . '%';
+        $like = '%'.$term.'%';
 
         return $query->where(function (Builder $query) use ($like) {
             $query->where('title', 'like', $like)

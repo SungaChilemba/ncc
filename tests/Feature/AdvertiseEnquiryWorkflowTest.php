@@ -6,6 +6,7 @@ use App\Models\SiteContent;
 use App\Models\User;
 use App\Support\CmsContent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class AdvertiseEnquiryWorkflowTest extends TestCase
@@ -333,7 +334,7 @@ class AdvertiseEnquiryWorkflowTest extends TestCase
 
     private function admin(): User
     {
-        return User::factory()->create(['is_admin' => true]);
+        return $this->userWithRole('system_admin');
     }
 
     private function makeEnquiry(array $overrides = []): SiteContent
@@ -379,7 +380,7 @@ class AdvertiseEnquiryWorkflowTest extends TestCase
         return SiteContent::create([
             'section' => 'advertise',
             'type' => 'card',
-            'slug' => \Illuminate\Support\Str::slug($title),
+            'slug' => Str::slug($title),
             'title' => $title,
             'category' => 'Sponsored Ads',
             'data' => $endsAt ? ['ends_at' => $endsAt] : [],

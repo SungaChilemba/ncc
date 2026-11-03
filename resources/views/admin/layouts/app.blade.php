@@ -7,12 +7,30 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-900">
+    @php
+        $adminUser = auth()->user();
+        $showCms = $adminUser?->canManageCms() ?? false;
+        $showCases = $adminUser?->hasCaseAccess() ?? false;
+        $showUsers = $adminUser?->hasAnyPermission('admin.users.view', 'admin.users.manage') ?? false;
+        $showRoles = $adminUser?->hasPermission('admin.roles.manage') ?? false;
+        $showAudit = $adminUser?->hasPermission('admin.audit.view') ?? false;
+        $showAccess = $showUsers || $showRoles || $showAudit;
+
+        $homeRoute = match (true) {
+            $showCms => route('admin.dashboard'),
+            $showCases => route('admin.cases.index'),
+            $showUsers => route('admin.access.users.index'),
+            $showRoles => route('admin.access.roles.index'),
+            default => route('admin.access.audit'),
+        };
+        $areaLabel = $showCms ? 'Content Studio' : ($showCases ? 'Case Management' : 'Administration');
+    @endphp
     <div class="min-h-screen lg:grid lg:grid-cols-[17rem_1fr]">
         <aside class="border-b border-slate-200 bg-white lg:min-h-screen lg:border-b-0 lg:border-r">
             <div class="flex items-center justify-between px-5 py-4 lg:block">
-                <a href="{{ route('admin.dashboard') }}" class="block">
-                    <p class="text-xs font-bold uppercase tracking-wider text-green-700">NCC Website</p>
-                    <p class="text-lg font-bold text-slate-950">Content Studio</p>
+                <a href="{{ $homeRoute }}" class="block">
+                    <p class="text-xs font-bold uppercase tracking-wider text-green-700">NCC</p>
+                    <p class="text-lg font-bold text-slate-950">{{ $areaLabel }}</p>
                 </a>
                 <form method="POST" action="{{ route('admin.logout') }}" class="lg:hidden">
                     @csrf
@@ -21,14 +39,43 @@
             </div>
 
             <nav class="flex gap-2 overflow-x-auto px-5 pb-4 lg:block lg:space-y-1 lg:overflow-visible">
-                <a href="{{ route('admin.dashboard') }}" class="block rounded-md px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.dashboard') ? 'bg-green-50 text-green-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' }}">Dashboard</a>
-                <a href="{{ route('admin.media.index') }}" class="block rounded-md px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.media.*') ? 'bg-green-50 text-green-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' }}">Media Library</a>
-                <a href="{{ route('admin.newsletter.index') }}" class="block rounded-md px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.newsletter.*') ? 'bg-green-50 text-green-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' }}">Newsletter</a>
-                @foreach (config('cms.sections') as $key => $managedSection)
-                    <a href="{{ route('admin.contents.index', ['section' => $key]) }}" class="block whitespace-nowrap rounded-md px-3 py-2 text-sm font-semibold {{ request()->route('section') === $key ? 'bg-green-50 text-green-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' }}">
-                        {{ $managedSection['label'] }}
-                    </a>
-                @endforeach
+                @if ($showCms)
+                    <a href="{{ route('admin.dashboard') }}" class="block rounded-md px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.dashboard') ? 'bg-green-50 text-green-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' }}">Dashboard</a>
+                @endif
+
+                @if ($showCases)
+                    <a href="{{ route('admin.cases.index') }}" class="block whitespace-nowrap rounded-md px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.cases.*') ? 'bg-green-50 text-green-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' }}">Case Queue</a>
+                @endif
+
+                @if ($showCms)
+                    <a href="{{ route('admin.media.index') }}" class="block rounded-md px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.media.*') ? 'bg-green-50 text-green-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' }}">Media Library</a>
+                    <a href="{{ route('admin.newsletter.index') }}" class="block rounded-md px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.newsletter.*') ? 'bg-green-50 text-green-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' }}">Newsletter</a>
+                    @foreach (config('cms.sections') as $key => $managedSection)
+                        <a href="{{ route('admin.contents.index', ['section' => $key]) }}" class="block whitespace-nowrap rounded-md px-3 py-2 text-sm font-semibold {{ request()->route('section') === $key ? 'bg-green-50 text-green-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' }}">
+                            {{ $managedSection['label'] }}
+                        </a>
+                    @endforeach
+                @endif
+
+                @if ($showAccess)
+                    <p class="mt-4 hidden px-3 text-xs font-semibold uppercase tracking-wide text-slate-400 lg:block">Access control</p>
+
+                    @if ($showUsers)
+                        <a href="{{ route('admin.access.users.index') }}" class="block whitespace-nowrap rounded-md px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.access.users.*') ? 'bg-green-50 text-green-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' }}">Users</a>
+                    @endif
+
+                    @if ($showRoles)
+                        <a href="{{ route('admin.access.roles.index') }}" class="block whitespace-nowrap rounded-md px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.access.roles.*') ? 'bg-green-50 text-green-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' }}">Roles &amp; permissions</a>
+                    @endif
+
+                    @if ($showAudit)
+                        <a href="{{ route('admin.access.audit') }}" class="block whitespace-nowrap rounded-md px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.access.audit') ? 'bg-green-50 text-green-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' }}">Access audit</a>
+                    @endif
+                @endif
+
+                @if ($showCases && $adminUser?->caseRoleLabel())
+                    <p class="mt-4 hidden px-3 text-xs font-semibold uppercase tracking-wide text-slate-400 lg:block">{{ $adminUser->caseRoleLabel() }}</p>
+                @endif
             </nav>
         </aside>
 

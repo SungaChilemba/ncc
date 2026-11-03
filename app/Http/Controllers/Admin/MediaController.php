@@ -21,7 +21,7 @@ class MediaController extends Controller
                 $query->whereNull('alt_text')->orWhere('alt_text', '');
             }))
             ->when($request->filled('q'), function ($query) use ($request) {
-                $term = '%' . $request->string('q')->toString() . '%';
+                $term = '%'.$request->string('q')->toString().'%';
 
                 $query->where(function ($query) use ($term) {
                     $query->where('original_name', 'like', $term)

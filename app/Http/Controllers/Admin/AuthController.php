@@ -43,19 +43,30 @@ class AuthController extends Controller
             ]);
         }
 
-        if (Auth::attempt($credentials, $request->filled('remember'))) {
+        if (Auth::attempt([...$credentials, 'is_active' => true], $request->filled('remember'))) {
             RateLimiter::clear($throttleKey);
-            $request->session()->regenerate();
 
-            if (! Auth::user()->canManageCms()) {
+            $user = Auth::user();
+
+            if (! $user->canAccessAdmin()) {
                 Auth::logout();
 
                 return back()->withErrors([
-                    'email' => 'You do not have admin access.',
+                    'email' => 'You do not have access to the admin area.',
                 ]);
             }
 
-            return redirect()->intended(route('admin.dashboard'));
+            $request->session()->regenerate();
+
+            // Case-only staff land in the case queue. Everyone else goes to the
+            // admin dashboard, which forwards them to the area they can use.
+            $target = $user->hasCaseAccess()
+                && ! $user->canManageCms()
+                && ! $user->hasPermission('admin.*')
+                ? route('admin.cases.index')
+                : route('admin.dashboard');
+
+            return redirect()->intended($target);
         }
 
         RateLimiter::hit($throttleKey, self::DECAY_SECONDS);

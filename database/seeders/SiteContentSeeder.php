@@ -672,9 +672,9 @@ class SiteContentSeeder extends Seeder
         return array_map(fn ($image, $index) => [
             'section' => 'childrens-corner',
             'type' => 'gallery',
-            'slug' => 'learning-window-' . ($index + 1),
-            'title' => 'Learning Window ' . ($index + 1),
-            'image_path' => 'images/' . $image,
+            'slug' => 'learning-window-'.($index + 1),
+            'title' => 'Learning Window '.($index + 1),
+            'image_path' => 'images/'.$image,
             'sort_order' => 40 + $index,
         ], ['window1.png', 'window2.png', 'window3.png', 'window4.png', 'window5.png'], range(0, 4));
     }

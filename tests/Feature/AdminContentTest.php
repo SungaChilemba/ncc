@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\MediaAsset;
 use App\Models\SiteContent;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,7 +18,7 @@ class AdminContentTest extends TestCase
     {
         $this->get(route('admin.dashboard'))->assertForbidden();
 
-        $user = User::factory()->create(['is_admin' => false, 'role' => 'viewer']);
+        $user = User::factory()->create();
 
         $this->actingAs($user)
             ->get(route('admin.dashboard'))
@@ -26,7 +27,7 @@ class AdminContentTest extends TestCase
 
     public function test_editor_can_access_cms_without_full_admin_flag(): void
     {
-        $editor = User::factory()->create(['is_admin' => false, 'role' => 'editor']);
+        $editor = $this->userWithRole('cms_editor');
 
         $this->actingAs($editor)
             ->get(route('admin.dashboard'))
@@ -36,7 +37,7 @@ class AdminContentTest extends TestCase
 
     public function test_admin_can_view_cms_dashboard_and_section_editor(): void
     {
-        $admin = User::factory()->create(['is_admin' => true]);
+        $admin = $this->userWithRole('system_admin');
 
         $this->actingAs($admin)
             ->get(route('admin.dashboard'))
@@ -55,7 +56,7 @@ class AdminContentTest extends TestCase
 
     public function test_admin_can_create_search_filter_and_publish_content(): void
     {
-        $admin = User::factory()->create(['is_admin' => true]);
+        $admin = $this->userWithRole('system_admin');
 
         $this->actingAs($admin)
             ->post(route('admin.contents.store', ['section' => 'home']), [
@@ -90,7 +91,7 @@ class AdminContentTest extends TestCase
 
     public function test_admin_create_and_edit_use_dedicated_editor_workspace(): void
     {
-        $admin = User::factory()->create(['is_admin' => true]);
+        $admin = $this->userWithRole('system_admin');
         $content = SiteContent::create([
             'section' => 'home',
             'type' => 'update',
@@ -119,7 +120,7 @@ class AdminContentTest extends TestCase
     {
         Storage::fake('public');
 
-        $admin = User::factory()->create(['is_admin' => true]);
+        $admin = $this->userWithRole('system_admin');
 
         $this->actingAs($admin)
             ->post(route('admin.contents.store', ['section' => 'resources']), [
@@ -150,7 +151,7 @@ class AdminContentTest extends TestCase
     {
         Storage::fake('public');
 
-        $admin = User::factory()->create(['is_admin' => true, 'role' => 'admin']);
+        $admin = $this->userWithRole('system_admin');
 
         $this->actingAs($admin)
             ->post(route('admin.media.store'), [
@@ -173,7 +174,7 @@ class AdminContentTest extends TestCase
     {
         Storage::fake('public');
 
-        $admin = User::factory()->create(['is_admin' => true, 'role' => 'admin']);
+        $admin = $this->userWithRole('system_admin');
 
         $this->actingAs($admin)
             ->post(route('admin.media.store'), [
@@ -181,7 +182,7 @@ class AdminContentTest extends TestCase
                 'alt_text' => 'Old alt text',
             ]);
 
-        $asset = \App\Models\MediaAsset::firstOrFail();
+        $asset = MediaAsset::firstOrFail();
         $oldPath = $asset->path;
 
         $this->actingAs($admin)
@@ -214,7 +215,7 @@ class AdminContentTest extends TestCase
 
     public function test_admin_can_schedule_content_and_future_items_stay_hidden_publicly(): void
     {
-        $admin = User::factory()->create(['is_admin' => true]);
+        $admin = $this->userWithRole('system_admin');
         $future = now()->addDay()->format('Y-m-d\TH:i');
 
         $this->actingAs($admin)
@@ -240,7 +241,7 @@ class AdminContentTest extends TestCase
 
     public function test_admin_structured_fields_create_source_items_and_bio_sections(): void
     {
-        $admin = User::factory()->create(['is_admin' => true]);
+        $admin = $this->userWithRole('system_admin');
 
         $this->actingAs($admin)
             ->post(route('admin.contents.store', ['section' => 'news']), [
@@ -267,7 +268,7 @@ class AdminContentTest extends TestCase
 
     public function test_admin_updates_create_revisions_and_can_restore_them(): void
     {
-        $admin = User::factory()->create(['is_admin' => true]);
+        $admin = $this->userWithRole('system_admin');
 
         $content = SiteContent::create([
             'section' => 'about',
@@ -310,7 +311,7 @@ class AdminContentTest extends TestCase
     {
         Storage::fake('public');
 
-        $admin = User::factory()->create(['is_admin' => true, 'role' => 'admin']);
+        $admin = $this->userWithRole('system_admin');
 
         $this->actingAs($admin)
             ->post(route('admin.media.store'), [
@@ -318,7 +319,7 @@ class AdminContentTest extends TestCase
                 'alt_text' => 'Used image',
             ]);
 
-        $asset = \App\Models\MediaAsset::firstOrFail();
+        $asset = MediaAsset::firstOrFail();
 
         SiteContent::create([
             'section' => 'home',
@@ -343,7 +344,7 @@ class AdminContentTest extends TestCase
     {
         Storage::fake('public');
 
-        $admin = User::factory()->create(['is_admin' => true, 'role' => 'admin']);
+        $admin = $this->userWithRole('system_admin');
 
         $this->actingAs($admin)
             ->post(route('admin.media.store'), [
@@ -351,7 +352,7 @@ class AdminContentTest extends TestCase
                 'alt_text' => 'Reusable image',
             ]);
 
-        $asset = \App\Models\MediaAsset::firstOrFail();
+        $asset = MediaAsset::firstOrFail();
 
         $this->actingAs($admin)
             ->post(route('admin.contents.store', ['section' => 'about']), [
@@ -397,7 +398,7 @@ class AdminContentTest extends TestCase
 
     public function test_duplicate_detail_slugs_are_rejected_within_section_and_type(): void
     {
-        $admin = User::factory()->create(['is_admin' => true]);
+        $admin = $this->userWithRole('system_admin');
 
         SiteContent::create([
             'section' => 'news',
@@ -424,14 +425,14 @@ class AdminContentTest extends TestCase
     {
         Storage::fake('public');
 
-        $admin = User::factory()->create(['is_admin' => true]);
+        $admin = $this->userWithRole('system_admin');
 
         $this->actingAs($admin)
             ->post(route('admin.contents.store', ['section' => 'home']), [
                 'type' => 'news',
                 'title' => 'Gallery Update',
                 'description' => 'A new gallery item.',
-                'accent_color' => 'red',
+                'accent_color' => 'green',
                 'sort_order' => 0,
                 'is_published' => '1',
                 'image' => UploadedFile::fake()->image('children.webp', 800, 450),
@@ -446,7 +447,7 @@ class AdminContentTest extends TestCase
 
     public function test_unknown_section_and_invalid_type_are_rejected(): void
     {
-        $admin = User::factory()->create(['is_admin' => true]);
+        $admin = $this->userWithRole('system_admin');
 
         $this->actingAs($admin)
             ->get(route('admin.contents.index', ['section' => 'not-a-page']))
@@ -460,9 +461,11 @@ class AdminContentTest extends TestCase
             ->assertSessionHasErrors('type');
     }
 
-    public function test_report_submissions_cannot_be_published_from_admin_create_or_update(): void
+    public function test_reporting_section_rejects_case_submission_content(): void
     {
-        $admin = User::factory()->create(['is_admin' => true]);
+        $admin = $this->userWithRole('system_admin');
+
+        $this->assertNotContains('submission', config('cms.sections.reporting.types'));
 
         $this->actingAs($admin)
             ->post(route('admin.contents.store', ['section' => 'reporting']), [
@@ -471,37 +474,44 @@ class AdminContentTest extends TestCase
                 'title' => 'Report NCC-2026-90001',
                 'subtitle' => 'Neglect',
                 'description' => 'Sensitive report content.',
-                'accent_color' => 'red',
+                'accent_color' => 'green',
                 'is_published' => '1',
             ])
-            ->assertRedirect(route('admin.contents.index', ['section' => 'reporting']));
+            ->assertSessionHasErrors('type');
 
-        $submission = SiteContent::where('slug', 'ncc-2026-90001')->firstOrFail();
+        $this->assertDatabaseMissing('site_contents', [
+            'section' => 'reporting',
+            'slug' => 'ncc-2026-90001',
+        ]);
 
-        $this->assertFalse($submission->is_published);
-        $this->assertNull($submission->published_at);
+        $card = SiteContent::create([
+            'section' => 'reporting',
+            'type' => 'card',
+            'slug' => 'reporting-guidance',
+            'title' => 'Reporting guidance',
+            'description' => 'Public guidance copy.',
+            'is_published' => true,
+            'sort_order' => 0,
+        ]);
 
         $this->actingAs($admin)
-            ->put(route('admin.contents.update', ['section' => 'reporting', 'id' => $submission->id]), [
+            ->put(route('admin.contents.update', ['section' => 'reporting', 'id' => $card->id]), [
                 'type' => 'submission',
                 'slug' => 'ncc-2026-90001',
-                'title' => 'Report NCC-2026-90001 Updated',
+                'title' => 'Report NCC-2026-90001',
                 'subtitle' => 'Neglect',
                 'description' => 'Updated sensitive report content.',
-                'accent_color' => 'red',
+                'accent_color' => 'green',
                 'is_published' => '1',
             ])
-            ->assertRedirect(route('admin.contents.index', ['section' => 'reporting']));
+            ->assertSessionHasErrors('type');
 
-        $submission->refresh();
-
-        $this->assertFalse($submission->is_published);
-        $this->assertNull($submission->published_at);
+        $this->assertSame('card', $card->fresh()->type);
     }
 
     public function test_report_submissions_cannot_be_published_by_toggle_or_bulk_action(): void
     {
-        $admin = User::factory()->create(['is_admin' => true]);
+        $admin = $this->userWithRole('system_admin');
 
         $submission = SiteContent::create([
             'section' => 'reporting',

@@ -10,12 +10,32 @@ use App\Support\AdEnquiries;
 
 class DashboardController extends Controller
 {
-    public function __construct(private readonly AdEnquiries $adEnquiries)
-    {
-    }
+    public function __construct(private readonly AdEnquiries $adEnquiries) {}
 
     public function index()
     {
+        $user = request()->user();
+
+        if (! $user->canManageCms()) {
+            if ($user->hasCaseAccess()) {
+                return redirect()->route('admin.cases.index');
+            }
+
+            if ($user->hasAnyPermission('admin.users.view', 'admin.users.manage')) {
+                return redirect()->route('admin.access.users.index');
+            }
+
+            if ($user->hasPermission('admin.roles.manage')) {
+                return redirect()->route('admin.access.roles.index');
+            }
+
+            if ($user->hasPermission('admin.audit.view')) {
+                return redirect()->route('admin.access.audit');
+            }
+
+            abort(403);
+        }
+
         $sections = collect(config('cms.sections'))->map(function (array $definition, string $key) {
             $contents = SiteContent::forSection($key)->get();
 

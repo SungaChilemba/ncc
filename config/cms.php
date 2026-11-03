@@ -73,7 +73,8 @@ return [
             'label' => 'Reporting',
             'description' => 'Reporting instructions, support copy, forms guidance, and response information.',
             'route' => 'reporting',
-            'types' => ['hero', 'card', 'stat', 'cta', 'submission'],
+            // Case submissions live in the dedicated case domain, never in the CMS.
+            'types' => ['hero', 'card', 'stat', 'cta'],
         ],
         'resources' => [
             'label' => 'Resources',

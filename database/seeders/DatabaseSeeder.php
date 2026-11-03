@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -18,18 +19,24 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             SiteContentSeeder::class,
+            AccessControlSeeder::class,
         ]);
 
-        // User::factory(10)->create();
-
-        User::updateOrCreate(
+        $admin = User::updateOrCreate(
             ['email' => 'admin@example.com'],
             [
-                'name' => 'Admin User',
+                'name' => 'System Administrator',
                 'password' => Hash::make('password'),
-                'is_admin' => true,
-                'role' => 'admin',
+                'is_active' => true,
             ],
         );
+
+        $admin->roles()->sync(
+            Role::where('key', 'system_admin')->pluck('id'),
+        );
+
+        if (! app()->isProduction()) {
+            $this->call(CaseStaffSeeder::class);
+        }
     }
 }
