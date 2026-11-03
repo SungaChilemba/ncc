@@ -28,8 +28,14 @@ return [
         'Partnership' => 'Partnership',
     ],
 
+    'donate_categories' => [
+        'Even a little Donation makes a big Difference' => 'Even a little Donation makes a big Difference',
+        'Where will your donation go' => 'Where will your donation go',
+        'Watch our story' => 'Watch our story',
+        'Thanks to our supporters' => 'Thanks to our supporters',
+    ],
+
     'accent_colors' => [
-        'red' => 'Red',
         'green' => 'Green',
         'blue' => 'Blue',
         'yellow' => 'Yellow',

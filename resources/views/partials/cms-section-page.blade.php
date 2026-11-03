@@ -176,6 +176,33 @@
                     @endpush
                 </div>
             </section>
+        @elseif (str_contains(strtolower((string) $group), 'even a little donation'))
+        <section class="bg-white px-4 py-10 sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-7xl">
+                <div class="mb-6 flex items-center gap-3">
+                    <span class="h-1 w-10 rounded-full bg-red-700"></span>
+                    <h2 class="text-2xl font-bold text-gray-950">{{ $group }}</h2>
+                </div>
+                <div class="relative">
+                    <div id="donationCarousel" class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth gap-4 pb-4">
+                        @foreach ($items as $card)
+                            <div class="snap-center shrink-0">
+                                @if ($card->image_url)
+                                    <img src="{{ $card->image_url }}?v={{ $card->updated_at->timestamp }}" alt="{{ $card->alt_text ?: $card->title ?: $group }}" class="block h-48 w-auto max-w-full">
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                    <button type="button" class="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 px-3 py-2 shadow md:hidden" onclick="document.getElementById('donationCarousel').scrollBy({left:-300,behavior:'smooth'})">‹</button>
+                    <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 px-3 py-2 shadow md:hidden" onclick="document.getElementById('donationCarousel').scrollBy({left:300,behavior:'smooth'})">›</button>
+                </div>
+                <div class="mt-4 flex justify-center gap-2" id="donationDots">
+                    @foreach ($items as $index => $card)
+                        <button type="button" data-index="{{ $index }}" class="h-2.5 w-2.5 rounded-full bg-gray-300" aria-label="Slide {{ $index + 1 }}"></button>
+                    @endforeach
+                </div>
+            </div>
+        </section>
         @else
         <section class="bg-white px-4 py-10 sm:px-6 lg:px-8">
             <div class="mx-auto max-w-7xl">

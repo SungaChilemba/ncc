@@ -215,6 +215,19 @@
                             @enderror
                             <p class="mt-1 text-xs text-slate-500">Matches frontend filters: {{ implode(', ', array_values(config('cms.resource_categories'))) }}.</p>
                         </div>
+                    @elseif ($section === 'donate')
+                        <div>
+                            <label for="category" class="block text-xs font-semibold text-slate-700 mb-1">Category</label>
+                            <select id="category" name="category" class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100">
+                                <option value="">Select category</option>
+                                @foreach (config('cms.donate_categories') as $catValue => $catLabel)
+                                    <option value="{{ $catValue }}" @selected(old('category', $editingItem->category ?? '') === $catValue)>{{ $catLabel }}</option>
+                                @endforeach
+                            </select>
+                            @error('category')
+                                <p class="mt-1 text-xs font-semibold text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
                     @elseif ($section === 'advertise')
                         <div>
                             <label for="category" class="block text-xs font-semibold text-slate-700 mb-1">Category</label>

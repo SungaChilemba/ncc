@@ -52,7 +52,7 @@ class ContentController extends Controller
 
         $categoryRule = match (true) {
             $section === 'resources' && $request->string('type')->toString() === 'resource' => ['nullable', 'string', Rule::in(array_keys(config('cms.resource_categories')))],
-            $section === 'advertise' && $request->string('type')->toString() === 'card' => ['nullable', 'string', Rule::in(array_keys(config('cms.advertise_categories')))],
+            $section === 'donate' && $request->string('type')->toString() === 'card' => ['nullable', 'string', Rule::in(array_keys(config('cms.donate_categories')))],
             default => ['nullable', 'string', 'max:100'],
         };
 
@@ -148,7 +148,7 @@ class ContentController extends Controller
 
         $categoryRuleUpdate = match (true) {
             $section === 'resources' && $request->string('type')->toString() === 'resource' => ['nullable', 'string', Rule::in(array_keys(config('cms.resource_categories')))],
-            $section === 'advertise' && $request->string('type')->toString() === 'card' => ['nullable', 'string', Rule::in(array_keys(config('cms.advertise_categories')))],
+            $section === 'donate' && $request->string('type')->toString() === 'card' => ['nullable', 'string', Rule::in(array_keys(config('cms.donate_categories')))],
             default => ['nullable', 'string', 'max:100'],
         };
 
