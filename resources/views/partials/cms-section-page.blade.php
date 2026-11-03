@@ -188,7 +188,7 @@
                         @foreach ($items as $card)
                             <div class="snap-center shrink-0">
                                 @if ($card->image_url)
-                                    <img src="{{ $card->image_url }}?v={{ $card->updated_at->timestamp }}" alt="{{ $card->alt_text ?: $card->title ?: $group }}" class="block h-48 w-auto max-w-full">
+                                    <img src="{{ $card->image_url }}?v={{ $card->updated_at->timestamp }}" alt="{{ $card->alt_text ?: $card->title ?: $group }}" class="block h-75 w-auto max-w-full">
                                 @endif
                             </div>
                         @endforeach
