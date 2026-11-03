@@ -117,6 +117,16 @@
                 $donationLabels = array_map(fn ($donationSegment) => $donationSegment['label'], $donationSegments);
                 $donationValues = array_map(fn ($donationSegment) => $donationSegment['value'], $donationSegments);
                 $donationColors = array_map(fn ($donationSegment) => $donationSegment['color'], $donationSegments);
+                $donationChartConfig = [
+                    'labels' => $donationLabels,
+                    'datasets' => [
+                        [
+                            'label' => 'Donation allocation',
+                            'data' => $donationValues,
+                            'backgroundColor' => $donationColors,
+                        ],
+                    ],
+                ];
             @endphp
             <section class="bg-white px-4 py-12 sm:px-6 lg:px-8">
                 <div class="mx-auto max-w-3xl">
@@ -124,16 +134,7 @@
                         <span class="mx-auto block h-1 w-10 rounded-full bg-red-700"></span>
                         <h2 class="mt-4 text-2xl font-bold text-gray-950">{{ $group }}</h2>
                     </div>
-                    <div class="mx-auto max-w-md" x-data="donationAllocationChart({
-                        labels: @json($donationLabels),
-                        datasets: [
-                            {
-                                label: 'Donation allocation',
-                                data: @json($donationValues),
-                                backgroundColor: @json($donationColors),
-                            },
-                        ],
-                    })">
+                    <div class="mx-auto max-w-md" x-data="donationAllocationChart(@json($donationChartConfig))">
                         <div class="h-44">
                             <canvas x-ref="donationChartCanvas" class="h-full w-full" aria-label="Donation allocation chart"></canvas>
                         </div>
