@@ -134,9 +134,9 @@
                         <span class="mx-auto block h-1 w-10 rounded-full bg-red-700"></span>
                         <h2 class="mt-4 text-2xl font-bold text-gray-950">{{ $group }}</h2>
                     </div>
-                    <div class="mx-auto max-w-md" x-data="donationAllocationChart" data-config="@json($donationChartConfig)">
-                        <div class="h-44">
-                            <canvas id="donationPieChart" x-ref="donationChartCanvas" class="h-full w-full" aria-label="Donation allocation chart"></canvas>
+                    <div class="mx-auto max-w-md">
+                        <div class="w-full max-w-sm mx-auto h-64 relative">
+                            <canvas id="donationPieChart"></canvas>
                         </div>
                         <div class="mt-4 space-y-2 text-center">
                             @foreach ($donationSegments as $donationSegment)
@@ -147,6 +147,33 @@
                             @endforeach
                         </div>
                     </div>
+                    @push('scripts')
+                        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                                const canvas = document.getElementById('donationPieChart');
+                                if (!canvas || !window.Chart) return;
+                                new Chart(canvas.getContext('2d'), {
+                                    type: 'pie',
+                                    data: {
+                                        labels: ['Direct Charitable Programmes', 'Fundraising'],
+                                        datasets: [{
+                                            label: 'Donation allocation',
+                                            data: [75, 25],
+                                            backgroundColor: ['#10b981', '#f59e0b']
+                                        }]
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        plugins: {
+                                            legend: { position: 'bottom' }
+                                        }
+                                    }
+                                });
+                            });
+                        </script>
+                    @endpush
                 </div>
             </section>
         @else

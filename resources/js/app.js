@@ -5,53 +5,6 @@ import { Chart } from 'chart.js/auto';
 window.Alpine = Alpine;
 window.Chart = Chart;
 
-Alpine.data('donationAllocationChart', () => ({
-    chart: null,
-    config: {},
-    init() {
-        try {
-            this.config = JSON.parse(this.$el?.dataset?.config || '{}');
-        } catch (e) {
-            this.config = {};
-        }
-
-        this.$nextTick(() => {
-            const canvas = this.$refs?.donationChartCanvas || document.getElementById('donationPieChart');
-
-            if (!canvas) {
-                return;
-            }
-
-            if (this.chart) {
-                this.chart.destroy();
-                this.chart = null;
-            }
-
-            this.chart = new Chart(canvas, {
-                type: 'pie',
-                data: {
-                    labels: this.config.labels ?? [],
-                    datasets: [
-                        {
-                            label: this.config.datasets?.[0]?.label ?? 'Donation allocation',
-                            data: this.config.datasets?.[0]?.data ?? [],
-                            backgroundColor: this.config.datasets?.[0]?.backgroundColor ?? [],
-                        },
-                    ],
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { enabled: true },
-                    },
-                },
-            });
-        });
-    },
-}));
-
 Alpine.start();
 
 // Subtle scroll-reveal for elements marked with .reveal.
