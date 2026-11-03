@@ -124,7 +124,7 @@
                         <span class="mx-auto block h-1 w-10 rounded-full bg-red-700"></span>
                         <h2 class="mt-4 text-2xl font-bold text-gray-950">{{ $group }}</h2>
                     </div>
-                    <div class="mx-auto max-w-md" x-data="{
+                    <div class="mx-auto max-w-md" x-data="donationAllocationChart({
                         labels: @json($donationLabels),
                         datasets: [
                             {
@@ -133,7 +133,7 @@
                                 backgroundColor: @json($donationColors),
                             },
                         ],
-                    }">
+                    })">
                         <div class="h-44">
                             <canvas x-ref="donationChartCanvas" class="h-full w-full" aria-label="Donation allocation chart"></canvas>
                         </div>

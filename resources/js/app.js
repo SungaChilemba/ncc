@@ -5,8 +5,10 @@ import { Chart } from 'chart.js/auto';
 window.Alpine = Alpine;
 window.Chart = Chart;
 
-Alpine.data('donationAllocationChart', {
+Alpine.data('donationAllocationChart', (config = {}) => ({
     chart: null,
+    labels: config.labels ?? [],
+    datasets: config.datasets ?? [],
     init() {
         this.$nextTick(() => {
             const canvas = this.$refs?.donationChartCanvas;
@@ -43,7 +45,7 @@ Alpine.data('donationAllocationChart', {
             });
         });
     },
-});
+}));
 
 Alpine.start();
 
