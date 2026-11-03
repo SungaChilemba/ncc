@@ -5,13 +5,18 @@ import { Chart } from 'chart.js/auto';
 window.Alpine = Alpine;
 window.Chart = Chart;
 
-Alpine.data('donationAllocationChart', (config = {}) => ({
+Alpine.data('donationAllocationChart', () => ({
     chart: null,
-    labels: config.labels ?? [],
-    datasets: config.datasets ?? [],
+    config: {},
     init() {
+        try {
+            this.config = JSON.parse(this.$el?.dataset?.config || '{}');
+        } catch (e) {
+            this.config = {};
+        }
+
         this.$nextTick(() => {
-            const canvas = this.$refs?.donationChartCanvas;
+            const canvas = this.$refs?.donationChartCanvas || document.getElementById('donationPieChart');
 
             if (!canvas) {
                 return;
@@ -25,12 +30,12 @@ Alpine.data('donationAllocationChart', (config = {}) => ({
             this.chart = new Chart(canvas, {
                 type: 'pie',
                 data: {
-                    labels: this.labels ?? [],
+                    labels: this.config.labels ?? [],
                     datasets: [
                         {
-                            label: this.datasets?.[0]?.label ?? 'Donation allocation',
-                            data: this.datasets?.[0]?.data ?? [],
-                            backgroundColor: this.datasets?.[0]?.backgroundColor ?? [],
+                            label: this.config.datasets?.[0]?.label ?? 'Donation allocation',
+                            data: this.config.datasets?.[0]?.data ?? [],
+                            backgroundColor: this.config.datasets?.[0]?.backgroundColor ?? [],
                         },
                     ],
                 },
