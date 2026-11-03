@@ -735,4 +735,27 @@ class PublicCmsContentTest extends TestCase
             ->assertSee('<iframe', false)
             ->assertSee('https://www.youtube.com/embed/WMNEL8-INig?rel=0', false);
     }
+
+    public function test_donate_page_renders_donation_allocation_pie_chart(): void
+    {
+        SiteContent::create([
+            'section' => 'donate',
+            'type' => 'card',
+            'slug' => 'where-donation-goes',
+            'category' => 'Where will your donation go',
+            'title' => 'Supporting Our Work',
+            'description' => '75% of every donation goes directly into charitable programmes. 25% is invested in fundraising.',
+            'is_published' => true,
+            'sort_order' => 9,
+        ]);
+
+        $response = $this->get(route('donate'));
+
+        $response->assertOk()
+            ->assertSee('Where will your donation go')
+            ->assertSee('Direct charitable programmes')
+            ->assertSee('Fundraising')
+            ->assertSee('<canvas', false)
+            ->assertSee('Donation allocation', false);
+    }
 }

@@ -70,6 +70,85 @@
                 </div>
             </section>
         @else
+        @if (strtolower((string) $group) === 'where will your donation go')
+            @php
+                $donationSegments = [
+                    ['label' => 'Direct charitable programmes', 'value' => 75, 'color' => '#16a34a'],
+                    ['label' => 'Fundraising', 'value' => 25, 'color' => '#ea580c'],
+                ];
+
+                $donationCard = $items->first();
+                $donationSource = (string) ($donationCard?->description ?? '');
+                if ($donationSource !== '') {
+                    preg_match_all('/(\d+(?:\.\d+)?)\s*%/', $donationSource, $donationMatches);
+                    $donationValues = array_map('floatval', $donationMatches[1]);
+                    if (count($donationValues) >= 2) {
+                        $donationSegments = [
+                            ['label' => 'Direct charitable programmes', 'value' => $donationValues[0], 'color' => '#16a34a'],
+                            ['label' => 'Fundraising', 'value' => $donationValues[1], 'color' => '#ea580c'],
+                        ];
+                    }
+                }
+
+                $donationChartTotal = array_sum(array_column($donationSegments, 'value'));
+                $donationChartRadius = 80;
+                $donationChartAngle = -90;
+                $donationSegmentPaths = [];
+                foreach ($donationSegments as $donationSegment) {
+                    $donationFraction = $donationSegment['value'] / max($donationChartTotal, 1) * 100;
+                    $donationStartAngle = $donationChartAngle;
+                    $donationEndAngle = $donationStartAngle + $donationFraction;
+                    $donationStartRad = deg2rad($donationStartAngle);
+                    $donationEndRad = deg2rad($donationEndAngle);
+                    $donationX1 = 100 + $donationChartRadius * cos($donationStartRad);
+                    $donationY1 = 100 + $donationChartRadius * sin($donationStartRad);
+                    $donationX2 = 100 + $donationChartRadius * cos($donationEndRad);
+                    $donationY2 = 100 + $donationChartRadius * sin($donationEndRad);
+                    $donationLargeArc = $donationEndAngle - $donationStartAngle > 180 ? 1 : 0;
+                    $donationSegmentPaths[] = [
+                        'd' => 'M100 100 L'.round($donationX1, 2).' '.round($donationY1, 2).' A80 80 0 '.$donationLargeArc.' 1 '.round($donationX2, 2).' '.round($donationY2, 2).' Z',
+                        'color' => $donationSegment['color'],
+                        'label' => $donationSegment['label'],
+                        'value' => $donationSegment['value'],
+                    ];
+                    $donationChartAngle = $donationEndAngle;
+                }
+
+                $donationLabels = array_map(fn ($donationSegment) => $donationSegment['label'], $donationSegments);
+                $donationValues = array_map(fn ($donationSegment) => $donationSegment['value'], $donationSegments);
+                $donationColors = array_map(fn ($donationSegment) => $donationSegment['color'], $donationSegments);
+            @endphp
+            <section class="bg-white px-4 py-12 sm:px-6 lg:px-8">
+                <div class="mx-auto max-w-3xl">
+                    <div class="mb-8 text-center">
+                        <span class="mx-auto block h-1 w-10 rounded-full bg-red-700"></span>
+                        <h2 class="mt-4 text-2xl font-bold text-gray-950">{{ $group }}</h2>
+                    </div>
+                    <div class="mx-auto max-w-md" x-data="{
+                        labels: @json($donationLabels),
+                        datasets: [
+                            {
+                                label: 'Donation allocation',
+                                data: @json($donationValues),
+                                backgroundColor: @json($donationColors),
+                            },
+                        ],
+                    }">
+                        <div class="h-44">
+                            <canvas x-ref="donationChartCanvas" class="h-full w-full" aria-label="Donation allocation chart"></canvas>
+                        </div>
+                        <div class="mt-4 space-y-2 text-center">
+                            @foreach ($donationSegments as $donationSegment)
+                                <p class="text-sm text-gray-600">
+                                    <span class="inline-block h-3 w-3 rounded-full align-middle" style="background-color: {{ $donationSegment['color'] }}"></span>
+                                    {{ $donationSegment['label'] }}: {{ $donationSegment['value'] }}%
+                                </p>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </section>
+        @else
         <section class="bg-white px-4 py-10 sm:px-6 lg:px-8">
             <div class="mx-auto max-w-7xl">
                 <div class="mb-6 flex items-center gap-3">
@@ -117,6 +196,7 @@
             </div>
         </div>
     </section>
+            @endif
         @endif
     @endif
 @endforeach

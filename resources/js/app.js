@@ -1,7 +1,49 @@
 import Alpine from 'alpinejs';
+import { Chart } from 'chart.js/auto';
 
-// Expose Alpine for the inline x-data expressions used across Blade views.
+// Expose Alpine and Chart.js for the inline x-data expressions used across Blade views.
 window.Alpine = Alpine;
+window.Chart = Chart;
+
+Alpine.data('donationAllocationChart', {
+    chart: null,
+    init() {
+        this.$nextTick(() => {
+            const canvas = this.$refs?.donationChartCanvas;
+
+            if (!canvas) {
+                return;
+            }
+
+            if (this.chart) {
+                this.chart.destroy();
+                this.chart = null;
+            }
+
+            this.chart = new Chart(canvas, {
+                type: 'pie',
+                data: {
+                    labels: this.labels ?? [],
+                    datasets: [
+                        {
+                            label: this.datasets?.[0]?.label ?? 'Donation allocation',
+                            data: this.datasets?.[0]?.data ?? [],
+                            backgroundColor: this.datasets?.[0]?.backgroundColor ?? [],
+                        },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: true },
+                    },
+                },
+            });
+        });
+    },
+});
 
 Alpine.start();
 
