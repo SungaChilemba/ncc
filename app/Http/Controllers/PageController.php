@@ -446,7 +446,7 @@ class PageController extends Controller
 
         return view($view, array_merge([
             'cmsContent' => $this->content->forSection($section),
-            'cmsHero' => $this->content->first($section, 'hero'),
+            'cmsHeroes' => $this->content->type($section, 'hero'),
             'cmsCards' => $this->content->type($section, 'card'),
             'cmsCtas' => $this->content->type($section, 'cta'),
             'cmsNews' => $this->content->type($section, 'news'),

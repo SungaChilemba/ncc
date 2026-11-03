@@ -1,5 +1,6 @@
 @php
-    $hero = $cmsHero ?? null;
+    $hero = ($cmsHeroes ?? collect())->first();
+    $heroImages = ($cmsHeroes ?? collect())->map(fn ($h) => $h->image_url)->filter()->values()->all();
     $cards = ($cmsCards ?? collect())->groupBy(fn ($item) => $item->category ?: 'Content');
 
     // The "Thanks to our supporters" group renders directly below the hero section.
@@ -11,15 +12,6 @@
 <section class="bg-white px-4 py-10 sm:px-6 lg:px-8">
     <div class="mx-auto max-w-7xl">
         <div class="relative overflow-hidden rounded-lg bg-green-900 px-6 py-16 text-center text-white shadow">
-            @php
-                $heroImages = [];
-                if (is_array($hero?->data['images'] ?? null)) {
-                    foreach ($hero->data['images'] as $heroImage) {
-                        if (is_string($heroImage) && $heroImage !== '') $heroImages[] = $heroImage;
-                    }
-                }
-                if (empty($heroImages) && $hero?->image_url) $heroImages[] = $hero->image_url;
-            @endphp
             @foreach ($heroImages as $index => $heroImageUrl)
                 <img src="{{ $heroImageUrl }}" alt="{{ $hero->alt_text ?: $hero->title ?: $title }}" class="absolute inset-0 h-full w-full object-cover opacity-45 transition-opacity duration-1000 {{ $index === 0 ? 'opacity-45' : 'opacity-0' }}" data-hero-slide="{{ $index }}">
             @endforeach
