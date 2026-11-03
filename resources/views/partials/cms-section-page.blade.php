@@ -11,9 +11,18 @@
 <section class="bg-white px-4 py-10 sm:px-6 lg:px-8">
     <div class="mx-auto max-w-7xl">
         <div class="relative overflow-hidden rounded-lg bg-green-900 px-6 py-16 text-center text-white shadow">
-            @if ($hero?->image_url)
-                <img src="{{ $hero->image_url }}?v={{ $hero->updated_at->timestamp }}" alt="{{ $hero->alt_text ?: $hero->title ?: $title }}" class="absolute inset-0 h-full w-full object-cover opacity-45">
-            @endif
+            @php
+                $heroImages = [];
+                if (is_array($hero?->data['images'] ?? null)) {
+                    foreach ($hero->data['images'] as $heroImage) {
+                        if (is_string($heroImage) && $heroImage !== '') $heroImages[] = $heroImage;
+                    }
+                }
+                if (empty($heroImages) && $hero?->image_url) $heroImages[] = $hero->image_url;
+            @endphp
+            @foreach ($heroImages as $index => $heroImageUrl)
+                <img src="{{ $heroImageUrl }}" alt="{{ $hero->alt_text ?: $hero->title ?: $title }}" class="absolute inset-0 h-full w-full object-cover opacity-45 transition-opacity duration-1000 {{ $index === 0 ? 'opacity-45' : 'opacity-0' }}" data-hero-slide="{{ $index }}">
+            @endforeach
             <div class="relative z-10">
                 <h1 class="text-3xl font-bold md:text-5xl">{{ $hero?->title ?: $title }}</h1>
                 @if ($hero?->subtitle)
@@ -251,6 +260,25 @@
             </div>
         </div>
     </section>
+
+    @if (count($heroImages ?? []) > 1)
+        @push('scripts')
+            <script>
+                (function () {
+                    const slides = document.querySelectorAll('[data-hero-slide]');
+                    if (slides.length < 2) return;
+                    let current = 0;
+                    setInterval(() => {
+                        slides[current].classList.remove('opacity-45');
+                        slides[current].classList.add('opacity-0');
+                        current = (current + 1) % slides.length;
+                        slides[current].classList.remove('opacity-0');
+                        slides[current].classList.add('opacity-45');
+                    }, 4000);
+                })();
+            </script>
+        @endpush
+    @endif
             @endif
         @endif
     @endif
