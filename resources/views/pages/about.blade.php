@@ -66,10 +66,8 @@
             ->filter()
             ->all();
         $commissioners = $cards->where("category", "Commissioners")->values();
-        $leadership = $cards->where("category", "Organogram")->values();
-        $executive = $leadership->firstWhere("slug", "chief-executive-officer") ?? $leadership->first();
-        $managers = $leadership->reject(fn ($item) => $executive && $item->is($executive))->values();
         $exOfficials = $cards->where("category", "Ex-Officials")->values();
+        $management = $cards->where("category", "Management")->values();
     @endphp
 
     <section
@@ -213,153 +211,37 @@
                 @endforeach
             </div>
 
-            <div x-show="peopleTab === 'commissioners'" x-cloak>
-                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
-                    @forelse ($commissioners as $person)
-                        @php
-                            $bioSections = collect($person->data["bio_sections"] ?? [])
-                                ->filter(fn ($section) => ! empty($section["heading"]) || ! empty($section["body"]));
+            @php
+                $peopleGroups = [
+                    "commissioners" => [
+                        "items" => $commissioners,
+                        "grid" => "lg:grid-cols-5",
+                        "empty" => "No commissioners have been published yet.",
+                    ],
+                    "exOfficials" => [
+                        "items" => $exOfficials,
+                        "grid" => "lg:grid-cols-3",
+                        "empty" => "No ex-officials have been published yet.",
+                    ],
+                    "management" => [
+                        "items" => $management,
+                        "grid" => "lg:grid-cols-4",
+                        "empty" => "No management roles have been published yet.",
+                    ],
+                ];
+            @endphp
 
-                            if ($bioSections->isEmpty() && $person->description) {
-                                $bioSections = collect([
-                                    [
-                                        "heading" => "Professional Background",
-                                        "body" => $person->description,
-                                    ],
-                                    [
-                                        "heading" => "Education & Certifications",
-                                        "body" => "This profile can be expanded in the CMS with education, certifications, and professional development details.",
-                                    ],
-                                ]);
-                            }
-                        @endphp
-                        <article class="flex flex-col items-center rounded-lg bg-white p-4 text-center shadow" x-data="{ bioOpen: false }">
-                            @if ($person->image_url)
-                                <img src="{{ $person->image_url }}?v={{ $person->updated_at->timestamp }}" class="mb-4 h-40 w-32 rounded-md object-cover transition duration-300 hover:scale-105" alt="{{ $person->alt_text ?: $person->title }}">
-                            @endif
-                            <h3 class="text-lg font-bold">{{ $person->title }}</h3>
-                            <p class="text-sm text-gray-600">{{ $person->subtitle }}</p>
-                            @if ($bioSections->isNotEmpty())
-                                <button
-                                    type="button"
-                                    @click="bioOpen = true"
-                                    class="mt-3 text-sm font-semibold text-green-700 hover:underline"
-                                >
-                                    View Biography
-                                </button>
-                            @endif
-
-                            @if ($bioSections->isNotEmpty())
-                                <div
-                                    x-show="bioOpen"
-                                    x-cloak
-                                    x-transition.opacity.duration.300ms
-                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm"
-                                    @click.self="bioOpen = false"
-                                    @keydown.escape.window="bioOpen = false"
-                                >
-                                    <div
-                                        x-show="bioOpen"
-                                        x-transition:enter="transition ease-out duration-300"
-                                        x-transition:enter-start="opacity-0 translate-y-4 scale-95"
-                                        x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                                        x-transition:leave="transition ease-in duration-200"
-                                        x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-                                        x-transition:leave-end="opacity-0 translate-y-3 scale-95"
-                                        class="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6 text-left shadow-xl"
-                                    >
-                                        <button type="button" @click="bioOpen = false" class="absolute right-4 top-4 text-gray-400 transition hover:text-gray-600" aria-label="Close biography">
-                                            <i class="fa-solid fa-xmark text-xl"></i>
-                                        </button>
-                                        <div class="mb-6 text-center">
-                                            @if ($person->image_url)
-                                                <img src="{{ $person->image_url }}?v={{ $person->updated_at->timestamp }}" class="mx-auto mb-3 h-24 w-24 rounded-full object-cover" alt="{{ $person->alt_text ?: $person->title }}">
-                                            @endif
-                                            <h3 class="text-xl font-bold">{{ $person->title }}</h3>
-                                            <p class="text-gray-600">{{ $person->subtitle }}</p>
-                                        </div>
-                                        <div class="space-y-5 text-gray-700">
-                                            @foreach ($bioSections as $section)
-                                                <div>
-                                                    @if (! empty($section["heading"]))
-                                                        <h4 class="mb-2 font-semibold text-green-700">{{ $section["heading"] }}</h4>
-                                                    @endif
-                                                    @if (! empty($section["body"]))
-                                                        <div class="space-y-3 text-sm leading-6">
-                                                            @foreach (preg_split("/\n\s*\n/", $section["body"]) as $paragraph)
-                                                                <p>{{ $paragraph }}</p>
-                                                            @endforeach
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
-                        </article>
-                    @empty
-                        <p class="rounded-lg bg-white p-6 text-gray-600 shadow-sm">No commissioners have been published yet.</p>
-                    @endforelse
-                </div>
-            </div>
-
-            <div x-show="peopleTab === 'exOfficials'" x-cloak>
-                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    @forelse ($exOfficials as $person)
-                        <article class="flex flex-col items-center rounded-lg bg-white p-4 text-center shadow">
-                            @if ($person->image_url)
-                                <img src="{{ $person->image_url }}?v={{ $person->updated_at->timestamp }}" class="mb-4 h-40 w-32 rounded-md object-cover transition duration-300 hover:scale-105" alt="{{ $person->alt_text ?: $person->title }}">
-                            @endif
-                            <h3 class="text-lg font-bold">{{ $person->title }}</h3>
-                            <p class="text-sm text-gray-600">{{ $person->subtitle }}</p>
-                        </article>
-                    @empty
-                        <p class="rounded-lg bg-white p-6 text-gray-600 shadow-sm">No ex-officials have been published yet.</p>
-                    @endforelse
-                </div>
-            </div>
-
-            <div x-show="peopleTab === 'management'" x-cloak>
-                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                    @forelse ($leadership as $person)
-                        <article class="rounded-lg bg-white p-5 text-center shadow">
-                            <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-green-700">
-                                <i class="fa-solid fa-user-tie text-xl"></i>
-                            </div>
-                            <h3 class="text-lg font-bold">{{ $person->title }}</h3>
-                            @if ($person->description)
-                                <p class="mt-2 text-sm leading-6 text-gray-600">{{ $person->description }}</p>
-                            @endif
-                        </article>
-                    @empty
-                        <p class="rounded-lg bg-white p-6 text-gray-600 shadow-sm">No management roles have been published yet.</p>
-                    @endforelse
-                </div>
-            </div>
-
-            @if ($executive || $managers->isNotEmpty())
-                <div class="mt-12 rounded-lg bg-white px-5 py-8 shadow-sm">
-                    <h2 class="mb-8 text-center text-2xl font-bold text-slate-950">Organogram</h2>
-                    <div class="flex flex-col items-center">
-                        @if ($executive)
-                            <div class="rounded-lg bg-green-600 px-6 py-3 text-center font-bold text-white shadow">
-                                {{ $executive->title }}
-                            </div>
-                        @endif
-                        @if ($managers->isNotEmpty())
-                            <div class="h-12 w-1 bg-green-600"></div>
-                            <div class="flex flex-wrap justify-center gap-5 md:gap-12">
-                                @foreach ($managers as $manager)
-                                    <div class="rounded-lg bg-green-600 px-6 py-3 text-center font-bold text-white shadow">
-                                        {{ $manager->title }}
-                                    </div>
-                                @endforeach
-                            </div>
-                        @endif
+            @foreach ($peopleGroups as $key => $group)
+                <div x-show="peopleTab === '{{ $key }}'" x-cloak>
+                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 {{ $group['grid'] }}">
+                        @forelse ($group["items"] as $person)
+                            <x-about-person-card :person="$person" />
+                        @empty
+                            <p class="rounded-lg bg-white p-6 text-gray-600 shadow-sm">{{ $group["empty"] }}</p>
+                        @endforelse
                     </div>
                 </div>
-            @endif
+            @endforeach
         </div>
     </section>
 
@@ -384,8 +266,8 @@
             ->filter()
             ->pluck("id")
             ->merge($commissioners->pluck("id"))
-            ->merge($leadership->pluck("id"))
-            ->merge($exOfficials->pluck("id"));
+            ->merge($exOfficials->pluck("id"))
+            ->merge($management->pluck("id"));
 
         $remainingCards = $cards->reject(fn ($card) => $claimedCardIds->contains($card->id))->values();
     @endphp

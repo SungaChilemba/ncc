@@ -144,7 +144,7 @@
                                 <textarea name="bio_body[]" rows="5" placeholder="Section body" class="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm leading-6">{{ $sectionData['body'] ?? '' }}</textarea>
                             </div>
                         @endforeach
-                        <p class="text-xs text-slate-500">Used by commissioner cards when the category is Commissioners.</p>
+                        <p class="text-xs text-slate-500">Used by Commissioners, Ex-Officials, and Management cards to power the View Biography window.</p>
                     </div>
 
 @if ($section === 'advertise')

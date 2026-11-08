@@ -593,6 +593,47 @@ class PublicCmsContentTest extends TestCase
         $response->assertSee('peopleTab === \'management\'', false);
     }
 
+    public function test_about_people_tabs_use_the_same_card_and_biography_fields(): void
+    {
+        $people = [
+            ['category' => 'Commissioners', 'slug' => 'test-commissioner', 'title' => 'Commissioner Person', 'subtitle' => 'Chairperson'],
+            ['category' => 'Ex-Officials', 'slug' => 'test-ex-official', 'title' => 'Ex-Official Person', 'subtitle' => 'Former Chairperson'],
+            ['category' => 'Management', 'slug' => 'test-management', 'title' => 'Management Person', 'subtitle' => 'Finance Manager'],
+        ];
+
+        foreach ($people as $index => $person) {
+            SiteContent::create([
+                'section' => 'about',
+                'type' => 'card',
+                'slug' => $person['slug'],
+                'category' => $person['category'],
+                'title' => $person['title'],
+                'subtitle' => $person['subtitle'],
+                'is_published' => true,
+                'sort_order' => $index,
+                'data' => [
+                    'bio_sections' => [
+                        ['heading' => $person['category'].' Background', 'body' => $person['title'].' biography body.'],
+                    ],
+                ],
+            ]);
+        }
+
+        $response = $this->get(route('about'))->assertOk();
+        $content = $response->getContent();
+
+        foreach ($people as $person) {
+            $response->assertSee($person['title']);
+            $response->assertSee($person['subtitle']);
+            $response->assertSee($person['category'].' Background');
+            $response->assertSee($person['title'].' biography body.');
+        }
+
+        // All three tabs render the same biography action and modal.
+        $this->assertSame(3, substr_count($content, 'View Biography'));
+        $response->assertDontSee('>Organogram<', false);
+    }
+
     public function test_donate_page_renders_faqs_as_centered_accordion_on_top(): void
     {
         SiteContent::create([
