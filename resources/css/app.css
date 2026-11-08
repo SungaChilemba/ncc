@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Class-based dark mode: toggled via a `.dark` class on <html> (see admin login page). */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @source "../views/**/*.blade.php";
 @source "../../app/**/*.php";
 @source "../../config/**/*.php";

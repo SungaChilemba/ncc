@@ -184,19 +184,19 @@
 
 								@if ($heroSlides->count() > 1)
 												<button type="button" @click="prev()" aria-label="Previous slide"
-																class="absolute left-4 top-1/2 z-50 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/80 focus:outline-none focus:ring-2 focus:ring-white">
+																class="absolute left-4 top-1/2 z-30 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white transition:hover:bg-black/80 focus:outline-none focus:ring-2 focus:ring-white">
 																<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 																				<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
 																</svg>
 												</button>
 												<button type="button" @click="next()" aria-label="Next slide"
-																class="absolute right-4 top-1/2 z-50 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/80 focus:outline-none focus:ring-2 focus:ring-white">
+																class="absolute right-4 top-1/2 z-30 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white transition:hover:bg-black/80 focus:outline-none focus:ring-2 focus:ring-white">
 																<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 																				<path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
 																</svg>
 												</button>
 
-												<div class="absolute bottom-6 left-1/2 z-50 flex -translate-x-1/2 gap-2">
+												<div class="absolute bottom-6 left-1/2 z-30 flex -translate-x-1/2 gap-2">
 																@foreach ($heroSlides as $index => $slide)
 																				<button type="button" @click="active = {{ $index }}"
 																:aria-current="active === {{ $index }} ? 'true' : 'false'"
@@ -209,65 +209,7 @@
 				</section>
 				@endif
 
-				{{-- Why Partner With NCC — CMS cards group "Why Partner" else fallback static 3 --}}
-				<section class="w-full bg-white py-16 px-6 md:px-12">
-								<div class="max-w-6xl mx-auto text-center">
-												<h2 class="text-3xl md:text-4xl font-bold text-green-700 mb-6">Why Partner With the National Children's
-																Commission?</h2>
-												<p class="text-gray-700 max-w-3xl mx-auto mb-12">
-																Partnering with NCC means aligning your brand with a mission that protects and empowers children across
-																Malawi.
-																Together, we create sustainable change through education, advocacy, and community engagement.
-												</p>
-												<div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
-																@if ($whyPartnerCards->isNotEmpty())
-																				@foreach ($whyPartnerCards->take(3) as $card)
-																								<div class="bg-gray-50 rounded-lg shadow p-6 hover:shadow-lg transition">
-																												@if ($card->image_url)
-																																<img src="{{ $card->image_url }}?v={{ $card->updated_at->timestamp }}" alt=""
-																																				class="w-full h-40 object-cover rounded mb-4">
-																												@else
-																																<i class="fas fa-hand-holding-heart text-green-600 text-3xl mb-4 block"></i>
-																												@endif
-																												<h3 class="text-xl font-semibold text-gray-800 mb-2">{{ $card->title }}</h3>
-																												@if ($card->description)
-																																<p class="text-gray-600 text-sm leading-6">{{ $card->description }}</p>
-																												@endif
-																												@if ($card->button_text && $card->button_link)
-																																<a href="{{ $card->button_link }}"
-																																				class="mt-3 inline-flex text-sm font-semibold text-green-700 hover:underline">{{ $card->button_text }}</a>
-																												@endif
-																								</div>
-																				@endforeach
-																@else
-																				<div class="bg-gray-50 rounded-lg shadow p-6 hover:shadow-lg transition">
-																								<i class="fas fa-hand-holding-heart text-green-600 text-3xl mb-4"></i>
-																								<h3 class="text-xl font-semibold text-gray-800 mb-2">Social Impact</h3>
-																								<p class="text-gray-600">Your sponsorship directly supports programs that improve child welfare and
-																												community resilience.</p>
-																				</div>
-																				<div class="bg-gray-50 rounded-lg shadow p-6 hover:shadow-lg transition">
-																								<i class="fas fa-users text-green-600 text-3xl mb-4"></i>
-																								<h3 class="text-xl font-semibold text-gray-800 mb-2">Community Reach</h3>
-																								<p class="text-gray-600">NCC's initiatives span 28 districts, connecting your brand with thousands
-																												of families and local leaders.</p>
-																				</div>
-																				<div class="bg-gray-50 rounded-lg shadow p-6 hover:shadow-lg transition">
-																								<i class="fas fa-shield-alt text-green-600 text-3xl mb-4"></i>
-																								<h3 class="text-xl font-semibold text-gray-800 mb-2">Trusted Partnership</h3>
-																								<p class="text-gray-600">We uphold strict ethical standards and transparency, ensuring every
-																												collaboration reflects shared values.</p>
-																				</div>
-																@endif
-												</div>
-								</div>
-				</section>
-
-				<div class="flex justify-center my-6 px-6 md:px-12">
-								<hr class="w-full max-w-6xl border-t-2 border-green-600">
-				</div>
-
-				{{-- Sponsorship Opportunities — CMS group "Sponsorship Opportunities" / "Opportunities" else fallback --}}
+				{{-- Sponsorship Opportunities — pricing-led tier cards from CMS category "Sponsorship Opportunities" --}}
 				<section class="w-full bg-white py-16 px-6 md:px-12">
 								<div class="max-w-6xl mx-auto text-center">
 												<h2 class="text-3xl md:text-4xl font-bold text-green-700 mb-6">Sponsorship Opportunities</h2>
@@ -275,50 +217,72 @@
 																Choose from a range of advertising formats designed to maximize your brand's visibility while supporting
 																child protection initiatives.
 												</p>
-												<div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
-																@if ($sponsorshipCards->isNotEmpty())
-																				@foreach ($sponsorshipCards->take(6) as $card)
-																								<div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition border border-slate-100">
-																												@if ($card->image_url)
-																																<img src="{{ $card->image_url }}?v={{ $card->updated_at->timestamp }}" alt=""
-																																				class="w-full h-40 object-cover rounded mb-4">
-																												@else
-																																<i class="fas fa-bullhorn text-green-600 text-3xl mb-4 block"></i>
-																												@endif
-																												<h3 class="text-xl font-semibold text-gray-800 mb-2">{{ $card->title }}</h3>
-																												@if ($card->subtitle)
-																																<p class="text-xs font-semibold uppercase text-green-700 mb-2">{{ $card->subtitle }}</p>
-																												@endif
-																												@if ($card->description)
-																																<p class="text-gray-600 text-sm leading-6">{{ $card->description }}</p>
-																												@endif
-																												@if ($card->button_text && $card->button_link)
-																																<a href="{{ $card->button_link }}"
-																																				class="mt-3 inline-flex rounded-md bg-green-700 px-4 py-2 text-sm font-semibold text-white hover:bg-green-800">{{ $card->button_text }}</a>
-																												@endif
+												@if ($sponsorshipCards->isNotEmpty())
+												<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+																@foreach ($sponsorshipCards as $card)
+																@php
+																								$tierData = $card->data ?? [];
+																								$price = data_get($tierData, 'price', '');
+																								$badge = data_get($tierData, 'badge', null);
+																								$reach = data_get($tierData, 'reach', null);
+																								$placements = collect((array) data_get($tierData, 'placements', []));
+																								$includes = collect((array) data_get($tierData, 'includes', []));
+																@endphp
+																<article class="flex flex-col h-full rounded-lg border border-slate-200 bg-white shadow-sm hover:shadow-md transition">
+																								@if ($badge)
+																																<span class="mt-4 ml-4 inline-flex items-center rounded-md bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-700">{{ $badge }}</span>
+																								@endif
+																								<div class="px-6 pt-6">
+																																@if ($card->image_url)
+																																								<img src="{{ $card->image_url }}?v={{ $card->updated_at->timestamp }}" alt=""
+																																																				class="mb-4 h-32 w-full object-cover rounded-lg">
+																																@endif
+																																<h3 class="text-xl font-bold text-gray-900 mb-1">{{ $card->title }}</h3>
+																																@if ($card->subtitle)
+																																								<p class="text-sm font-semibold text-green-700 mb-4">{{ $card->subtitle }}</p>
+																																@endif
+																																@if ($price)
+																																								<div class="mb-3">
+																																												<span class="text-2xl font-bold text-gray-900">{{ $price }}</span>
+																																								</div>
+																																@endif
+																																@if ($reach)
+																																								<p class="text-sm text-gray-600 mb-4">{{ $reach }}</p>
+																																@endif
+																																@if ($placements->isNotEmpty())
+																																								<div class="flex flex-wrap gap-2 mb-4">
+																																												@foreach ($placements as $placement)
+																																																<span class="px-2.5 py-1 rounded-md border border-slate-200 bg-slate-50 text-xs text-slate-600">{{ $placement }}</span>
+																																												@endforeach
+																																								</div>
+																																@endif
+																																@if ($includes->isNotEmpty())
+																																								<ul class="space-y-2 mb-6">
+																																												@foreach ($includes as $include)
+																																																<li class="flex items-start text-sm text-gray-700">
+																																																<i class="fas fa-check text-green-600 mt-0.5 mr-2"></i><span>{{ $include }}</span>
+																																																</li>
+																																												@endforeach
+																																								</ul>
+																																@endif
 																								</div>
-																				@endforeach
-																@else
-																				<div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition border border-slate-50">
-																								<i class="fas fa-desktop text-green-600 text-3xl mb-4"></i>
-																								<h3 class="text-xl font-semibold text-gray-800 mb-2">Digital Display</h3>
-																								<p class="text-gray-600">Place your brand on select NCC news and article pages with banner ads that
-																												reach engaged readers.</p>
-																				</div>
-																				<div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition border border-slate-50">
-																								<i class="fas fa-envelope text-green-600 text-3xl mb-4"></i>
-																								<h3 class="text-xl font-semibold text-gray-800 mb-2">Newsletter Sponsorship</h3>
-																								<p class="text-gray-600">Feature your brand in our monthly stakeholder emails sent to partners,
-																												families, and community leaders.</p>
-																				</div>
-																				<div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition border border-slate-50">
-																								<i class="fas fa-users text-green-600 text-3xl mb-4"></i>
-																								<h3 class="text-xl font-semibold text-gray-800 mb-2">Event & Campaign Sponsorship</h3>
-																								<p class="text-gray-600">Gain visibility during major events such as the Day of the African Child
-																												and Day of Families.</p>
-																				</div>
-																@endif
+																								<div class="px-6 pb-6">
+																																@if ($card->button_text && $card->button_link)
+																																								<a href="{{ $card->button_link }}"
+																																																				class="w-full inline-flex items-center justify-center rounded-md bg-green-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-green-800">{{ $card->button_text }}</a>
+																																@else
+																																								<a href="#inquiry-form"
+																																																				class="w-full inline-flex items-center justify-center rounded-md bg-green-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-green-800">Start Inquiry</a>
+																																@endif
+																								</div>
+																</article>
+																@endforeach
 												</div>
+												@else
+												<div class="rounded-lg border border-slate-200 bg-slate-50 p-12 text-center">
+												<p class="text-gray-500">No sponsorship opportunities are currently published. Check back soon.</p>
+												</div>
+												@endif
 								</div>
 				</section>
 
@@ -331,214 +295,214 @@
 				<section class="bg-white px-4 py-12 sm:px-6 lg:px-8" id="inquiry-form">
 								<div class="mx-auto max-w-7xl">
 												<div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_28rem] lg:items-start">
-                {{-- Left: Inquiry / Application Form — wired to backend + dynamic --}}
-                <div x-data="{
-                    tab: 'campaign',
-                    company: '{{ old('company') }}',
-                    industry: '{{ old('industry') }}',
-                    objectives: `{{ old('objectives') }}`,
-                    start_date: '{{ old('start_date') }}',
-                    budget: '{{ old('budget') }}',
-                    contact_name: '{{ old('contact_name') }}',
-                    contact_email: '{{ old('contact_email') }}',
-                    contact_phone: '{{ old('contact_phone') }}',
-                    org_address: `{{ old('org_address') }}`,
-                    preferred_contact: '{{ old('preferred_contact') }}',
-                    agreement: false,
-                    submitting: false,
-                    success: false,
-                    reference: '',
-                    previewUrl: '',
-                    previewName: '',
-                    errors: {},
-                    async submit($event) {
-                        this.submitting = true; this.errors = {};
-                        const form = $event.target;
-                        const data = new FormData(form);
-                        if (!this.agreement) data.set('agreement','0'); else data.set('agreement','1');
-                        try {
-                            const res = await fetch('{{ route('advertise.inquire') }}', {
-                                method: 'POST',
-                                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                                body: data
-                            });
-                            const contentType = res.headers.get('content-type') || '';
-                            if (!contentType.includes('application/json')) {
-                                this.errors = { _form: ['The server returned an unexpected response (status ' + res.status + '). Please try again.'] };
-                                this.submitting = false; return;
-                            }
-                            const json = await res.json();
-                            if (!res.ok) {
-                                if (json.errors) {
-                                    this.errors = json.errors;
-                                    const hasContact = ['contact_name','contact_email','contact_phone','org_address','preferred_contact','agreement'].some(k=>json.errors[k]);
-                                    if(hasContact) this.tab='contact';
-                                }
-                                else this.errors = { _form: [json.message || 'Submission failed.'] };
-                                this.submitting = false; return;
-                            }
-                            this.success = true; this.reference = json.reference || '';
-                            this.errors = {}; this.tab='campaign';
-                            form.reset(); this.previewUrl=''; this.previewName=''; this.agreement=false;
-                            this.company='';this.industry='';this.objectives='';this.start_date='';this.budget='';this.contact_name='';this.contact_email='';this.contact_phone='';this.org_address='';this.preferred_contact='';
-                        } catch(e) {
-                            this.errors = { _form: ['Network error. Please try again.'] };
-                        }
-                        this.submitting = false;
-                    },
-                    onFile(e){
-                        const f = e.target.files[0];
-                        if(!f){ this.previewUrl=''; this.previewName=''; return; }
-                        this.previewName = f.name + ' (' + Math.round(f.size/1024) + ' KB)';
-                        if(f.type.startsWith('image/')) this.previewUrl = URL.createObjectURL(f); else this.previewUrl='';
-                    }
-                }">
-                    <h2 class="text-3xl md:text-4xl font-bold text-green-700 mb-4">Submit Your Advertising Inquiry</h2>
-                    <p class="text-gray-700 max-w-2xl mb-6">Complete the form below to apply for partnership. All submissions are reviewed by the NCC board to ensure compliance with our safeguarding standards.</p>
+                 {{-- Left: Inquiry / Application Form — wired to backend + dynamic --}}
+                 <div x-data="{
+                     tab: 'campaign',
+                     company: '{{ old('company') }}',
+                     industry: '{{ old('industry') }}',
+                     objectives: `{{ old('objectives') }}`,
+                     start_date: '{{ old('start_date') }}',
+                     budget: '{{ old('budget') }}',
+                     contact_name: '{{ old('contact_name') }}',
+                     contact_email: '{{ old('contact_email') }}',
+                     contact_phone: '{{ old('contact_phone') }}',
+                     org_address: `{{ old('org_address') }}`,
+                     preferred_contact: '{{ old('preferred_contact') }}',
+                     agreement: false,
+                     submitting: false,
+                     success: false,
+                     reference: '',
+                     previewUrl: '',
+                     previewName: '',
+                     errors: {},
+                     async submit($event) {
+                         this.submitting = true; this.errors = {};
+                         const form = $event.target;
+                         const data = new FormData(form);
+                         if (!this.agreement) data.set('agreement','0'); else data.set('agreement','1');
+                         try {
+                             const res = await fetch('{{ route('advertise.inquire') }}', {
+                                 method: 'POST',
+                                 headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                                 body: data
+                             });
+                             const contentType = res.headers.get('content-type') || '';
+                             if (!contentType.includes('application/json')) {
+                                 this.errors = { _form: ['The server returned an unexpected response (status ' + res.status + '). Please try again.'] };
+                                 this.submitting = false; return;
+                             }
+                             const json = await res.json();
+                             if (!res.ok) {
+                                 if (json.errors) {
+                                     this.errors = json.errors;
+                                     const hasContact = ['contact_name','contact_email','contact_phone','org_address','preferred_contact','agreement'].some(k=>json.errors[k]);
+                                     if(hasContact) this.tab='contact';
+                                 }
+                                 else this.errors = { _form: [json.message || 'Submission failed.'] };
+                                 this.submitting = false; return;
+                             }
+                             this.success = true; this.reference = json.reference || '';
+                             this.errors = {}; this.tab='campaign';
+                             form.reset(); this.previewUrl=''; this.previewName=''; this.agreement=false;
+                             this.company='';this.industry='';this.objectives='';this.start_date='';this.budget='';this.contact_name='';this.contact_email='';this.contact_phone='';this.org_address='';this.preferred_contact='';
+                         } catch(e) {
+                             this.errors = { _form: ['Network error. Please try again.'] };
+                         }
+                         this.submitting = false;
+                     },
+                     onFile(e){
+                         const f = e.target.files[0];
+                         if(!f){ this.previewUrl=''; this.previewName=''; return; }
+                         this.previewName = f.name + ' (' + Math.round(f.size/1024) + ' KB)';
+                         if(f.type.startsWith('image/')) this.previewUrl = URL.createObjectURL(f); else this.previewUrl='';
+                     }
+                 }">
+                     <h2 class="text-3xl md:text-4xl font-bold text-green-700 mb-4">Submit Your Advertising Inquiry</h2>
+                     <p class="text-gray-700 max-w-2xl mb-6">Complete the form below to apply for partnership. All submissions are reviewed by the NCC board to ensure compliance with our safeguarding standards.</p>
 
-                    @if (session('inquiry_status'))
-                        <div class="mb-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">
-                            {{ session('inquiry_status') }}
-                            @if (session('inquiry_reference'))
-                                <strong class="ml-1">{{ session('inquiry_reference') }}</strong>
-                            @endif
-                        </div>
-                    @endif
-                    <div x-show="success" class="mb-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800" x-cloak>
-                        <span x-text="'Inquiry received — reference ' + reference + '. NCC board will review within 5–7 days.'"></span>
-                    </div>
-                    <div x-show="errors._form" class="mb-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700" x-cloak>
-                        <template x-for="msg in (errors._form || [])" :key="msg"><p x-text="msg"></p></template>
-                    </div>
+                     @if (session('inquiry_status'))
+                         <div class="mb-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">
+                             {{ session('inquiry_status') }}
+                             @if (session('inquiry_reference'))
+                                 <strong class="ml-1">{{ session('inquiry_reference') }}</strong>
+                             @endif
+                         </div>
+                     @endif
+                     <div x-show="success" class="mb-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800" x-cloak>
+                         <span x-text="'Inquiry received — reference ' + reference + '. NCC board will review within 5–7 days.'"></span>
+                     </div>
+                     <div x-show="errors._form" class="mb-6 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700" x-cloak>
+                         <template x-for="msg in (errors._form || [])" :key="msg"><p x-text="msg"></p></template>
+                     </div>
 
-                    {{-- Tabs like reporting.blade.php:30 --}}
-                    <div class="mb-6 flex flex-wrap gap-3">
-                        <button type="button" @click="tab='campaign'" :class="tab==='campaign' ? 'bg-green-700 text-white' : 'border border-slate-300 bg-white text-slate-700 hover:border-green-700 hover:text-green-700'" class="rounded-md px-4 py-2 text-sm font-semibold transition">Campaign Details</button>
-                        <button type="button" @click="tab='contact'" :class="tab==='contact' ? 'bg-green-700 text-white' : 'border border-slate-300 bg-white text-slate-700 hover:border-green-700 hover:text-green-700'" class="rounded-md px-4 py-2 text-sm font-semibold transition">Contact Details</button>
-                    </div>
+                     {{-- Tabs like reporting.blade.php:30 --}}
+                     <div class="mb-6 flex flex-wrap gap-3">
+                         <button type="button" @click="tab='campaign'" :class="tab==='campaign' ? 'bg-green-700 text-white' : 'border border-slate-300 bg-white text-slate-700 hover:border-green-700 hover:text-green-700'" class="rounded-md px-4 py-2 text-sm font-semibold transition">Campaign Details</button>
+                         <button type="button" @click="tab='contact'" :class="tab==='contact' ? 'bg-green-700 text-white' : 'border border-slate-300 bg-white text-slate-700 hover:border-green-700 hover:text-green-700'" class="rounded-md px-4 py-2 text-sm font-semibold transition">Contact Details</button>
+                     </div>
 
-                    <form @submit.prevent="submit($event)" action="{{ route('advertise.inquire') }}" method="POST" enctype="multipart/form-data"
-                        class="bg-white rounded-lg border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
-                        @csrf
-                        {{-- Campaign Details Tab --}}
-                        <div x-show="tab==='campaign'" x-transition class="space-y-6">
-                        <div>
-                            <label for="company" class="block text-sm font-semibold text-slate-800">Company / Organization Name</label>
-                            <input type="text" id="company" name="company" x-model="company" required
-                                class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" :class="errors.company ? 'border-red-400' : ''">
-                            <template x-if="errors.company"><p class="mt-1 text-sm text-red-600" x-text="errors.company[0]"></p></template>
-                            @error('company')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
-                        </div>
-                        <div>
-                            <label for="industry" class="block text-sm font-semibold text-slate-800">Industry / Sector</label>
-                            <input type="text" id="industry" name="industry" x-model="industry" required
-                                class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" :class="errors.industry ? 'border-red-400' : ''">
-                            <template x-if="errors.industry"><p class="mt-1 text-sm text-red-600" x-text="errors.industry[0]"></p></template>
-                            @error('industry')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
-                        </div>
-                        <div>
-                            <label for="objectives" class="block text-sm font-semibold text-slate-800">Campaign Objectives</label>
-                            <textarea id="objectives" name="objectives" x-model="objectives" rows="4" required
-                                class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" :class="errors.objectives ? 'border-red-400' : ''"></textarea>
-                            <p class="mt-1 text-xs text-slate-500" x-text="objectives.length + '/2000'"></p>
-                            <template x-if="errors.objectives"><p class="mt-1 text-sm text-red-600" x-text="errors.objectives[0]"></p></template>
-                            @error('objectives')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
-                        </div>
-                        <div>
-                            <label for="start_date" class="block text-sm font-semibold text-slate-800">Target Start Date</label>
-                            <input type="date" id="start_date" name="start_date" x-model="start_date" required
-                                class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" :class="errors.start_date ? 'border-red-400' : ''">
-                            <template x-if="errors.start_date"><p class="mt-1 text-sm text-red-600" x-text="errors.start_date[0]"></p></template>
-                            @error('start_date')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
-                        </div>
-                        <div>
-                            <label for="budget" class="block text-sm font-semibold text-slate-800">Budget Scope</label>
-                            <input type="text" id="budget" name="budget" x-model="budget" placeholder="e.g. MWK 500,000"
-                                class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" :class="errors.budget ? 'border-red-400' : ''">
-                            <template x-if="errors.budget"><p class="mt-1 text-sm text-red-600" x-text="errors.budget[0]"></p></template>
-                            @error('budget')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
-                        </div>
-                        <div>
-                            <label for="artwork" class="block text-sm font-semibold text-slate-800">Upload Proposed Ad Artwork</label>
-                            <input type="file" id="artwork" name="artwork" accept="image/*,application/pdf" @change="onFile($event)"
-                                class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1 file:text-sm file:font-semibold file:text-slate-700" :class="errors.artwork ? 'border-red-400' : ''">
-                            <template x-if="previewName"><p class="mt-2 text-xs font-semibold text-green-700" x-text="previewName"></p></template>
-                            <template x-if="previewUrl"><img :src="previewUrl" alt="Preview" class="mt-2 h-24 w-auto rounded border"></template>
-                            <template x-if="errors.artwork"><p class="mt-1 text-sm text-red-600" x-text="errors.artwork[0]"></p></template>
-                            @error('artwork')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
-                            <p class="mt-1 text-xs text-slate-500">JPG/PNG/WEBP/PDF, max 5 MB.</p>
-                        </div>
-                        <div class="flex justify-end">
-                            <button type="button" @click="tab='contact'" class="rounded-md border border-green-600 px-5 py-2 text-sm font-semibold text-green-700 hover:bg-green-50">Next: Contact Details →</button>
-                        </div>
-                        </div>
+                     <form @submit.prevent="submit($event)" action="{{ route('advertise.inquire') }}" method="POST" enctype="multipart/form-data"
+                         class="bg-white rounded-lg border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
+                         @csrf
+                         {{-- Campaign Details Tab --}}
+                         <div x-show="tab==='campaign'" x-transition class="space-y-6">
+                         <div>
+                             <label for="company" class="block text-sm font-semibold text-slate-800">Company / Organization Name</label>
+                             <input type="text" id="company" name="company" x-model="company" required
+                                 class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" :class="errors.company ? 'border-red-400' : ''">
+                             <template x-if="errors.company"><p class="mt-1 text-sm text-red-600" x-text="errors.company[0]"></p></template>
+                             @error('company')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                         </div>
+                         <div>
+                             <label for="industry" class="block text-sm font-semibold text-slate-800">Industry / Sector</label>
+                             <input type="text" id="industry" name="industry" x-model="industry" required
+                                 class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" :class="errors.industry ? 'border-red-400' : ''">
+                             <template x-if="errors.industry"><p class="mt-1 text-sm text-red-600" x-text="errors.industry[0]"></p></template>
+                             @error('industry')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                         </div>
+                         <div>
+                             <label for="objectives" class="block text-sm font-semibold text-slate-800">Campaign Objectives</label>
+                             <textarea id="objectives" name="objectives" x-model="objectives" rows="4" required
+                                 class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" :class="errors.objectives ? 'border-red-400' : ''"></textarea>
+                             <p class="mt-1 text-xs text-slate-500" x-text="objectives.length + '/2000'"></p>
+                             <template x-if="errors.objectives"><p class="mt-1 text-sm text-red-600" x-text="errors.objectives[0]"></p></template>
+                             @error('objectives')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                         </div>
+                         <div>
+                             <label for="start_date" class="block text-sm font-semibold text-slate-800">Target Start Date</label>
+                             <input type="date" id="start_date" name="start_date" x-model="start_date" required
+                                 class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" :class="errors.start_date ? 'border-red-400' : ''">
+                             <template x-if="errors.start_date"><p class="mt-1 text-sm text-red-600" x-text="errors.start_date[0]"></p></template>
+                             @error('start_date')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                         </div>
+                         <div>
+                             <label for="budget" class="block text-sm font-semibold text-slate-800">Budget Scope</label>
+                             <input type="text" id="budget" name="budget" x-model="budget" placeholder="e.g. MWK 500,000"
+                                 class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" :class="errors.budget ? 'border-red-400' : ''">
+                             <template x-if="errors.budget"><p class="mt-1 text-sm text-red-600" x-text="errors.budget[0]"></p></template>
+                             @error('budget')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                         </div>
+                         <div>
+                             <label for="artwork" class="block text-sm font-semibold text-slate-800">Upload Proposed Ad Artwork</label>
+                             <input type="file" id="artwork" name="artwork" accept="image/*,application/pdf" @change="onFile($event)"
+                                 class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1 file:text-sm file:font-semibold file:text-slate-700" :class="errors.artwork ? 'border-red-400' : ''">
+                             <template x-if="previewName"><p class="mt-2 text-xs font-semibold text-green-700" x-text="previewName"></p></template>
+                             <template x-if="previewUrl"><img :src="previewUrl" alt="Preview" class="mt-2 h-24 w-auto rounded border"></template>
+                             <template x-if="errors.artwork"><p class="mt-1 text-sm text-red-600" x-text="errors.artwork[0]"></p></template>
+                             @error('artwork')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                             <p class="mt-1 text-xs text-slate-500">JPG/PNG/WEBP/PDF, max 5 MB.</p>
+                         </div>
+                         <div class="flex justify-end">
+                             <button type="button" @click="tab='contact'" class="rounded-md border border-green-600 px-5 py-2 text-sm font-semibold text-green-700 hover:bg-green-50">Next: Contact Details →</button>
+                         </div>
+                         </div>
 
-                        {{-- Contact Details Tab --}}
-                        <div x-show="tab==='contact'" x-cloak x-transition class="space-y-6">
-                            <p class="text-sm text-slate-500">Provide a reachable contact for NCC board follow-up within 5–7 days.</p>
-                            <div>
-                                <label for="contact_name" class="block text-sm font-semibold text-slate-800">Contact Person Name</label>
-                                <input type="text" id="contact_name" name="contact_name" x-model="contact_name" required
-                                    class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" :class="errors.contact_name ? 'border-red-400' : ''">
-                                <template x-if="errors.contact_name"><p class="mt-1 text-sm text-red-600" x-text="errors.contact_name[0]"></p></template>
-                                @error('contact_name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
-                            </div>
-                            <div class="grid gap-5 md:grid-cols-2">
-                                <div>
-                                    <label for="contact_email" class="block text-sm font-semibold text-slate-800">Email Address</label>
-                                    <input type="email" id="contact_email" name="contact_email" x-model="contact_email" required
-                                        class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" :class="errors.contact_email ? 'border-red-400' : ''">
-                                    <template x-if="errors.contact_email"><p class="mt-1 text-sm text-red-600" x-text="errors.contact_email[0]"></p></template>
-                                    @error('contact_email')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
-                                </div>
-                                <div>
-                                    <label for="contact_phone" class="block text-sm font-semibold text-slate-800">Phone Number</label>
-                                    <input type="tel" id="contact_phone" name="contact_phone" x-model="contact_phone" placeholder="+265 ..." required
-                                        class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" :class="errors.contact_phone ? 'border-red-400' : ''">
-                                    <template x-if="errors.contact_phone"><p class="mt-1 text-sm text-red-600" x-text="errors.contact_phone[0]"></p></template>
-                                    @error('contact_phone')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
-                                </div>
-                            </div>
-                            <div>
-                                <label for="org_address" class="block text-sm font-semibold text-slate-800">Organization Address</label>
-                                <input type="text" id="org_address" name="org_address" x-model="org_address" placeholder="e.g. Area 47, Lilongwe"
-                                    class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" :class="errors.org_address ? 'border-red-400' : ''">
-                                <template x-if="errors.org_address"><p class="mt-1 text-sm text-red-600" x-text="errors.org_address[0]"></p></template>
-                            </div>
-                            <div>
-                                <label for="preferred_contact" class="block text-sm font-semibold text-slate-800">Preferred Contact Method</label>
-                                <select id="preferred_contact" name="preferred_contact" x-model="preferred_contact" required
-                                    class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" :class="errors.preferred_contact ? 'border-red-400' : ''">
-                                    <option value="">Select method</option>
-                                    <option>Email</option>
-                                    <option>Phone</option>
-                                    <option>WhatsApp</option>
-                                </select>
-                                <template x-if="errors.preferred_contact"><p class="mt-1 text-sm text-red-600" x-text="errors.preferred_contact[0]"></p></template>
-                                @error('preferred_contact')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <input type="checkbox" id="agreement" name="agreement" x-model="agreement" value="1" required
-                                    class="h-5 w-5 rounded border-slate-300 text-green-600 focus:ring-green-600">
-                                <label for="agreement" class="text-sm text-slate-700">I confirm my campaign complies with NCC's safeguarding guidelines.</label>
-                            </div>
-                            <template x-if="errors.agreement"><p class="text-sm text-red-600" x-text="errors.agreement[0]"></p></template>
-                            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                <button type="button" @click="tab='campaign'" class="rounded-md border border-slate-300 px-5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">← Back to Campaign</button>
-                                <button type="submit" :disabled="submitting || !agreement"
-                                    class="rounded-md bg-green-600 px-6 py-2 font-semibold text-white transition hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed" x-text="submitting ? 'Submitting...' : 'Submit Inquiry'"></button>
-                            </div>
-                            <p class="text-sm text-gray-500 text-center">Reviewed by NCC board within 5–7 days.</p>
-                        </div>
-                    </form>
-                </div>
+                         {{-- Contact Details Tab --}}
+                         <div x-show="tab==='contact'" x-cloak x-transition class="space-y-6">
+                             <p class="text-sm text-slate-500">Provide a reachable contact for NCC board follow-up within 5–7 days.</p>
+                             <div>
+                                 <label for="contact_name" class="block text-sm font-semibold text-slate-800">Contact Person Name</label>
+                                 <input type="text" id="contact_name" name="contact_name" x-model="contact_name" required
+                                     class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" :class="errors.contact_name ? 'border-red-400' : ''">
+                                 <template x-if="errors.contact_name"><p class="mt-1 text-sm text-red-600" x-text="errors.contact_name[0]"></p></template>
+                                 @error('contact_name')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                             </div>
+                             <div class="grid gap-5 md:grid-cols-2">
+                                 <div>
+                                     <label for="contact_email" class="block text-sm font-semibold text-slate-800">Email Address</label>
+                                     <input type="email" id="contact_email" name="contact_email" x-model="contact_email" required
+                                         class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" :class="errors.contact_email ? 'border-red-400' : ''">
+                                     <template x-if="errors.contact_email"><p class="mt-1 text-sm text-red-600" x-text="errors.contact_email[0]"></p></template>
+                                     @error('contact_email')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                                 </div>
+                                 <div>
+                                     <label for="contact_phone" class="block text-sm font-semibold text-slate-800">Phone Number</label>
+                                     <input type="tel" id="contact_phone" name="contact_phone" x-model="contact_phone" placeholder="+265 ..." required
+                                         class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" :class="errors.contact_phone ? 'border-red-400' : ''">
+                                     <template x-if="errors.contact_phone"><p class="mt-1 text-sm text-red-600" x-text="errors.contact_phone[0]"></p></template>
+                                     @error('contact_phone')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                                 </div>
+                             </div>
+                             <div>
+                                 <label for="org_address" class="block text-sm font-semibold text-slate-800">Organization Address</label>
+                                 <input type="text" id="org_address" name="org_address" x-model="org_address" placeholder="e.g. Area 47, Lilongwe"
+                                     class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" :class="errors.org_address ? 'border-red-400' : ''">
+                                 <template x-if="errors.org_address"><p class="mt-1 text-sm text-red-600" x-text="errors.org_address[0]"></p></template>
+                             </div>
+                             <div>
+                                 <label for="preferred_contact" class="block text-sm font-semibold text-slate-800">Preferred Contact Method</label>
+                                 <select id="preferred_contact" name="preferred_contact" x-model="preferred_contact" required
+                                     class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100" :class="errors.preferred_contact ? 'border-red-400' : ''">
+                                     <option value="">Select method</option>
+                                     <option>Email</option>
+                                     <option>Phone</option>
+                                     <option>WhatsApp</option>
+                                 </select>
+                                 <template x-if="errors.preferred_contact"><p class="mt-1 text-sm text-red-600" x-text="errors.preferred_contact[0]"></p></template>
+                                 @error('preferred_contact')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                             </div>
+                             <div class="flex items-center gap-2">
+                                 <input type="checkbox" id="agreement" name="agreement" x-model="agreement" value="1" required
+                                     class="h-5 w-5 rounded border-slate-300 text-green-600 focus:ring-green-600">
+                                 <label for="agreement" class="text-sm text-slate-700">I confirm my campaign complies with NCC's safeguarding guidelines.</label>
+                             </div>
+                             <template x-if="errors.agreement"><p class="text-sm text-red-600" x-text="errors.agreement[0]"></p></template>
+                             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                 <button type="button" @click="tab='campaign'" class="rounded-md border border-slate-300 px-5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">← Back to Campaign</button>
+                                 <button type="submit" :disabled="submitting || !agreement"
+                                     class="rounded-md bg-green-600 px-6 py-2 font-semibold text-white transition hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed" x-text="submitting ? 'Submitting...' : 'Submit Inquiry'"></button>
+                             </div>
+                             <p class="text-sm text-gray-500 text-center">Reviewed by NCC board within 5–7 days.</p>
+                         </div>
+                     </form>
+                 </div>
 
 																{{-- Right: Ethical & Safeguarding Guidelines (sticky on desktop like reporting Instructions) --}}
 																<aside id="ethical-guidelines"
 																				class="rounded-lg border border-slate-200 bg-red-50 p-5 lg:sticky lg:top-24">
 																				<h2 class="text-xl font-bold text-red-700">Ethical & Safeguarding Guidelines</h2>
 																				<p class="mt-2 text-sm leading-6 text-gray-700">NCC is committed to protecting children and ensuring
-																								that all advertising partnerships align with our values of safety, education, and empowerment.</p>
+																							that all advertising partnerships align with our values of safety, education, and empowerment.</p>
 																				@if ($guidelineCards->isNotEmpty())
 																								<div class="mt-4 space-y-3">
 																												@foreach ($guidelineCards as $g)
@@ -573,6 +537,22 @@
 
 				{{-- Sponsored Ads (CMS-driven carousel, shared with /latest-news) --}}
 				<x-sponsored-ads-carousel :ads="$sponsoredAds" />
+
+				{{-- Why Partner With NCC — FAQ style (expandable), moved below sponsored ads --}}
+				@php
+					$whyPartnerFaqs = $whyPartnerCards->isNotEmpty()
+						? $whyPartnerCards->take(3)
+						: collect([
+							(object) ["title" => "Social Impact", "description" => "Your sponsorship directly supports programs that improve child welfare and community resilience."],
+							(object) ["title" => "Community Reach", "description" => "NCC's initiatives span 28 districts, connecting your brand with thousands of families and local leaders."],
+							(object) ["title" => "Trusted Partnership", "description" => "We uphold strict ethical standards and transparency, ensuring every collaboration reflects shared values."],
+						]);
+				@endphp
+				@include("partials.faq-accordion", [
+					"faqs" => $whyPartnerFaqs,
+					"title" => "Why Partner With the National Children's Commission?",
+					"subtitle" => "Partnering with NCC means aligning your brand with a mission that protects and empowers children across Malawi. Together, we create sustainable change through education, advocacy, and community engagement.",
+				])
 
 				{{-- Fallback generic CMS groups not covered above (e.g. admin-added custom categories) --}}
 				@php

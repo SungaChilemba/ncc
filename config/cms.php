@@ -24,6 +24,7 @@ return [
 
     'advertise_categories' => [
         'Opportunities' => 'Opportunities',
+        'Sponsorship Opportunities' => 'Sponsorship Opportunities',
         'Sponsored Ads' => 'Sponsored Ads',
         'Partnership' => 'Partnership',
     ],
