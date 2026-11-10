@@ -8,6 +8,7 @@ use App\Models\ContentRevision;
 use App\Models\MediaAsset;
 use App\Models\SiteContent;
 use App\Support\AdEnquiries;
+use App\Support\CmsEditorSchema;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,6 +25,8 @@ class ContentController extends Controller
     {
         $sectionConfig = $this->sectionConfig($section);
         $typeOptions = $this->typeOptions($sectionConfig);
+        $editorSchema = CmsEditorSchema::forSection($section);
+        $categoryOptions = $this->sectionCategoryOptions($section, $sectionConfig);
 
         $contents = $this->contentQuery($request, $section)
             ->paginate(12)
@@ -39,7 +42,9 @@ class ContentController extends Controller
             'typeOptions',
             'mediaAssets',
             'enquiryStates',
-            'currentReview'
+            'currentReview',
+            'editorSchema',
+            'categoryOptions'
         ));
     }
 
@@ -119,8 +124,21 @@ class ContentController extends Controller
         $sectionConfig = $this->sectionConfig($section);
         $typeOptions = $this->typeOptions($sectionConfig);
         $mediaAssets = MediaAsset::latest()->take(18)->get();
+        $editorSchema = CmsEditorSchema::forSection($section);
+        $selectedType = $request->input('type', array_key_first($typeOptions));
+        $selectedCategory = $request->input('category', '');
+        $initialSchema = CmsEditorSchema::for($section, (string) $selectedType, (string) $selectedCategory);
 
-        return view('admin.contents.editor', compact('section', 'sectionConfig', 'typeOptions', 'mediaAssets'));
+        return view('admin.contents.editor', compact(
+            'section',
+            'sectionConfig',
+            'typeOptions',
+            'mediaAssets',
+            'editorSchema',
+            'initialSchema',
+            'selectedType',
+            'selectedCategory'
+        ));
     }
 
     public function edit(Request $request, string $section, int $id)
@@ -128,6 +146,10 @@ class ContentController extends Controller
         $sectionConfig = $this->sectionConfig($section);
         $typeOptions = $this->typeOptions($sectionConfig);
         $content = SiteContent::where('section', $section)->findOrFail($id);
+        $editorSchema = CmsEditorSchema::forSection($section);
+        $selectedType = $content->type;
+        $selectedCategory = $content->category ?? '';
+        $initialSchema = CmsEditorSchema::for($section, (string) $selectedType, (string) $selectedCategory);
 
         return view('admin.contents.editor', [
             'section' => $section,
@@ -135,6 +157,10 @@ class ContentController extends Controller
             'typeOptions' => $typeOptions,
             'mediaAssets' => MediaAsset::latest()->take(18)->get(),
             'editing' => $content,
+            'editorSchema' => $editorSchema,
+            'initialSchema' => $initialSchema,
+            'selectedType' => $selectedType,
+            'selectedCategory' => $selectedCategory,
         ]);
     }
 
@@ -415,6 +441,27 @@ class ContentController extends Controller
             ->all();
     }
 
+    /**
+     * Fixed category lists for the index filter. Sections whose types allow
+     * custom categories (e.g. News) have no fixed list and get no filter.
+     *
+     * @return array<string, string>
+     */
+    private function sectionCategoryOptions(string $section, array $sectionConfig): array
+    {
+        $options = [];
+
+        foreach ($sectionConfig['types'] ?? [] as $type) {
+            $schema = CmsEditorSchema::for($section, $type);
+
+            if (($schema['category_options'] ?? null) !== null && ! ($schema['category_allow_custom'] ?? false)) {
+                $options = array_merge($options, $schema['category_options']);
+            }
+        }
+
+        return array_unique($options);
+    }
+
     private function canBePublished(string $type): bool
     {
         return $type !== 'submission';
@@ -457,6 +504,7 @@ class ContentController extends Controller
 
         return SiteContent::forSection($section)
             ->when($request->filled('type'), fn ($query) => $query->where('type', $request->string('type')->toString()))
+            ->when($request->filled('category'), fn ($query) => $query->where('category', $request->string('category')->toString()))
             ->when($request->filled('status'), function ($query) use ($request, $section) {
                 $status = $request->string('status')->toString();
 

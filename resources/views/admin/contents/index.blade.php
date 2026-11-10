@@ -17,6 +17,11 @@
     }
 
     $isEnquiryBoard = $section === 'advertise' && $currentStatus === 'enquiries';
+    $currentCategory = request('category', '');
+    $showCategoryColumn = collect($editorSchema['types'] ?? [])->contains(
+        fn (array $schema) => ! empty($schema['category_options'] ?? [])
+    );
+    $showOrderColumn = $section !== 'news';
     $enquiryPills = [
         'pending_review' => ['label' => 'Pending', 'class' => 'bg-amber-50 text-amber-700'],
         'approved' => ['label' => 'Live', 'class' => 'bg-green-50 text-green-700'],
@@ -34,10 +39,29 @@
         <div>
             <div class="flex flex-wrap items-center gap-3">
                 <h2 class="text-2xl font-semibold text-slate-950">All {{ $sectionConfig['label'] }}</h2>
-                <a href="{{ route('admin.contents.create', ['section' => $section, 'type' => request('type')]) }}" class="inline-flex items-center rounded-md border border-green-700 px-3 py-1.5 text-sm font-semibold text-green-700 hover:bg-green-50">
-                    Add New
+                <a href="{{ route($sectionConfig['route']) }}" target="_blank" class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 hover:border-green-600 hover:text-green-700">
+                    <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                    View page
                 </a>
+                <details class="group relative" data-add-new-chooser>
+                    <summary class="inline-flex cursor-pointer list-none items-center rounded-md border border-green-700 bg-green-700 px-3 py-1.5 text-sm font-semibold text-white hover:bg-green-800 [&::-webkit-details-marker]:hidden">
+                        Add New
+                        <i class="fa-solid fa-chevron-down text-xs transition group-open:rotate-180"></i>
+                    </summary>
+                    <div class="absolute left-0 z-20 mt-2 w-80 rounded-lg border border-slate-200 bg-white p-1.5 shadow-xl">
+                        <p class="px-3 pb-2 pt-2 text-xs font-semibold uppercase tracking-wide text-slate-400">What do you want to add?</p>
+                        @foreach ($editorSchema['types'] ?? [] as $chooserType => $chooserSchema)
+                            <a href="{{ route('admin.contents.create', ['section' => $section, 'type' => $chooserType]) }}" class="block rounded-md px-3 py-2.5 hover:bg-green-50">
+                                <span class="block text-sm font-semibold text-slate-900">{{ $chooserSchema['type_label'] }}</span>
+                                @if (! empty($chooserSchema['summary']))
+                                    <span class="mt-0.5 block text-xs leading-5 text-slate-500">{{ $chooserSchema['summary'] }}</span>
+                                @endif
+                            </a>
+                        @endforeach
+                    </div>
+                </details>
             </div>
+            <p class="mt-2 max-w-2xl text-sm text-slate-500">{{ $sectionConfig['description'] }}</p>
             <div class="mt-3 flex flex-wrap items-center gap-2 text-sm">
                 @foreach ($statusLinks as $statusKey => $statusLabel)
                     <a href="{{ route('admin.contents.index', ['section' => $section] + ($statusKey === 'all' ? request()->except('status', 'page') : ['status' => $statusKey] + request()->except('status', 'page'))) }}" class="{{ $currentStatus === $statusKey || ($statusKey === 'all' && ! request('status')) ? 'font-semibold text-green-700' : 'text-slate-600 hover:text-green-700' }}">
@@ -71,6 +95,9 @@
             @if ($currentType)
                 <input type="hidden" name="type" value="{{ $currentType }}">
             @endif
+            @if ($currentCategory)
+                <input type="hidden" name="category" value="{{ $currentCategory }}">
+            @endif
             @if ($currentReview)
                 <input type="hidden" name="review" value="{{ $currentReview }}">
             @endif
@@ -89,7 +116,7 @@
             <button form="bulk-content-form" type="submit" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-green-600 hover:text-green-700">Apply</button>
         </div>
 
-        <form method="GET" action="{{ route('admin.contents.index', ['section' => $section]) }}" class="grid gap-2 sm:grid-cols-[12rem_12rem_auto]">
+        <form method="GET" action="{{ route('admin.contents.index', ['section' => $section]) }}" class="grid gap-2 sm:grid-cols-[12rem_12rem_auto] {{ ! empty($categoryOptions) ? 'lg:grid-cols-[12rem_12rem_12rem_auto]' : '' }}">
             @if (request('q'))
                 <input type="hidden" name="q" value="{{ request('q') }}">
             @endif
@@ -102,6 +129,14 @@
                     <option value="{{ $typeKey }}" @selected($currentType === $typeKey)>{{ $typeLabel }}</option>
                 @endforeach
             </select>
+            @if (! empty($categoryOptions))
+                <select name="category" class="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm" aria-label="Category">
+                    <option value="">All categories</option>
+                    @foreach ($categoryOptions as $categoryValue => $categoryLabel)
+                        <option value="{{ $categoryValue }}" @selected($currentCategory === $categoryValue)>{{ $categoryLabel }}</option>
+                    @endforeach
+                </select>
+            @endif
             <select name="status" class="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm">
                 <option value="">All statuses</option>
                 <option value="published" @selected($currentStatus === 'published')>Published</option>
@@ -132,10 +167,14 @@
                         </th>
                         <th class="px-4 py-3">Title</th>
                         <th class="px-4 py-3">Type</th>
-                        <th class="px-4 py-3">Category</th>
+                        @if ($showCategoryColumn)
+                            <th class="px-4 py-3">Category</th>
+                        @endif
                         <th class="px-4 py-3">Date</th>
                         <th class="px-4 py-3">Status</th>
-                        <th class="w-28 px-4 py-3">Order</th>
+                        @if ($showOrderColumn)
+                            <th class="w-28 px-4 py-3">Order</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -234,7 +273,9 @@
                                 </div>
                             </td>
                             <td class="px-4 py-4 text-slate-600">{{ $isEnquiry && $section === 'advertise' ? 'Ad Enquiry' : config('cms.types.' . $item->type, ucfirst($item->type)) }}</td>
-                            <td class="px-4 py-4 text-slate-600">{{ $item->category ?: '-' }}</td>
+                            @if ($showCategoryColumn)
+                                <td class="px-4 py-4 text-slate-600">{{ $item->category ?: '-' }}</td>
+                            @endif
                             <td class="px-4 py-4 text-slate-600">
                                 @if ($isEnquiry)
                                     {{ $submittedOn ?: '-' }}
@@ -255,13 +296,15 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-4 py-4">
-                                @if ($isEnquiry)
-                                    <span class="text-xs text-slate-400">—</span>
-                                @else
-                                    <input form="reorder-content-form" type="number" name="orders[{{ $item->id }}]" min="0" value="{{ $item->sort_order }}" class="w-20 rounded-md border border-slate-300 px-2 py-1 text-sm">
-                                @endif
-                            </td>
+                            @if ($showOrderColumn)
+                                <td class="px-4 py-4">
+                                    @if ($isEnquiry)
+                                        <span class="text-xs text-slate-400">—</span>
+                                    @else
+                                        <input form="reorder-content-form" type="number" name="orders[{{ $item->id }}]" min="0" value="{{ $item->sort_order }}" class="w-20 rounded-md border border-slate-300 px-2 py-1 text-sm">
+                                    @endif
+                                </td>
+                            @endif
                         </tr>
                     @empty
                         <tr>
@@ -288,9 +331,13 @@
         @endforeach
 
         <div class="flex flex-col gap-3 border-t border-slate-200 bg-slate-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-            <button form="reorder-content-form" type="submit" class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-green-600 hover:text-green-700">
-                Save Order
-            </button>
+            @if ($showOrderColumn)
+                <button form="reorder-content-form" type="submit" class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-green-600 hover:text-green-700">
+                    Save Order
+                </button>
+            @else
+                <span class="text-sm text-slate-500">Newest on top. Manage order with the type editor.</span>
+            @endif
             @if ($contents->hasPages())
                 <div>
                     {{ $contents->links() }}

@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'CMS') - {{ config('app.name') }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-900">
@@ -50,9 +51,12 @@
                 @if ($showCms)
                     <a href="{{ route('admin.media.index') }}" class="block rounded-md px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.media.*') ? 'bg-green-50 text-green-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' }}">Media Library</a>
                     <a href="{{ route('admin.newsletter.index') }}" class="block rounded-md px-3 py-2 text-sm font-semibold {{ request()->routeIs('admin.newsletter.*') ? 'bg-green-50 text-green-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' }}">Newsletter</a>
+
+                    <p class="mt-4 hidden px-3 text-xs font-semibold uppercase tracking-wide text-slate-400 lg:block">Website pages</p>
                     @foreach (config('cms.sections') as $key => $managedSection)
-                        <a href="{{ route('admin.contents.index', ['section' => $key]) }}" class="block whitespace-nowrap rounded-md px-3 py-2 text-sm font-semibold {{ request()->route('section') === $key ? 'bg-green-50 text-green-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' }}">
-                            {{ $managedSection['label'] }}
+                        <a href="{{ route('admin.contents.index', ['section' => $key]) }}" class="flex items-center gap-2.5 whitespace-nowrap rounded-md px-3 py-2 text-sm font-semibold {{ request()->route('section') === $key ? 'bg-green-50 text-green-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' }}">
+                            <i class="fa-solid {{ $managedSection['icon'] ?? 'fa-file' }} w-4 text-center text-xs {{ request()->route('section') === $key ? 'text-green-700' : 'text-slate-400' }}"></i>
+                            <span>{{ $managedSection['label'] }}</span>
                         </a>
                     @endforeach
                 @endif

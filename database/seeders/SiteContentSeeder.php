@@ -30,7 +30,11 @@ class SiteContentSeeder extends Seeder
         }
     }
 
-    private function rows(): array
+    /**
+     * Canonical test content rows. Public so parity tests can assert that
+     * every seeded section/type/category is valid for its configured page.
+     */
+    public function rows(): array
     {
         return [
             [
@@ -89,18 +93,6 @@ class SiteContentSeeder extends Seeder
                 'accent_color' => 'red',
                 'published_on' => '2025-05-01',
                 'sort_order' => 1,
-            ],
-            [
-                'section' => 'news',
-                'type' => 'hero',
-                'slug' => 'protect-families-and-children',
-                'title' => 'Protect Families & Children',
-                'category' => 'News',
-                'published_on' => '2026-06-02',
-                'description' => "The National Children's Commission joined the Ministry of Gender, Children, Disability and Social Welfare, development partners, traditional leaders, and community members in commemorating the International Day of Families and the International Day of Street-Connected Children at Lunzu Primary School Ground in Blantyre.\n\nThe commemoration was presided over by the Honourable Minister of Gender, Children, Disability and Social Welfare, Honourable Mary Thom Navicha, MP, and attended by traditional leaders led by Senior Chief Kapeni. The Commission was represented by Commissioner Julia Chimuna and members of the Secretariat. Held under the theme \"Families, Inequalities and Child Well being\", the event provided an opportunity for stakeholders to reflect on the importance of strong families in promoting child well being and addressing challenges affecting street-connected children.",
-                'image_path' => 'images/newsbanner.png',
-                'accent_color' => 'red',
-                'sort_order' => 0,
             ],
             [
                 'section' => 'news',
