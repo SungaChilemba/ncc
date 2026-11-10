@@ -92,6 +92,74 @@ section[id] {
     display: none !important;
 }
 
+/* ---------------------------------------------------------------------------
+   Admin shell: collapsible sidebar and dark-mode form controls.
+   The public site never receives the `dark` or `sidebar-collapsed` classes.
+--------------------------------------------------------------------------- */
+
+/* Native controls (date pickers, scrollbars, checkboxes) follow the theme. */
+.dark {
+    color-scheme: dark;
+}
+
+@media (max-width: 1023.98px) {
+    #admin-sidebar {
+        transform: translateX(-100%);
+        visibility: hidden;
+        transition: transform 220ms ease, visibility 0s linear 220ms, background-color 200ms ease, border-color 200ms ease;
+    }
+
+    #admin-sidebar.is-open {
+        transform: translateX(0);
+        visibility: visible;
+        transition: transform 220ms ease, visibility 0s linear 0s, background-color 200ms ease, border-color 200ms ease;
+    }
+}
+
+@media (min-width: 1024px) {
+    #admin-sidebar {
+        width: 16rem;
+        transition: width 220ms ease, background-color 200ms ease, border-color 200ms ease;
+    }
+
+    html.sidebar-collapsed #admin-sidebar {
+        width: 5rem;
+    }
+
+    html.sidebar-collapsed #admin-sidebar [data-nav-label],
+    html.sidebar-collapsed #admin-sidebar [data-nav-group] {
+        display: none;
+    }
+
+    html.sidebar-collapsed #admin-sidebar [data-nav-link] {
+        justify-content: center;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    html.sidebar-collapsed #admin-sidebar [data-nav-icon] {
+        font-size: 1rem;
+    }
+}
+
+/* Form fields without an explicit dark background still need to be legible. */
+.dark .admin-shell input:not([type="checkbox"]):not([type="radio"]),
+.dark .admin-shell select,
+.dark .admin-shell textarea {
+    background-color: var(--color-slate-900);
+    color: var(--color-slate-100);
+    border-color: var(--color-slate-700);
+}
+
+.dark .admin-shell ::placeholder {
+    color: var(--color-slate-500);
+}
+
+.dark .admin-shell select option {
+    background-color: var(--color-slate-900);
+    color: var(--color-slate-100);
+}
+
 /* FAQ accordion: native disclosure markers are hidden and the chevron rotates when open. */
 .faq-item > summary::-webkit-details-marker {
     display: none;

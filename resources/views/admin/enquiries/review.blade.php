@@ -6,10 +6,10 @@
     $reference = $enquiryData['reference_number'] ?? ('#' . $enquiry->id);
 
     $pills = [
-        'pending_review' => ['label' => 'Pending review', 'class' => 'border-amber-200 bg-amber-50 text-amber-700'],
-        'approved' => ['label' => 'Approved', 'class' => 'border-green-200 bg-green-50 text-green-700'],
-        'expired' => ['label' => 'Expired', 'class' => 'border-slate-200 bg-slate-100 text-slate-600'],
-        'rejected' => ['label' => 'Rejected', 'class' => 'border-red-200 bg-red-50 text-red-700'],
+        'pending_review' => ['label' => 'Pending review', 'class' => 'border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400'],
+        'approved' => ['label' => 'Approved', 'class' => 'border-green-200 dark:border-green-900/60 bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-400'],
+        'expired' => ['label' => 'Expired', 'class' => 'border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'],
+        'rejected' => ['label' => 'Rejected', 'class' => 'border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400'],
     ];
     $pill = $pills[$status] ?? $pills['pending_review'];
 
@@ -43,13 +43,13 @@
 @section('content')
     <div class="mb-5 flex flex-col gap-3" x-data="{ mode: @js($defaultMode) }">
         <div class="flex flex-wrap items-center justify-between gap-3">
-            <a href="{{ route('admin.contents.index', ['section' => 'advertise', 'status' => 'enquiries']) }}" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-green-700">
+            <a href="{{ route('admin.contents.index', ['section' => 'advertise', 'status' => 'enquiries']) }}" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-green-700 dark:hover:text-green-300">
                 <span aria-hidden="true">&larr;</span> Back to enquiries board
             </a>
             <div class="flex flex-wrap items-center gap-2">
                 <span class="rounded-full border px-2.5 py-1 text-xs font-semibold {{ $pill['class'] }}">{{ $pill['label'] }}</span>
                 @if ($submittedAt)
-                    <span class="text-xs text-slate-500">Received {{ $submittedAt->format('j M Y, g:ia') }}</span>
+                    <span class="text-xs text-slate-500 dark:text-slate-400">Received {{ $submittedAt->format('j M Y, g:ia') }}</span>
                 @endif
             </div>
         </div>
@@ -60,7 +60,7 @@
                     @continue
                 @endif
                 <a href="{{ route('admin.contents.index', ['section' => 'advertise', 'status' => 'enquiries', 'review' => $stateKey]) }}"
-                   class="rounded-full border border-slate-200 bg-white px-3 py-1 font-semibold text-slate-600 hover:border-green-600 hover:text-green-700">
+                   class="rounded-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1 font-semibold text-slate-600 dark:text-slate-400 hover:border-green-600 dark:hover:border-green-500 hover:text-green-700 dark:hover:text-green-300">
                     {{ $stateCount }} {{ \App\Support\AdEnquiries::LABELS[$stateKey] ?? \Illuminate\Support\Str::headline($stateKey) }}
                 </a>
             @endforeach
@@ -68,141 +68,141 @@
 
         <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
             <div class="space-y-5">
-                <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                    <h2 class="text-base font-semibold text-slate-950">Campaign brief</h2>
+                <section class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
+                    <h2 class="text-base font-semibold text-slate-950 dark:text-slate-100">Campaign brief</h2>
                     <dl class="mt-4 grid gap-x-6 gap-y-4 sm:grid-cols-2">
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Organisation</dt>
-                            <dd class="mt-1 text-sm font-medium text-slate-900">{{ $enquiryData['company'] ?? $enquiry->title }}</dd>
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Organisation</dt>
+                            <dd class="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">{{ $enquiryData['company'] ?? $enquiry->title }}</dd>
                         </div>
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Industry</dt>
-                            <dd class="mt-1 text-sm text-slate-700">{{ $enquiryData['industry'] ?? $enquiry->subtitle ?: '—' }}</dd>
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Industry</dt>
+                            <dd class="mt-1 text-sm text-slate-700 dark:text-slate-300">{{ $enquiryData['industry'] ?? $enquiry->subtitle ?: '—' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Preferred start</dt>
-                            <dd class="mt-1 text-sm text-slate-700">
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Preferred start</dt>
+                            <dd class="mt-1 text-sm text-slate-700 dark:text-slate-300">
                                 {{ filled($enquiryData['start_date'] ?? null) ? \Illuminate\Support\Carbon::parse($enquiryData['start_date'])->format('j M Y') : '—' }}
                             </dd>
                         </div>
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Budget</dt>
-                            <dd class="mt-1 text-sm text-slate-700">{{ $enquiryData['budget'] ?? 'Not stated' }}</dd>
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Budget</dt>
+                            <dd class="mt-1 text-sm text-slate-700 dark:text-slate-300">{{ $enquiryData['budget'] ?? 'Not stated' }}</dd>
                         </div>
                         <div class="sm:col-span-2">
-                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Objectives</dt>
-                            <dd class="mt-1 whitespace-pre-line text-sm leading-6 text-slate-700">{{ $enquiryData['objectives'] ?? $enquiry->description ?: '—' }}</dd>
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Objectives</dt>
+                            <dd class="mt-1 whitespace-pre-line text-sm leading-6 text-slate-700 dark:text-slate-300">{{ $enquiryData['objectives'] ?? $enquiry->description ?: '—' }}</dd>
                         </div>
                     </dl>
                 </section>
 
-                <section class="rounded-lg border border-amber-200 bg-amber-50/50 p-5">
+                <section class="rounded-lg border border-amber-200 dark:border-amber-900/60 bg-amber-50/50 dark:bg-amber-950/30 p-5">
                     <div class="flex flex-wrap items-center justify-between gap-2">
-                        <h2 class="text-base font-semibold text-slate-950">Private contact details</h2>
-                        <span class="rounded-full border border-amber-300 bg-white px-2 py-0.5 text-[11px] font-semibold text-amber-700">Never shown publicly</span>
+                        <h2 class="text-base font-semibold text-slate-950 dark:text-slate-100">Private contact details</h2>
+                        <span class="rounded-full border border-amber-300 dark:border-amber-800 bg-white dark:bg-slate-900 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:text-amber-400">Never shown publicly</span>
                     </div>
                     <dl class="mt-4 grid gap-x-6 gap-y-3 sm:grid-cols-2">
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Contact name</dt>
-                            <dd class="mt-1 text-sm text-slate-800">{{ $enquiryData['contact_name'] ?? '—' }}</dd>
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Contact name</dt>
+                            <dd class="mt-1 text-sm text-slate-800 dark:text-slate-200">{{ $enquiryData['contact_name'] ?? '—' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Preferred channel</dt>
-                            <dd class="mt-1 text-sm text-slate-800">{{ $enquiryData['preferred_contact'] ?? '—' }}</dd>
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Preferred channel</dt>
+                            <dd class="mt-1 text-sm text-slate-800 dark:text-slate-200">{{ $enquiryData['preferred_contact'] ?? '—' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Email</dt>
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Email</dt>
                             <dd class="mt-1 text-sm">
                                 @if (filled($enquiryData['contact_email'] ?? null))
-                                    <a href="mailto:{{ $enquiryData['contact_email'] }}" class="font-medium text-green-700 hover:underline">{{ $enquiryData['contact_email'] }}</a>
+                                    <a href="mailto:{{ $enquiryData['contact_email'] }}" class="font-medium text-green-700 dark:text-green-400 hover:underline">{{ $enquiryData['contact_email'] }}</a>
                                 @else
-                                    <span class="text-slate-600">—</span>
+                                    <span class="text-slate-600 dark:text-slate-400">—</span>
                                 @endif
                             </dd>
                         </div>
                         <div>
-                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Phone</dt>
+                            <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Phone</dt>
                             <dd class="mt-1 text-sm">
                                 @if (filled($enquiryData['contact_phone'] ?? null))
-                                    <a href="tel:{{ $enquiryData['contact_phone'] }}" class="font-medium text-green-700 hover:underline">{{ $enquiryData['contact_phone'] }}</a>
+                                    <a href="tel:{{ $enquiryData['contact_phone'] }}" class="font-medium text-green-700 dark:text-green-400 hover:underline">{{ $enquiryData['contact_phone'] }}</a>
                                 @else
-                                    <span class="text-slate-600">—</span>
+                                    <span class="text-slate-600 dark:text-slate-400">—</span>
                                 @endif
                             </dd>
                         </div>
                         @if (filled($enquiryData['org_address'] ?? null))
                             <div class="sm:col-span-2">
-                                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Address</dt>
-                                <dd class="mt-1 text-sm text-slate-800">{{ $enquiryData['org_address'] }}</dd>
+                                <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Address</dt>
+                                <dd class="mt-1 text-sm text-slate-800 dark:text-slate-200">{{ $enquiryData['org_address'] }}</dd>
                             </div>
                         @endif
                     </dl>
                 </section>
 
-                <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                    <h2 class="text-base font-semibold text-slate-950">Submitted artwork</h2>
+                <section class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
+                    <h2 class="text-base font-semibold text-slate-950 dark:text-slate-100">Submitted artwork</h2>
                     @if ($artwork)
                         <div class="mt-4 flex flex-col gap-4 sm:flex-row sm:items-start">
                             @if ($artworkIsImage && $artworkUrl)
-                                <img src="{{ $artworkUrl }}" alt="{{ $artwork['original_name'] ?? 'Submitted artwork' }}" class="h-40 w-full rounded-md border border-slate-200 object-cover sm:w-64">
+                                <img src="{{ $artworkUrl }}" alt="{{ $artwork['original_name'] ?? 'Submitted artwork' }}" class="h-40 w-full rounded-md border border-slate-200 dark:border-slate-800 object-cover sm:w-64">
                             @else
-                                <div class="flex h-40 w-full items-center justify-center rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 text-center text-xs font-semibold text-slate-500 sm:w-64">
+                                <div class="flex h-40 w-full items-center justify-center rounded-md border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-4 text-center text-xs font-semibold text-slate-500 dark:text-slate-400 sm:w-64">
                                     {{ strtoupper(pathinfo($artwork['original_name'] ?? '', PATHINFO_EXTENSION) ?: 'file') }} preview not available
                                 </div>
                             @endif
                             <div class="min-w-0 text-sm">
-                                <p class="font-semibold text-slate-900 break-all">{{ $artwork['original_name'] ?? 'Artwork file' }}</p>
-                                <p class="mt-1 text-xs text-slate-500">
+                                <p class="font-semibold text-slate-900 dark:text-slate-100 break-all">{{ $artwork['original_name'] ?? 'Artwork file' }}</p>
+                                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                     {{ $artwork['mime_type'] ?? 'unknown type' }}
                                     @if (! empty($artwork['size']))
                                         · {{ round($artwork['size'] / 1024) }} KB
                                     @endif
                                 </p>
                                 @if ($artworkUrl)
-                                    <a href="{{ $artworkUrl }}" target="_blank" rel="noopener" class="mt-3 inline-flex items-center rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-green-600 hover:text-green-700">Open file</a>
+                                    <a href="{{ $artworkUrl }}" target="_blank" rel="noopener" class="mt-3 inline-flex items-center rounded-md border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:border-green-600 dark:hover:border-green-500 hover:text-green-700 dark:hover:text-green-300">Open file</a>
                                 @endif
                                 @if (! $artworkIsImage)
-                                    <p class="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                                    <p class="mt-3 rounded-md border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/40 px-3 py-2 text-xs text-amber-800 dark:text-amber-300">
                                         This is not an image, so the sponsored card will be created without creative. Attach artwork on the card editor before publishing.
                                     </p>
                                 @endif
                             </div>
                         </div>
                     @else
-                        <p class="mt-3 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">No artwork was submitted. You can still approve the enquiry and add creative from the card editor.</p>
+                        <p class="mt-3 rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-sm text-slate-600 dark:text-slate-400">No artwork was submitted. You can still approve the enquiry and add creative from the card editor.</p>
                     @endif
                 </section>
 
                 @if ($ad)
-                    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                    <section class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
                         <div class="flex flex-wrap items-center justify-between gap-2">
-                            <h2 class="text-base font-semibold text-slate-950">Linked sponsored advert</h2>
-                            <span class="rounded-full border px-2.5 py-1 text-xs font-semibold {{ $status === 'expired' ? 'border-slate-300 bg-slate-100 text-slate-600' : ($ad->is_published ? 'border-green-200 bg-green-50 text-green-700' : 'border-amber-200 bg-amber-50 text-amber-700') }}">
+                            <h2 class="text-base font-semibold text-slate-950 dark:text-slate-100">Linked sponsored advert</h2>
+                            <span class="rounded-full border px-2.5 py-1 text-xs font-semibold {{ $status === 'expired' ? 'border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400' : ($ad->is_published ? 'border-green-200 dark:border-green-900/60 bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-400' : 'border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400') }}">
                                 {{ $status === 'expired' ? 'Expired' : ($ad->is_published ? 'Published' : 'Draft') }}
                             </span>
                         </div>
                         <div class="mt-4 flex flex-col gap-4 sm:flex-row">
                             @if ($ad->image_url)
-                                <img src="{{ $ad->image_url }}?v={{ $ad->updated_at->timestamp }}" alt="{{ $ad->alt_text ?: $ad->title }}" class="h-32 w-full rounded-md border border-slate-200 object-cover sm:w-52">
+                                <img src="{{ $ad->image_url }}?v={{ $ad->updated_at->timestamp }}" alt="{{ $ad->alt_text ?: $ad->title }}" class="h-32 w-full rounded-md border border-slate-200 dark:border-slate-800 object-cover sm:w-52">
                             @endif
                             <div class="min-w-0 text-sm">
-                                <p class="font-semibold text-slate-900">{{ $ad->title }}</p>
+                                <p class="font-semibold text-slate-900 dark:text-slate-100">{{ $ad->title }}</p>
                                 @if ($ad->subtitle)
-                                    <p class="mt-1 text-xs text-slate-500">{{ $ad->subtitle }}</p>
+                                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ $ad->subtitle }}</p>
                                 @endif
                                 @if ($ad->description)
-                                    <p class="mt-2 text-xs leading-5 text-slate-600">{{ \Illuminate\Support\Str::limit($ad->description, 180) }}</p>
+                                    <p class="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-400">{{ \Illuminate\Support\Str::limit($ad->description, 180) }}</p>
                                 @endif
-                                <p class="mt-2 text-xs text-slate-500">
+                                <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
                                     Runs until
-                                    <span class="font-semibold {{ $status === 'expired' ? 'text-red-700' : 'text-slate-700' }}">
+                                    <span class="font-semibold {{ $status === 'expired' ? 'text-red-700 dark:text-red-400' : 'text-slate-700 dark:text-slate-300' }}">
                                         {{ $currentEndsAt ? \Illuminate\Support\Carbon::parse($currentEndsAt)->format('j M Y') : 'no end date' }}
                                     </span>
                                 </p>
                                 <div class="mt-3 flex flex-wrap gap-3 text-xs font-semibold">
-                                    <a href="{{ route('admin.contents.edit', ['section' => 'advertise', 'id' => $ad->id]) }}" class="text-green-700 hover:underline">Edit card</a>
-                                    <a href="{{ route('admin.contents.preview', ['section' => 'advertise', 'id' => $ad->id]) }}" class="text-blue-700 hover:underline">Preview</a>
-                                    <a href="{{ route('advertise') }}" target="_blank" rel="noopener" class="text-slate-600 hover:underline">View board</a>
+                                    <a href="{{ route('admin.contents.edit', ['section' => 'advertise', 'id' => $ad->id]) }}" class="text-green-700 dark:text-green-400 hover:underline">Edit card</a>
+                                    <a href="{{ route('admin.contents.preview', ['section' => 'advertise', 'id' => $ad->id]) }}" class="text-blue-700 dark:text-blue-400 hover:underline">Preview</a>
+                                    <a href="{{ route('advertise') }}" target="_blank" rel="noopener" class="text-slate-600 dark:text-slate-400 hover:underline">View board</a>
                                 </div>
                             </div>
                         </div>
@@ -210,32 +210,32 @@
                 @endif
 
                 @if (! empty($enquiryData['reviewed_at']))
-                    <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                        <h2 class="text-base font-semibold text-slate-950">Review history</h2>
-                        <p class="mt-2 text-sm text-slate-600">
+                    <section class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
+                        <h2 class="text-base font-semibold text-slate-950 dark:text-slate-100">Review history</h2>
+                        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
                             {{ \Illuminate\Support\Str::headline($status) }} by {{ $enquiryData['reviewed_by_name'] ?? 'an administrator' }}
                             on {{ \Illuminate\Support\Carbon::parse($enquiryData['reviewed_at'])->format('j M Y, g:ia') }}.
                         </p>
                         @if (! empty($enquiryData['rejection_reason']))
-                            <p class="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{{ $enquiryData['rejection_reason'] }}</p>
+                            <p class="mt-3 rounded-md border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/40 px-3 py-2 text-sm text-red-800 dark:text-red-300">{{ $enquiryData['rejection_reason'] }}</p>
                         @endif
                     </section>
                 @endif
             </div>
 
-            <aside class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm lg:sticky lg:top-6">
-                <h2 class="text-base font-semibold text-slate-950">Board decision</h2>
-                <p class="mt-1 text-xs leading-5 text-slate-500">Approving creates a Sponsored Ads card on the public /advertise board. Contact details stay private.</p>
+            <aside class="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm lg:sticky lg:top-6">
+                <h2 class="text-base font-semibold text-slate-950 dark:text-slate-100">Board decision</h2>
+                <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">Approving creates a Sponsored Ads card on the public /advertise board. Contact details stay private.</p>
 
-                <div class="mt-4 grid gap-2 rounded-md bg-slate-100 p-1 {{ $ad ? 'grid-cols-3' : 'grid-cols-2' }}">
-                    <button type="button" @click="mode = 'approve'" :class="mode === 'approve' ? 'bg-white text-green-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'" class="rounded px-2 py-1.5 text-xs font-semibold">
+                <div class="mt-4 grid gap-2 rounded-md bg-slate-100 dark:bg-slate-800 p-1 {{ $ad ? 'grid-cols-3' : 'grid-cols-2' }}">
+                    <button type="button" @click="mode = 'approve'" :class="mode === 'approve' ? 'bg-white dark:bg-slate-900 text-green-700 dark:text-green-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'" class="rounded px-2 py-1.5 text-xs font-semibold">
                         {{ $ad ? 'Edit ad' : 'Approve' }}
                     </button>
-                    <button type="button" @click="mode = 'reject'" :class="mode === 'reject' ? 'bg-white text-red-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'" class="rounded px-2 py-1.5 text-xs font-semibold">
+                    <button type="button" @click="mode = 'reject'" :class="mode === 'reject' ? 'bg-white dark:bg-slate-900 text-red-700 dark:text-red-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'" class="rounded px-2 py-1.5 text-xs font-semibold">
                         Reject
                     </button>
                     @if ($ad)
-                        <button type="button" @click="mode = 'renew'" :class="mode === 'renew' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'" class="rounded px-2 py-1.5 text-xs font-semibold">
+                        <button type="button" @click="mode = 'renew'" :class="mode === 'renew' ? 'bg-white dark:bg-slate-900 text-blue-700 dark:text-blue-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'" class="rounded px-2 py-1.5 text-xs font-semibold">
                             Renew
                         </button>
                     @endif
@@ -246,68 +246,68 @@
                     <input type="hidden" name="_mode" value="approve">
 
                     <div>
-                        <label for="ad_title" class="block text-xs font-semibold uppercase tracking-wide text-slate-500">Card headline</label>
-                        <input id="ad_title" name="ad_title" type="text" required value="{{ old('ad_title', $prefillTitle) }}" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100">
-                        @error('ad_title')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                        <label for="ad_title" class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Card headline</label>
+                        <input id="ad_title" name="ad_title" type="text" required value="{{ old('ad_title', $prefillTitle) }}" class="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 px-3 py-2 text-sm focus:border-green-600 dark:focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900/40">
+                        @error('ad_title')<p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>@enderror
                     </div>
 
                     <div>
-                        <label for="ad_subtitle" class="block text-xs font-semibold uppercase tracking-wide text-slate-500">Sub-headline</label>
-                        <input id="ad_subtitle" name="ad_subtitle" type="text" value="{{ old('ad_subtitle', $prefillSubtitle) }}" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100">
+                        <label for="ad_subtitle" class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Sub-headline</label>
+                        <input id="ad_subtitle" name="ad_subtitle" type="text" value="{{ old('ad_subtitle', $prefillSubtitle) }}" class="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 px-3 py-2 text-sm focus:border-green-600 dark:focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900/40">
                     </div>
 
                     <div>
-                        <label for="ad_blurb" class="block text-xs font-semibold uppercase tracking-wide text-slate-500">Card copy</label>
-                        <textarea id="ad_blurb" name="ad_blurb" rows="3" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100">{{ old('ad_blurb', $prefillBlurb) }}</textarea>
+                        <label for="ad_blurb" class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Card copy</label>
+                        <textarea id="ad_blurb" name="ad_blurb" rows="3" class="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 px-3 py-2 text-sm focus:border-green-600 dark:focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900/40">{{ old('ad_blurb', $prefillBlurb) }}</textarea>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label for="ends_at" class="block text-xs font-semibold uppercase tracking-wide text-slate-500">Runs until</label>
-                            <input id="ends_at" name="ends_at" type="date" min="{{ now()->toDateString() }}" value="{{ old('ends_at', $currentEndsAt ?: now()->addDays(30)->toDateString()) }}" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100">
+                            <label for="ends_at" class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Runs until</label>
+                            <input id="ends_at" name="ends_at" type="date" min="{{ now()->toDateString() }}" value="{{ old('ends_at', $currentEndsAt ?: now()->addDays(30)->toDateString()) }}" class="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 px-3 py-2 text-sm focus:border-green-600 dark:focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900/40">
                         </div>
                         <div>
-                            <label for="sort_order" class="block text-xs font-semibold uppercase tracking-wide text-slate-500">Board order</label>
-                            <input id="sort_order" name="sort_order" type="number" min="0" value="{{ old('sort_order', $ad?->sort_order ?? 0) }}" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100">
+                            <label for="sort_order" class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Board order</label>
+                            <input id="sort_order" name="sort_order" type="number" min="0" value="{{ old('sort_order', $ad?->sort_order ?? 0) }}" class="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 px-3 py-2 text-sm focus:border-green-600 dark:focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900/40">
                         </div>
                     </div>
-                    @error('ends_at')<p class="text-xs text-red-600">{{ $message }}</p>@enderror
+                    @error('ends_at')<p class="text-xs text-red-600 dark:text-red-400">{{ $message }}</p>@enderror
 
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label for="button_text" class="block text-xs font-semibold uppercase tracking-wide text-slate-500">Button label</label>
-                            <input id="button_text" name="button_text" type="text" value="{{ old('button_text', $ad->button_text ?? 'Learn more') }}" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100">
+                            <label for="button_text" class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Button label</label>
+                            <input id="button_text" name="button_text" type="text" value="{{ old('button_text', $ad->button_text ?? 'Learn more') }}" class="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 px-3 py-2 text-sm focus:border-green-600 dark:focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900/40">
                         </div>
                         <div>
-                            <label for="button_url" class="block text-xs font-semibold uppercase tracking-wide text-slate-500">Button link</label>
-                            <input id="button_url" name="button_url" type="text" value="{{ old('button_url', $ad?->button_url) }}" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-100">
+                            <label for="button_url" class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Button link</label>
+                            <input id="button_url" name="button_url" type="text" value="{{ old('button_url', $ad?->button_url) }}" class="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 px-3 py-2 text-sm focus:border-green-600 dark:focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900/40">
                         </div>
                     </div>
 
-                    <label class="flex items-start gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
-                        <input type="checkbox" name="is_featured" value="1" @checked(old('is_featured', $ad ? ($ad->data['is_featured'] ?? false) : false)) class="mt-0.5 rounded border-slate-300 text-green-700 focus:ring-green-600">
+                    <label class="flex items-start gap-2 rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-3 py-2 text-sm text-slate-700 dark:text-slate-300">
+                        <input type="checkbox" name="is_featured" value="1" @checked(old('is_featured', $ad ? ($ad->data['is_featured'] ?? false) : false)) class="mt-0.5 rounded border-slate-300 dark:border-slate-700 text-green-700 dark:text-green-400 focus:ring-green-600">
                         <span>Feature in the hero carousel (shows the campaign image full-width; adverts stay in the sponsored ads carousel either way)</span>
                     </label>
 
                     <fieldset>
-                        <legend class="text-xs font-semibold uppercase tracking-wide text-slate-500">Publishing</legend>
-                        <div class="mt-2 space-y-2 text-sm text-slate-700">
+                        <legend class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Publishing</legend>
+                        <div class="mt-2 space-y-2 text-sm text-slate-700 dark:text-slate-300">
                             <label class="flex items-center gap-2">
-                                <input type="radio" name="publish_mode" value="published" @checked($defaultPublishMode === 'published') class="border-slate-300 text-green-700 focus:ring-green-600">
+                                <input type="radio" name="publish_mode" value="published" @checked($defaultPublishMode === 'published') class="border-slate-300 dark:border-slate-700 text-green-700 dark:text-green-400 focus:ring-green-600">
                                 <span>Publish to the board now</span>
                             </label>
                             <label class="flex items-center gap-2">
-                                <input type="radio" name="publish_mode" value="draft" @checked($defaultPublishMode === 'draft') class="border-slate-300 text-green-700 focus:ring-green-600">
+                                <input type="radio" name="publish_mode" value="draft" @checked($defaultPublishMode === 'draft') class="border-slate-300 dark:border-slate-700 text-green-700 dark:text-green-400 focus:ring-green-600">
                                 <span>Save as draft card</span>
                             </label>
                         </div>
                     </fieldset>
 
                     @if (! $artworkIsImage)
-                        <p class="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">No image artwork on file — the card will use the default placeholder until you upload creative.</p>
+                        <p class="rounded-md border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/40 px-3 py-2 text-xs text-amber-800 dark:text-amber-300">No image artwork on file — the card will use the default placeholder until you upload creative.</p>
                     @endif
 
-                    <button type="submit" class="w-full rounded-md bg-green-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-800">
+                    <button type="submit" class="w-full rounded-md bg-green-700 dark:bg-green-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-800 dark:hover:bg-green-500">
                         {{ $ad ? 'Save advert changes' : 'Approve & publish advert' }}
                     </button>
                 </form>
@@ -316,12 +316,12 @@
                     @csrf
                     <input type="hidden" name="_mode" value="reject">
                     <div>
-                        <label for="rejection_reason" class="block text-xs font-semibold uppercase tracking-wide text-slate-500">Reason for rejection</label>
-                        <textarea id="rejection_reason" name="rejection_reason" rows="4" required class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-100">{{ old('rejection_reason', $enquiryData['rejection_reason'] ?? '') }}</textarea>
-                        <p class="mt-1 text-xs text-slate-500">Stored on the enquiry record for audit. @if ($ad) The linked advert will be unpublished. @endif</p>
-                        @error('rejection_reason')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                        <label for="rejection_reason" class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Reason for rejection</label>
+                        <textarea id="rejection_reason" name="rejection_reason" rows="4" required class="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 px-3 py-2 text-sm focus:border-red-500 dark:focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900/40">{{ old('rejection_reason', $enquiryData['rejection_reason'] ?? '') }}</textarea>
+                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Stored on the enquiry record for audit. @if ($ad) The linked advert will be unpublished. @endif</p>
+                        @error('rejection_reason')<p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>@enderror
                     </div>
-                    <button type="submit" class="w-full rounded-md bg-red-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-800">Reject enquiry</button>
+                    <button type="submit" class="w-full rounded-md bg-red-700 dark:bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-800 dark:hover:bg-red-500">Reject enquiry</button>
                 </form>
 
                 @if ($ad)
@@ -329,14 +329,14 @@
                         @csrf
                         <input type="hidden" name="_mode" value="renew">
                         <div>
-                            <label for="renew_ends_at" class="block text-xs font-semibold uppercase tracking-wide text-slate-500">Extend until</label>
-                            <input id="renew_ends_at" name="ends_at" type="date" min="{{ now()->addDay()->toDateString() }}" value="{{ old('ends_at', $renewDefault) }}" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
-                            <p class="mt-1 text-xs text-slate-500">
+                            <label for="renew_ends_at" class="block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Extend until</label>
+                            <input id="renew_ends_at" name="ends_at" type="date" min="{{ now()->addDay()->toDateString() }}" value="{{ old('ends_at', $renewDefault) }}" class="mt-1 w-full rounded-md border border-slate-300 dark:border-slate-700 px-3 py-2 text-sm focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/40">
+                            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                 Current end date: {{ $currentEndsAt ? \Illuminate\Support\Carbon::parse($currentEndsAt)->format('j M Y') : 'not set' }}
                             </p>
-                            @error('ends_at')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                            @error('ends_at')<p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>@enderror
                         </div>
-                        <button type="submit" class="w-full rounded-md bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800">Renew advert</button>
+                        <button type="submit" class="w-full rounded-md bg-blue-700 dark:bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 dark:hover:bg-blue-500">Renew advert</button>
                     </form>
                 @endif
             </aside>
