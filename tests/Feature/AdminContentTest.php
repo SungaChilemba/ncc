@@ -254,16 +254,272 @@ class AdminContentTest extends TestCase
                 'source_url' => 'https://example.com/story',
                 'source_posted_on' => '2026-09-01',
                 'source_excerpt' => 'Source excerpt',
-                'item_label' => ['Reach'],
-                'item_value' => ['National'],
             ])
             ->assertRedirect(route('admin.contents.index', ['section' => 'news']));
 
-        $content = SiteContent::where('title', 'Structured Story')->firstOrFail();
+        $news = SiteContent::where('title', 'Structured Story')->firstOrFail();
 
-        $this->assertSame('NCC Source', $content->data['source']['name']);
-        $this->assertSame('https://example.com/story', $content->data['source']['url']);
-        $this->assertSame('National', $content->data['items'][0]['value']);
+        $this->assertSame('NCC Source', $news->data['source']['name']);
+        $this->assertSame('https://example.com/story', $news->data['source']['url']);
+
+        $this->actingAs($admin)
+            ->post(route('admin.contents.store', ['section' => 'what-we-do']), [
+                'type' => 'card',
+                'category' => 'How We Work',
+                'title' => 'Structured Programme',
+                'description' => 'Programme body.',
+                'publish_mode' => 'published',
+                'item_label' => ['Reach'],
+                'item_value' => ['National'],
+            ])
+            ->assertRedirect(route('admin.contents.index', ['section' => 'what-we-do']));
+
+        $card = SiteContent::where('title', 'Structured Programme')->firstOrFail();
+
+        $this->assertSame('National', $card->data['items'][0]['value']);
+
+        $this->actingAs($admin)
+            ->post(route('admin.contents.store', ['section' => 'about']), [
+                'type' => 'card',
+                'category' => 'Commissioners',
+                'title' => 'Structured Commissioner',
+                'description' => 'Biography fallback.',
+                'publish_mode' => 'published',
+                'bio_heading' => ['Professional Background'],
+                'bio_body' => ['Two decades of child protection experience.'],
+            ])
+            ->assertRedirect(route('admin.contents.index', ['section' => 'about']));
+
+        $person = SiteContent::where('title', 'Structured Commissioner')->firstOrFail();
+
+        $this->assertSame('Professional Background', $person->data['bio_sections'][0]['heading']);
+        $this->assertSame('Two decades of child protection experience.', $person->data['bio_sections'][0]['body']);
+    }
+
+    public function test_admin_saves_sponsorship_tier_and_sponsored_ad_fields(): void
+    {
+        $admin = $this->userWithRole('system_admin');
+
+        $this->actingAs($admin)
+            ->post(route('admin.contents.store', ['section' => 'advertise']), [
+                'type' => 'card',
+                'category' => 'Sponsorship Opportunities',
+                'title' => 'Gold Package',
+                'subtitle' => 'Gold',
+                'publish_mode' => 'published',
+                'price' => 'Mkw 500,000',
+                'badge' => 'Best value',
+                'reach' => '500,000 people',
+                'tier_placement' => ["Homepage banner\nNewsletter"],
+                'tier_include' => ["Logo placement\nTwo social posts"],
+            ])
+            ->assertRedirect(route('admin.contents.index', ['section' => 'advertise']));
+
+        $tier = SiteContent::where('title', 'Gold Package')->firstOrFail();
+
+        $this->assertSame('Mkw 500,000', $tier->data['price']);
+        $this->assertSame('Best value', $tier->data['badge']);
+        $this->assertSame('500,000 people', $tier->data['reach']);
+        $this->assertSame(['Homepage banner', 'Newsletter'], $tier->data['placements']);
+        $this->assertSame(['Logo placement', 'Two social posts'], $tier->data['includes']);
+
+        $this->actingAs($admin)
+            ->post(route('admin.contents.store', ['section' => 'advertise']), [
+                'type' => 'card',
+                'category' => 'Sponsored Ads',
+                'title' => 'Summer Campaign',
+                'description' => 'Sponsored ad copy.',
+                'publish_mode' => 'published',
+                'ends_at' => '2026-12-31',
+                'hero_featured' => '1',
+            ])
+            ->assertRedirect(route('admin.contents.index', ['section' => 'advertise']));
+
+        $ad = SiteContent::where('title', 'Summer Campaign')->firstOrFail();
+
+        $this->assertSame('2026-12-31', $ad->data['ends_at']);
+        $this->assertTrue($ad->data['is_featured']);
+    }
+
+    public function test_admin_saves_news_placements_and_custom_categories(): void
+    {
+        $admin = $this->userWithRole('system_admin');
+
+        $this->actingAs($admin)
+            ->post(route('admin.contents.store', ['section' => 'news']), [
+                'type' => 'news',
+                'title' => 'Local Voices Story',
+                'category' => 'Local Voices',
+                'location' => 'Lilongwe',
+                'publish_mode' => 'published',
+                'news_placement' => ['hero', 'featured'],
+            ])
+            ->assertRedirect(route('admin.contents.index', ['section' => 'news']));
+
+        $news = SiteContent::where('title', 'Local Voices Story')->firstOrFail();
+
+        $this->assertSame('Local Voices', $news->category);
+        $this->assertSame('Lilongwe', $news->location);
+        $this->assertSame(['hero', 'featured'], $news->data['placements']);
+    }
+
+    public function test_admin_saves_donation_allocation_video_and_resource_metadata(): void
+    {
+        $admin = $this->userWithRole('system_admin');
+
+        $this->actingAs($admin)
+            ->post(route('admin.contents.store', ['section' => 'donate']), [
+                'type' => 'card',
+                'category' => 'Where will your donation go',
+                'title' => 'Supporting Our Work',
+                'description' => 'How the money is split.',
+                'publish_mode' => 'published',
+                'allocation_direct' => 80,
+                'allocation_fundraising' => 20,
+            ])
+            ->assertRedirect(route('admin.contents.index', ['section' => 'donate']));
+
+        $allocation = SiteContent::where('title', 'Supporting Our Work')->firstOrFail();
+
+        $this->assertSame(80, $allocation->data['allocation']['direct']);
+        $this->assertSame(20, $allocation->data['allocation']['fundraising']);
+
+        $this->actingAs($admin)
+            ->post(route('admin.contents.store', ['section' => 'donate']), [
+                'type' => 'card',
+                'category' => 'Watch Our Story',
+                'title' => 'Watch Our Story',
+                'description' => 'Video story.',
+                'publish_mode' => 'published',
+                'youtube_url' => 'https://www.youtube.com/embed/abc123',
+            ])
+            ->assertRedirect(route('admin.contents.index', ['section' => 'donate']));
+
+        $video = SiteContent::where('title', 'Watch Our Story')->firstOrFail();
+
+        $this->assertSame('https://www.youtube.com/embed/abc123', $video->data['youtube_url']);
+
+        $this->actingAs($admin)
+            ->post(route('admin.contents.store', ['section' => 'resources']), [
+                'type' => 'resource',
+                'category' => 'Reports',
+                'title' => 'Annual Report 2026',
+                'publish_mode' => 'published',
+                'size' => '2.4 MB',
+                'pages' => 32,
+            ])
+            ->assertRedirect(route('admin.contents.index', ['section' => 'resources']));
+
+        $resource = SiteContent::where('title', 'Annual Report 2026')->firstOrFail();
+
+        $this->assertSame('2.4 MB', $resource->data['size']);
+        $this->assertSame(32, $resource->data['pages']);
+    }
+
+    public function test_admin_saves_about_bullets_and_ad_enquiry_metadata(): void
+    {
+        $admin = $this->userWithRole('system_admin');
+
+        $this->actingAs($admin)
+            ->post(route('admin.contents.store', ['section' => 'about']), [
+                'type' => 'card',
+                'category' => 'Mandate, Mission & Objectives',
+                'title' => 'Our Mandate',
+                'publish_mode' => 'published',
+                'bullets' => ["Hold duty bearers accountable.\nPromote child rights."],
+            ])
+            ->assertRedirect(route('admin.contents.index', ['section' => 'about']));
+
+        $story = SiteContent::where('title', 'Our Mandate')->firstOrFail();
+
+        $this->assertSame(['Hold duty bearers accountable.', 'Promote child rights.'], $story->data['bullets']);
+
+        $this->actingAs($admin)
+            ->post(route('admin.contents.store', ['section' => 'advertise']), [
+                'type' => 'submission',
+                'title' => 'NCC-AD-10001',
+                'description' => 'Enquiry details.',
+                'enquiry_status' => 'approved',
+                'company' => 'Acme Malawi',
+                'ends_at' => '2026-12-31',
+                'is_published' => '1',
+            ])
+            ->assertRedirect(route('admin.contents.index', ['section' => 'advertise']));
+
+        $submission = SiteContent::where('title', 'NCC-AD-10001')->firstOrFail();
+
+        $this->assertFalse($submission->is_published);
+        $this->assertNull($submission->published_at);
+        $this->assertSame('approved', $submission->data['status']);
+        $this->assertSame('Acme Malawi', $submission->data['company']);
+        $this->assertSame('2026-12-31', $submission->data['ends_at']);
+    }
+
+    public function test_hidden_blocks_do_not_persist_for_other_types(): void
+    {
+        $admin = $this->userWithRole('system_admin');
+
+        $this->actingAs($admin)
+            ->post(route('admin.contents.store', ['section' => 'home']), [
+                'type' => 'update',
+                'title' => 'No Leaking Fields',
+                'description' => 'Homepage story body.',
+                'publish_mode' => 'published',
+                'item_label' => ['Reach'],
+                'item_value' => ['National'],
+                'source_name' => 'Hidden source',
+                'source_url' => 'https://example.com/hidden',
+                'price' => 'Hidden price',
+                'bullets' => ['Hidden bullet'],
+                'stat_icon' => 'fa-solid fa-hidden',
+                'allocation_direct' => 75,
+                'size' => '1 MB',
+                'pages' => 5,
+                'youtube_url' => 'https://www.youtube.com/embed/hidden',
+            ])
+            ->assertRedirect(route('admin.contents.index', ['section' => 'home']));
+
+        $content = SiteContent::where('title', 'No Leaking Fields')->firstOrFail();
+        $data = $content->data ?? [];
+
+        foreach (['items', 'source', 'price', 'bullets', 'icon', 'allocation', 'size', 'pages', 'youtube_url'] as $key) {
+            $this->assertArrayNotHasKey($key, $data, "Hidden field [{$key}] leaked into saved data.");
+        }
+    }
+
+    public function test_fixed_category_lists_are_strict_and_custom_lists_are_allowed(): void
+    {
+        $admin = $this->userWithRole('system_admin');
+
+        $this->actingAs($admin)
+            ->post(route('admin.contents.store', ['section' => 'resources']), [
+                'type' => 'resource',
+                'category' => 'Not a real category',
+                'title' => 'Rejected Resource',
+            ])
+            ->assertSessionHasErrors('category');
+
+        $this->actingAs($admin)
+            ->post(route('admin.contents.store', ['section' => 'about']), [
+                'type' => 'card',
+                'category' => 'Organogram',
+                'title' => 'Rejected About Card',
+            ])
+            ->assertSessionHasErrors('category');
+
+        $this->actingAs($admin)
+            ->post(route('admin.contents.store', ['section' => 'news']), [
+                'type' => 'news',
+                'category' => 'Custom News Category',
+                'title' => 'Custom Category Story',
+            ])
+            ->assertRedirect(route('admin.contents.index', ['section' => 'news']));
+
+        $this->assertDatabaseHas('site_contents', [
+            'section' => 'news',
+            'title' => 'Custom Category Story',
+            'category' => 'Custom News Category',
+        ]);
     }
 
     public function test_admin_updates_create_revisions_and_can_restore_them(): void

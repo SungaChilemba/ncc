@@ -53,47 +53,7 @@ class ContentController extends Controller
         $sectionConfig = $this->sectionConfig($section);
         $this->hydrateSlug($request);
 
-        $categoryRule = match (true) {
-            $section === 'resources' && $request->string('type')->toString() === 'resource' => ['nullable', 'string', Rule::in(array_keys(config('cms.resource_categories')))],
-            $section === 'donate' && $request->string('type')->toString() === 'card' => ['nullable', 'string', Rule::in(array_keys(config('cms.donate_categories')))],
-            default => ['nullable', 'string', 'max:100'],
-        };
-
-        $validated = $request->validate([
-            'type' => ['required', Rule::in($sectionConfig['types'])],
-            'slug' => ['nullable', 'string', 'max:255', $this->uniqueSlugRule($request, $section)],
-            'title' => ['nullable', 'string', 'max:255'],
-            'subtitle' => ['nullable', 'string', 'max:255'],
-            'category' => $categoryRule,
-            'location' => ['nullable', 'string', 'max:100'],
-            'published_on' => ['nullable', 'date'],
-            'description' => ['nullable', 'string'],
-            'data_json' => ['nullable', 'json'],
-            'hero_featured' => ['nullable', 'boolean'],
-            'alt_text' => ['nullable', 'string', 'max:255'],
-            'media_asset_id' => ['nullable', 'integer', 'exists:media_assets,id'],
-            'image' => ['nullable', File::image()->types(['jpg', 'jpeg', 'png', 'webp'])->max('3mb')],
-            'document' => ['nullable', File::types(['pdf', 'doc', 'docx'])->max('10mb')],
-            'accent_color' => ['nullable', Rule::in(array_keys(config('cms.accent_colors')))],
-            'button_text' => ['nullable', 'string', 'max:100'],
-            'button_url' => ['nullable', 'string', 'max:255'],
-            'sort_order' => ['nullable', 'integer', 'min:0'],
-            'is_published' => ['boolean'],
-            'publish_mode' => ['nullable', Rule::in(['draft', 'published', 'scheduled'])],
-            'publish_at' => ['nullable', 'date'],
-            'source_name' => ['nullable', 'string', 'max:255'],
-            'source_url' => ['nullable', 'url', 'max:500'],
-            'source_posted_on' => ['nullable', 'date'],
-            'source_excerpt' => ['nullable', 'string'],
-            'item_label' => ['nullable', 'array'],
-            'item_label.*' => ['nullable', 'string', 'max:255'],
-            'item_value' => ['nullable', 'array'],
-            'item_value.*' => ['nullable', 'string'],
-            'bio_heading' => ['nullable', 'array'],
-            'bio_heading.*' => ['nullable', 'string', 'max:255'],
-            'bio_body' => ['nullable', 'array'],
-            'bio_body.*' => ['nullable', 'string'],
-        ]);
+        $validated = $request->validate($this->contentValidationRules($request, $section, $sectionConfig));
 
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('uploads', 'public');
@@ -170,49 +130,11 @@ class ContentController extends Controller
         $content = SiteContent::where('section', $section)->findOrFail($id);
         $this->hydrateSlug($request);
 
-        $categoryRuleUpdate = match (true) {
-            $section === 'resources' && $request->string('type')->toString() === 'resource' => ['nullable', 'string', Rule::in(array_keys(config('cms.resource_categories')))],
-            $section === 'donate' && $request->string('type')->toString() === 'card' => ['nullable', 'string', Rule::in(array_keys(config('cms.donate_categories')))],
-            default => ['nullable', 'string', 'max:100'],
-        };
+        $rules = $this->contentValidationRules($request, $section, $sectionConfig, $content->id);
+        $rules['_remove_image'] = ['boolean'];
+        $rules['_remove_document'] = ['boolean'];
 
-        $validated = $request->validate([
-            'type' => ['required', Rule::in($sectionConfig['types'])],
-            'slug' => ['nullable', 'string', 'max:255', $this->uniqueSlugRule($request, $section, $content->id)],
-            'title' => ['nullable', 'string', 'max:255'],
-            'subtitle' => ['nullable', 'string', 'max:255'],
-            'category' => $categoryRuleUpdate,
-            'location' => ['nullable', 'string', 'max:100'],
-            'published_on' => ['nullable', 'date'],
-            'description' => ['nullable', 'string'],
-            'data_json' => ['nullable', 'json'],
-            'hero_featured' => ['nullable', 'boolean'],
-            'alt_text' => ['nullable', 'string', 'max:255'],
-            'media_asset_id' => ['nullable', 'integer', 'exists:media_assets,id'],
-            'image' => ['nullable', File::image()->types(['jpg', 'jpeg', 'png', 'webp'])->max('3mb')],
-            'document' => ['nullable', File::types(['pdf', 'doc', 'docx'])->max('10mb')],
-            'accent_color' => ['nullable', Rule::in(array_keys(config('cms.accent_colors')))],
-            'button_text' => ['nullable', 'string', 'max:100'],
-            'button_url' => ['nullable', 'string', 'max:255'],
-            'sort_order' => ['nullable', 'integer', 'min:0'],
-            'is_published' => ['boolean'],
-            'publish_mode' => ['nullable', Rule::in(['draft', 'published', 'scheduled'])],
-            'publish_at' => ['nullable', 'date'],
-            'source_name' => ['nullable', 'string', 'max:255'],
-            'source_url' => ['nullable', 'url', 'max:500'],
-            'source_posted_on' => ['nullable', 'date'],
-            'source_excerpt' => ['nullable', 'string'],
-            'item_label' => ['nullable', 'array'],
-            'item_label.*' => ['nullable', 'string', 'max:255'],
-            'item_value' => ['nullable', 'array'],
-            'item_value.*' => ['nullable', 'string'],
-            'bio_heading' => ['nullable', 'array'],
-            'bio_heading.*' => ['nullable', 'string', 'max:255'],
-            'bio_body' => ['nullable', 'array'],
-            'bio_body.*' => ['nullable', 'string'],
-            '_remove_image' => ['boolean'],
-            '_remove_document' => ['boolean'],
-        ]);
+        $validated = $request->validate($rules);
 
         if ($request->boolean('_remove_image') && $content->image_path) {
             $this->deleteStoredAsset($content->image_path);
@@ -442,6 +364,85 @@ class ContentController extends Controller
     }
 
     /**
+     * Build the shared store/update rules for a section.
+     *
+     * Category validation is driven by the resolved editor schema: fixed
+     * lists are strict, datalist categories allow custom values, and types
+     * without a category list keep the generic string rule.
+     *
+     * @param  array<string, mixed>  $sectionConfig
+     * @return array<string, mixed>
+     */
+    private function contentValidationRules(Request $request, string $section, array $sectionConfig, ?int $ignoreId = null): array
+    {
+        $type = $request->string('type')->toString();
+        $category = $request->input('category');
+        $schema = CmsEditorSchema::for($section, $type, is_string($category) ? $category : null);
+
+        $categoryOptions = $schema['category_options'] ?? null;
+        $categoryAllowCustom = (bool) ($schema['category_allow_custom'] ?? false);
+        $categoryRule = $categoryOptions !== null && ! $categoryAllowCustom
+            ? ['nullable', 'string', Rule::in(array_keys($categoryOptions))]
+            : ['nullable', 'string', 'max:100'];
+
+        return [
+            'type' => ['required', Rule::in($sectionConfig['types'])],
+            'slug' => ['nullable', 'string', 'max:255', $this->uniqueSlugRule($request, $section, $ignoreId)],
+            'title' => ['nullable', 'string', 'max:255'],
+            'subtitle' => ['nullable', 'string', 'max:255'],
+            'category' => $categoryRule,
+            'location' => ['nullable', 'string', 'max:100'],
+            'published_on' => ['nullable', 'date'],
+            'description' => ['nullable', 'string'],
+            'data_json' => ['nullable', 'json'],
+            'hero_featured' => ['nullable', 'boolean'],
+            'alt_text' => ['nullable', 'string', 'max:255'],
+            'media_asset_id' => ['nullable', 'integer', 'exists:media_assets,id'],
+            'image' => ['nullable', File::image()->types(['jpg', 'jpeg', 'png', 'webp'])->max('3mb')],
+            'document' => ['nullable', File::types(['pdf', 'doc', 'docx'])->max('10mb')],
+            'accent_color' => ['nullable', Rule::in(array_keys(config('cms.accent_colors')))],
+            'button_text' => ['nullable', 'string', 'max:100'],
+            'button_url' => ['nullable', 'string', 'max:255'],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
+            'is_published' => ['boolean'],
+            'publish_mode' => ['nullable', Rule::in(['draft', 'published', 'scheduled'])],
+            'publish_at' => ['nullable', 'date'],
+            'source_name' => ['nullable', 'string', 'max:255'],
+            'source_url' => ['nullable', 'url', 'max:500'],
+            'source_posted_on' => ['nullable', 'date'],
+            'source_excerpt' => ['nullable', 'string'],
+            'item_label' => ['nullable', 'array'],
+            'item_label.*' => ['nullable', 'string', 'max:255'],
+            'item_value' => ['nullable', 'array'],
+            'item_value.*' => ['nullable', 'string'],
+            'bio_heading' => ['nullable', 'array'],
+            'bio_heading.*' => ['nullable', 'string', 'max:255'],
+            'bio_body' => ['nullable', 'array'],
+            'bio_body.*' => ['nullable', 'string'],
+            'bullets' => ['nullable', 'array'],
+            'bullets.*' => ['nullable', 'string', 'max:5000'],
+            'news_placement' => ['nullable', 'array'],
+            'news_placement.*' => [Rule::in(['hero', 'featured'])],
+            'price' => ['nullable', 'string', 'max:50'],
+            'badge' => ['nullable', 'string', 'max:50'],
+            'reach' => ['nullable', 'string', 'max:100'],
+            'tier_placement' => ['nullable', 'array'],
+            'tier_placement.*' => ['nullable', 'string', 'max:2000'],
+            'tier_include' => ['nullable', 'array'],
+            'tier_include.*' => ['nullable', 'string', 'max:5000'],
+            'ends_at' => ['nullable', 'date'],
+            'stat_icon' => ['nullable', 'string', 'max:100'],
+            'enquiry_status' => ['nullable', Rule::in(['pending_review', 'approved', 'rejected'])],
+            'company' => ['nullable', 'string', 'max:255'],
+            'size' => ['nullable', 'string', 'max:30'],
+            'pages' => ['nullable', 'integer', 'min:1', 'max:10000'],
+            'youtube_url' => ['nullable', 'url', 'max:500'],
+            'allocation_direct' => ['nullable', 'numeric', 'between:0,100'],
+            'allocation_fundraising' => ['nullable', 'numeric', 'between:0,100'],
+        ];
+    }
+
+    /**
      * Fixed category lists for the index filter. Sections whose types allow
      * custom categories (e.g. News) have no fixed list and get no filter.
      *
@@ -583,14 +584,31 @@ class ContentController extends Controller
 
     private function prepareContentData(array $data): array
     {
-        $structured = $this->structuredDataFromFields($data);
+        $section = (string) ($data['section'] ?? '');
+        $type = (string) ($data['type'] ?? '');
+        $category = is_string($data['category'] ?? null) && $data['category'] !== ''
+            ? $data['category']
+            : null;
+
+        $schema = CmsEditorSchema::for($section, $type, $category);
+        $fields = $schema['fields'] ?? [];
+        $structured = $this->structuredDataFromFields($data, $fields);
 
         if (array_key_exists('data_json', $data)) {
             $data['data'] = $data['data_json'] ? json_decode($data['data_json'], true) : null;
             unset($data['data_json']);
         }
 
-        $data['data'] = array_replace_recursive($data['data'] ?? [], $structured);
+        $existing = is_array($data['data'] ?? null) ? $data['data'] : [];
+        $data['data'] = array_replace_recursive($existing, $structured);
+
+        // Lists must replace, not merge by index, so clearing or shortening a
+        // repeater does not leave old rows behind in the saved JSON.
+        foreach (['bullets', 'placements', 'includes', 'allocation'] as $listKey) {
+            if (array_key_exists($listKey, $structured)) {
+                $data['data'][$listKey] = $structured[$listKey];
+            }
+        }
 
         unset(
             $data['source_name'],
@@ -601,6 +619,23 @@ class ContentController extends Controller
             $data['item_value'],
             $data['bio_heading'],
             $data['bio_body'],
+            $data['bullets'],
+            $data['news_placement'],
+            $data['price'],
+            $data['badge'],
+            $data['reach'],
+            $data['tier_placement'],
+            $data['tier_include'],
+            $data['ends_at'],
+            $data['stat_icon'],
+            $data['enquiry_status'],
+            $data['company'],
+            $data['size'],
+            $data['pages'],
+            $data['youtube_url'],
+            $data['allocation_direct'],
+            $data['allocation_fundraising'],
+            $data['hero_featured'],
         );
 
         $data['preview_token'] ??= Str::random(40);
@@ -613,22 +648,27 @@ class ContentController extends Controller
             $data['slug'] = Str::slug($data['slug']);
         }
 
-        if (($data['section'] ?? null) === 'advertise') {
-            $existingData = is_array($data['data'] ?? null) ? $data['data'] : [];
-            $existingData['is_featured'] = filter_var($data['hero_featured'] ?? false, FILTER_VALIDATE_BOOLEAN);
-            $data['data'] = $existingData;
-        }
-
-        unset($data['hero_featured']);
-
         return $data;
     }
 
-    private function structuredDataFromFields(array $data): array
+    /**
+     * Map authoring inputs to the JSON data keys the public views read.
+     *
+     * Only fields resolved for the submitted section/type/category are
+     * mapped, so hidden blocks cannot leak stale values when an editor
+     * switches type or category.
+     *
+     * @param  array<string, mixed>  $data
+     * @param  list<string>  $fields
+     * @return array<string, mixed>
+     */
+    private function structuredDataFromFields(array $data, array $fields): array
     {
+        $allowed = array_flip($fields);
         $structured = [];
 
-        if (! empty($data['source_name']) || ! empty($data['source_url']) || ! empty($data['source_posted_on']) || ! empty($data['source_excerpt'])) {
+        if (isset($allowed['source_name'])
+            && (! empty($data['source_name']) || ! empty($data['source_url']) || ! empty($data['source_posted_on']) || ! empty($data['source_excerpt']))) {
             $structured['source'] = array_filter([
                 'name' => $data['source_name'] ?? null,
                 'url' => $data['source_url'] ?? null,
@@ -637,49 +677,154 @@ class ContentController extends Controller
             ], fn ($value) => filled($value));
         }
 
-        $labels = $data['item_label'] ?? [];
-        $values = $data['item_value'] ?? [];
-        $items = [];
+        if (isset($allowed['item_label'])) {
+            $labels = $data['item_label'] ?? [];
+            $values = $data['item_value'] ?? [];
+            $items = [];
 
-        foreach ($labels as $index => $label) {
-            $value = $values[$index] ?? null;
+            foreach ($labels as $index => $label) {
+                $value = $values[$index] ?? null;
 
-            if (blank($label) && blank($value)) {
-                continue;
+                if (blank($label) && blank($value)) {
+                    continue;
+                }
+
+                $items[] = [
+                    'label' => $label,
+                    'value' => $value,
+                ];
             }
 
-            $items[] = [
-                'label' => $label,
-                'value' => $value,
+            if ($items) {
+                $structured['items'] = $items;
+            }
+        }
+
+        if (isset($allowed['bio_heading'])) {
+            $headings = $data['bio_heading'] ?? [];
+            $bodies = $data['bio_body'] ?? [];
+            $bioSections = [];
+
+            foreach ($headings as $index => $heading) {
+                $body = $bodies[$index] ?? null;
+
+                if (blank($heading) && blank($body)) {
+                    continue;
+                }
+
+                $bioSections[] = [
+                    'heading' => $heading,
+                    'body' => $body,
+                ];
+            }
+
+            if ($bioSections) {
+                $structured['bio_sections'] = $bioSections;
+            }
+        }
+
+        if (isset($allowed['bullets'])) {
+            $structured['bullets'] = $this->linesFromInput($data['bullets'] ?? []);
+        }
+
+        if (isset($allowed['news_placement'])) {
+            $structured['placements'] = array_values(array_intersect(
+                array_map('strval', (array) ($data['news_placement'] ?? [])),
+                ['hero', 'featured']
+            ));
+        }
+
+        if (isset($allowed['tier_placement'])) {
+            $structured['placements'] = $this->linesFromInput($data['tier_placement'] ?? []);
+        }
+
+        if (isset($allowed['tier_include'])) {
+            $structured['includes'] = $this->linesFromInput($data['tier_include'] ?? []);
+        }
+
+        foreach (['price', 'badge', 'reach', 'size'] as $key) {
+            if (isset($allowed[$key])) {
+                $structured[$key] = blank($data[$key] ?? null) ? null : (string) $data[$key];
+            }
+        }
+
+        if (isset($allowed['pages'])) {
+            $structured['pages'] = blank($data['pages'] ?? null) ? null : (int) $data['pages'];
+        }
+
+        if (isset($allowed['ends_at'])) {
+            $structured['ends_at'] = $this->dateOnly($data['ends_at'] ?? null);
+        }
+
+        if (isset($allowed['stat_icon'])) {
+            $structured['icon'] = blank($data['stat_icon'] ?? null) ? null : (string) $data['stat_icon'];
+        }
+
+        if (isset($allowed['enquiry_status'])
+            && ($data['section'] ?? null) === 'advertise'
+            && ($data['type'] ?? null) === 'submission') {
+            $structured['status'] = ($data['enquiry_status'] ?? null) ?: 'pending_review';
+        }
+
+        if (isset($allowed['company'])) {
+            $structured['company'] = blank($data['company'] ?? null) ? null : (string) $data['company'];
+        }
+
+        if (isset($allowed['youtube_url'])) {
+            $structured['youtube_url'] = blank($data['youtube_url'] ?? null) ? null : (string) $data['youtube_url'];
+        }
+
+        if (isset($allowed['allocation_direct']) || isset($allowed['allocation_fundraising'])) {
+            $structured['allocation'] = [
+                'direct' => $this->percentage($data['allocation_direct'] ?? null),
+                'fundraising' => $this->percentage($data['allocation_fundraising'] ?? null),
             ];
         }
 
-        if ($items) {
-            $structured['items'] = $items;
-        }
-
-        $headings = $data['bio_heading'] ?? [];
-        $bodies = $data['bio_body'] ?? [];
-        $bioSections = [];
-
-        foreach ($headings as $index => $heading) {
-            $body = $bodies[$index] ?? null;
-
-            if (blank($heading) && blank($body)) {
-                continue;
-            }
-
-            $bioSections[] = [
-                'heading' => $heading,
-                'body' => $body,
-            ];
-        }
-
-        if ($bioSections) {
-            $structured['bio_sections'] = $bioSections;
+        if (($data['section'] ?? null) === 'advertise' && isset($allowed['hero_featured'])) {
+            $structured['is_featured'] = filter_var($data['hero_featured'] ?? false, FILTER_VALIDATE_BOOLEAN);
         }
 
         return $structured;
+    }
+
+    /**
+     * Split textarea/repeater input into a clean list of non-empty lines.
+     *
+     * @return list<string>
+     */
+    private function linesFromInput(mixed $value): array
+    {
+        $lines = is_array($value) ? $value : [$value];
+        $result = [];
+
+        foreach ($lines as $line) {
+            foreach (preg_split('/\r\n|\r|\n/', (string) $line) ?: [] as $part) {
+                $part = trim($part);
+
+                if ($part !== '') {
+                    $result[] = $part;
+                }
+            }
+        }
+
+        return array_values($result);
+    }
+
+    private function percentage(mixed $value): int|float|null
+    {
+        if ($value === null || $value === '' || ! is_numeric($value)) {
+            return null;
+        }
+
+        return $value + 0;
+    }
+
+    private function dateOnly(mixed $value): ?string
+    {
+        $value = trim((string) $value);
+
+        return $value === '' ? null : substr($value, 0, 10);
     }
 
     private function recordRevision(SiteContent $content): void

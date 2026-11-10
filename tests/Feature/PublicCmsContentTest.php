@@ -717,4 +717,24 @@ class PublicCmsContentTest extends TestCase
             ->assertSee('<canvas', false)
             ->assertSee('Donation allocation', false);
     }
+
+    public function test_about_page_renders_cms_story_bullets(): void
+    {
+        SiteContent::create([
+            'section' => 'about',
+            'type' => 'card',
+            'slug' => 'our-mandate',
+            'category' => 'Mandate, Mission & Objectives',
+            'title' => 'Our Mandate',
+            'description' => 'Fallback description',
+            'data' => ['bullets' => ['First CMS bullet', 'Second CMS bullet']],
+            'is_published' => true,
+            'sort_order' => 0,
+        ]);
+
+        $this->get(route('about'))
+            ->assertOk()
+            ->assertSee('First CMS bullet')
+            ->assertSee('Second CMS bullet');
+    }
 }
