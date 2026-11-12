@@ -167,7 +167,11 @@ class ContentController extends Controller
         $original = $content->getOriginal();
         $this->recordRevision($content);
         $content->update($validated);
-        $this->audit($content, 'updated', $this->changedValues($original, $content));
+        $changes = $this->changedValues($original, $content);
+
+        if ($changes !== []) {
+            $this->audit($content, 'updated', $changes);
+        }
 
         return redirect()->route('admin.contents.index', ['section' => $section])->with('status', 'Content updated successfully.');
     }
@@ -206,7 +210,7 @@ class ContentController extends Controller
         $this->deleteStoredAsset($content->image_path);
         $this->deleteStoredAsset($content->file_path);
 
-        $this->audit($content, 'deleted');
+        $this->audit($content, 'deleted', $this->deletionSnapshot($content));
         $content->delete();
 
         return redirect()->route('admin.contents.index', ['section' => $section])->with('status', 'Content deleted successfully.');
@@ -250,7 +254,7 @@ class ContentController extends Controller
             if ($validated['action'] === 'delete') {
                 $this->deleteStoredAsset($content->image_path);
                 $this->deleteStoredAsset($content->file_path);
-                $this->audit($content, 'deleted');
+                $this->audit($content, 'deleted', $this->deletionSnapshot($content));
                 $content->delete();
 
                 continue;
@@ -897,6 +901,20 @@ class ContentController extends Controller
             'action' => $action,
             'changes' => $changes,
         ]);
+    }
+
+    /**
+     * Keep enough context on the audit row to identify the item after its row is gone.
+     *
+     * @return array{title: string|null, section: string, type: string}
+     */
+    private function deletionSnapshot(SiteContent $content): array
+    {
+        return [
+            'title' => $content->title,
+            'section' => $content->section,
+            'type' => $content->type,
+        ];
     }
 
     private function changedValues(array $original, SiteContent $content): array

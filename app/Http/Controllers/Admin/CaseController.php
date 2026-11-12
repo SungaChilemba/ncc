@@ -9,6 +9,7 @@ use App\Models\ReportEvidence;
 use App\Models\ReportNote;
 use App\Models\User;
 use App\Support\CaseAudit;
+use App\Support\CaseQueues;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -57,11 +58,7 @@ class CaseController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        $counts = Report::query()
-            ->visibleTo($user)
-            ->selectRaw('status, count(*) as total')
-            ->groupBy('status')
-            ->pluck('total', 'status');
+        $counts = collect(CaseQueues::statusCounts($user));
 
         return view('admin.cases.index', [
             'reports' => $reports,

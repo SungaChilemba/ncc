@@ -2,7 +2,8 @@
 
 @section('title', 'CMS Dashboard')
 @section('heading', 'CMS Dashboard')
-@section('subheading', 'Manage website sections, publishing status, and recent updates from one place.')
+@section('subheading', 'Publishing status, advert enquiries, and recent activity across the website.')
+
 
 @section('content')
     <div class="grid grid-cols-1 gap-4 md:grid-cols-5">
@@ -115,39 +116,69 @@
         </div>
     </section>
 
-    <section class="mt-8 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
-        <div class="border-b border-slate-200 dark:border-slate-800 px-5 py-4">
-            <h2 class="text-lg font-semibold text-slate-950 dark:text-slate-100">Publishing Audit</h2>
-        </div>
-        <div class="divide-y divide-slate-100 dark:divide-slate-800">
-            @forelse ($audits as $audit)
-                <div class="flex flex-col gap-1 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-                    <p class="text-sm font-semibold text-slate-950 dark:text-slate-100">{{ ucfirst(str_replace('_', ' ', $audit->action)) }}</p>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ $audit->created_at?->diffForHumans() }}</p>
-                </div>
-            @empty
-                <p class="px-5 py-8 text-sm text-slate-500 dark:text-slate-400">No publishing activity has been recorded yet.</p>
-            @endforelse
-        </div>
-    </section>
+    @php
+        $activityMeta = [
+            'created' => ['label' => 'Created', 'icon' => 'fa-plus', 'class' => 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400'],
+            'updated' => ['label' => 'Updated', 'icon' => 'fa-pen', 'class' => 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'],
+            'published' => ['label' => 'Published', 'icon' => 'fa-circle-check', 'class' => 'bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-400'],
+            'unpublished' => ['label' => 'Unpublished', 'icon' => 'fa-circle-pause', 'class' => 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400'],
+            'deleted' => ['label' => 'Deleted', 'icon' => 'fa-trash-can', 'class' => 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400'],
+            'image_uploaded' => ['label' => 'Image uploaded', 'icon' => 'fa-image', 'class' => 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'],
+            'publish_blocked' => ['label' => 'Publish blocked', 'icon' => 'fa-ban', 'class' => 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400'],
+            'revision_restored' => ['label' => 'Revision restored', 'icon' => 'fa-clock-rotate-left', 'class' => 'bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300'],
+        ];
+        $activityFallback = fn (string $action) => [
+            'label' => ucfirst(str_replace('_', ' ', $action)),
+            'icon' => 'fa-clock-rotate-left',
+            'class' => 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400',
+        ];
+    @endphp
 
     <section class="mt-8 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
         <div class="border-b border-slate-200 dark:border-slate-800 px-5 py-4">
-            <h2 class="text-lg font-semibold text-slate-950 dark:text-slate-100">Recent Activity</h2>
+            <h2 class="text-lg font-semibold text-slate-950 dark:text-slate-100">Recent activity</h2>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Edits, publishes and deletions across the website, with who made them.</p>
         </div>
         <div class="divide-y divide-slate-100 dark:divide-slate-800">
-            @forelse ($recent as $item)
-                <div class="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <p class="text-sm font-semibold text-slate-950 dark:text-slate-100">{{ $item->title ?: ucfirst($item->type) . ' item' }}</p>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">{{ config('cms.sections.' . $item->section . '.label', ucfirst($item->section)) }} - {{ config('cms.types.' . $item->type, ucfirst($item->type)) }} - Updated {{ $item->updated_at?->diffForHumans() }}</p>
-                    </div>
-                    <span class="w-fit rounded-full px-2.5 py-1 text-xs font-semibold {{ $item->is_published ? 'bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-400' : 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400' }}">
-                        {{ $item->is_published ? 'Published' : 'Draft' }}
+            @forelse ($activity as $audit)
+                @php
+                    $meta = $activityMeta[$audit->action] ?? $activityFallback((string) $audit->action);
+                    $content = $audit->content;
+                    $snapshot = is_array($audit->changes) ? $audit->changes : [];
+                    $title = $content?->title ?: ($snapshot['title'] ?? null);
+                    $sectionKey = $content?->section ?? ($snapshot['section'] ?? null);
+                    $typeKey = $content?->type ?? ($snapshot['type'] ?? null);
+                    $sectionLabel = $sectionKey ? config('cms.sections.' . $sectionKey . '.label', ucfirst(str_replace('-', ' ', $sectionKey))) : null;
+                    $typeLabel = $typeKey ? config('cms.types.' . $typeKey, ucfirst(str_replace('_', ' ', $typeKey))) : null;
+                    $actor = $audit->user?->name ?? 'System';
+                    $context = collect([$sectionLabel, $typeLabel, 'by ' . $actor])->filter()->implode(' · ');
+                @endphp
+                <div class="flex items-start gap-3 px-5 py-4">
+                    <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full {{ $meta['class'] }}">
+                        <i class="fa-solid {{ $meta['icon'] }} text-xs" aria-hidden="true"></i>
                     </span>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                            <p class="truncate text-sm font-semibold {{ $content ? 'text-slate-950 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400' }}">
+                                @if ($content)
+                                    <a href="{{ route('admin.contents.edit', ['section' => $content->section, 'id' => $content->id]) }}" class="hover:text-green-700 hover:underline dark:hover:text-green-300">{{ $title ?: 'Untitled item' }}</a>
+                                @else
+                                    {{ $title ?: 'Removed item' }}
+                                @endif
+                            </p>
+                            <span class="w-fit shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold {{ $meta['class'] }}">{{ $meta['label'] }}</span>
+                        </div>
+                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                            {{ $context }}
+                            @if ($context)
+                                ·
+                            @endif
+                            <time datetime="{{ $audit->created_at?->toIso8601String() }}" title="{{ $audit->created_at?->format('j M Y, H:i') }}">{{ $audit->created_at?->diffForHumans() }}</time>
+                        </p>
+                    </div>
                 </div>
             @empty
-                <p class="px-5 py-8 text-sm text-slate-500 dark:text-slate-400">No CMS activity yet.</p>
+                <p class="px-5 py-8 text-sm text-slate-500 dark:text-slate-400">No publishing activity yet. Edits, publishes and deletions will appear here.</p>
             @endforelse
         </div>
     </section>

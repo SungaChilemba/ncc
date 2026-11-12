@@ -31,7 +31,7 @@
         </div>
     @endif
 
-    <div class="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div class="mb-5 flex flex-col gap-4 lg:hidden">
         <div class="flex flex-wrap items-center gap-2 text-sm">
             <a href="{{ route('admin.cases.index', request()->except('status', 'page')) }}"
                class="{{ $currentStatus === '' ? 'rounded-full bg-green-700 dark:bg-green-600 px-3 py-1 font-semibold text-white' : 'rounded-full border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1 font-semibold text-slate-600 dark:text-slate-400 hover:border-green-600 dark:hover:border-green-500 hover:text-green-700 dark:hover:text-green-300' }}">

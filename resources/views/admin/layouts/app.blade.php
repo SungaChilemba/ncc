@@ -32,6 +32,9 @@
         $showRoles = $adminUser?->hasPermission('admin.roles.manage') ?? false;
         $showAudit = $adminUser?->hasPermission('admin.audit.view') ?? false;
         $showAccess = $showUsers || $showRoles || $showAudit;
+        $caseQueues = $showCases && ! request()->routeIs('admin.cases.totp.*')
+            ? \App\Support\CaseQueues::forUser($adminUser)
+            : null;
 
         $homeRoute = match (true) {
             $showCms => route('admin.dashboard'),
@@ -132,11 +135,61 @@
                         </a>
                     @endif
 
-                    @if ($showCases)
-                        <a href="{{ route('admin.cases.index') }}" data-nav-link aria-label="Case Queue" title="Case Queue" class="{{ $navLinkBase }} {{ request()->routeIs('admin.cases.*') ? $navLinkActive : $navLinkIdle }}">
-                            <i data-nav-icon class="fa-solid fa-inbox {{ $navIconBase }} {{ request()->routeIs('admin.cases.*') ? $navIconActive : $navIconIdle }}"></i>
-                            <span data-nav-label class="truncate">Case Queue</span>
+                    @if ($showCases && $caseQueues)
+                        @php
+                            $onCaseIndex = request()->routeIs('admin.cases.index');
+                            $activeStatus = $onCaseIndex ? (string) request()->query('status', '') : '';
+                            $primaryActive = $onCaseIndex && $activeStatus === '';
+                            $countBadgeIdle = 'shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-400';
+                            $countBadgeActive = 'shrink-0 rounded-full bg-green-700 px-2 py-0.5 text-[11px] font-semibold text-white dark:bg-green-600';
+                        @endphp
+
+                        <p data-nav-group class="{{ $navGroup }}">Case Queues</p>
+
+                        <a href="{{ route('admin.cases.index', request()->except('status', 'page')) }}"
+                           data-nav-link aria-label="{{ $caseQueues['primary']['label'] }}, {{ $caseQueues['primary']['count'] }} {{ \Illuminate\Support\Str::plural('case', $caseQueues['primary']['count']) }}" title="{{ $caseQueues['primary']['label'] }}"
+                           @if ($primaryActive) aria-current="page" @endif
+                           class="{{ $navLinkBase }} {{ $primaryActive ? $navLinkActive : $navLinkIdle }}">
+                            <span data-nav-icon class="{{ $navIconBase }} {{ $primaryActive ? $navIconActive : $navIconIdle }}"><i class="fa-solid fa-inbox"></i></span>
+                            <span data-nav-label class="min-w-0 flex-1 truncate">{{ $caseQueues['primary']['label'] }}</span>
+                            <span aria-hidden="true" class="{{ $primaryActive ? $countBadgeActive : $countBadgeIdle }}">{{ $caseQueues['primary']['count'] }}</span>
                         </a>
+
+                        @foreach ($caseQueues['groups'] as $group)
+                            <p data-nav-group class="{{ $navGroup }}">{{ $group['label'] }}</p>
+                            @foreach ($group['items'] as $item)
+                                @php
+                                    $itemActive = $onCaseIndex && $activeStatus === $item['key'];
+                                @endphp
+                                <a href="{{ route('admin.cases.index', $item['params'] + request()->except('status', 'page')) }}"
+                                   data-nav-link aria-label="{{ $item['label'] }}, {{ $item['count'] }} {{ \Illuminate\Support\Str::plural('case', $item['count']) }}" title="{{ $item['label'] }}"
+                                   @if ($itemActive) aria-current="page" @endif
+                                   class="{{ $navLinkBase }} {{ $itemActive ? $navLinkActive : $navLinkIdle }}">
+                                    <span data-nav-icon class="{{ $navIconBase }}"><span class="inline-block h-2 w-2 rounded-full {{ $item['dot'] }}"></span></span>
+                                    <span data-nav-label class="min-w-0 flex-1 truncate">{{ $item['label'] }}</span>
+                                    <span aria-hidden="true" class="{{ $itemActive ? $countBadgeActive : $countBadgeIdle }}">{{ $item['count'] }}</span>
+                                </a>
+                            @endforeach
+                        @endforeach
+
+                        @if (! empty($caseQueues['shortcuts']))
+                            <p data-nav-group class="{{ $navGroup }}">Shortcuts</p>
+                            @foreach ($caseQueues['shortcuts'] as $shortcut)
+                                @php
+                                    $shortcutActive = $onCaseIndex && collect($shortcut['params'])->every(
+                                        fn (string $value, string $key): bool => (string) request()->query($key, '') === $value
+                                    );
+                                @endphp
+                                <a href="{{ route('admin.cases.index', $shortcut['params'] + request()->except('status', 'page')) }}"
+                                   data-nav-link aria-label="{{ $shortcut['label'] }}, {{ $shortcut['count'] }} {{ \Illuminate\Support\Str::plural('case', $shortcut['count']) }}" title="{{ $shortcut['label'] }}"
+                                   @if ($shortcutActive) aria-current="page" @endif
+                                   class="{{ $navLinkBase }} {{ $shortcutActive ? $navLinkActive : $navLinkIdle }}">
+                                    <span data-nav-icon class="{{ $navIconBase }} {{ $shortcutActive ? $navIconActive : $navIconIdle }}"><i class="fa-solid {{ $shortcut['icon'] }}"></i></span>
+                                    <span data-nav-label class="min-w-0 flex-1 truncate">{{ $shortcut['label'] }}</span>
+                                    <span aria-hidden="true" class="{{ $shortcutActive ? $countBadgeActive : $countBadgeIdle }}">{{ $shortcut['count'] }}</span>
+                                </a>
+                            @endforeach
+                        @endif
                     @endif
 
                     @if ($showCms)

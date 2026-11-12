@@ -136,6 +136,16 @@ class User extends Authenticatable
         return $this->hasPermission('cases.*');
     }
 
+    /**
+     * Whether any of the user's active roles can be given case work.
+     */
+    public function canBeAssigned(): bool
+    {
+        return $this->activeRoles()->contains(
+            fn (Role $role): bool => (bool) $role->can_be_assigned,
+        );
+    }
+
     public function canManageCms(): bool
     {
         return $this->hasPermission('cms.*');

@@ -57,14 +57,20 @@ class DashboardController extends Controller
             'media' => MediaAsset::count(),
         ];
 
-        $recent = SiteContent::latest()->take(6)->get();
-        $audits = ContentAudit::latest()->take(6)->get();
+        $activity = ContentAudit::with(['content', 'user'])
+            ->latest()
+            ->take(30)
+            ->get()
+            // One row per item: keep its most recent event so repeated saves don't crowd the feed.
+            ->unique(fn (ContentAudit $audit) => $audit->site_content_id ?? 'audit-'.$audit->id)
+            ->take(8)
+            ->values();
 
         $enquiries = [
             'counts' => $this->adEnquiries->counts(),
             'pending' => $this->adEnquiries->latestPending(5),
         ];
 
-        return view('admin.dashboard', compact('stats', 'recent', 'sections', 'audits', 'enquiries'));
+        return view('admin.dashboard', compact('stats', 'activity', 'sections', 'enquiries'));
     }
 }

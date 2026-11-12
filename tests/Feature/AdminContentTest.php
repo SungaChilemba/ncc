@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\ContentAudit;
 use App\Models\MediaAsset;
 use App\Models\SiteContent;
 use App\Models\User;
@@ -52,6 +53,82 @@ class AdminContentTest extends TestCase
             ->assertSee('All Home')
             ->assertSee('Add New')
             ->assertSee('Top Story');
+    }
+
+    public function test_dashboard_recent_activity_shows_item_actor_and_action(): void
+    {
+        $admin = $this->userWithRole('system_admin');
+        $content = SiteContent::create([
+            'section' => 'about',
+            'type' => 'card',
+            'title' => 'Commissioner Grace Banda',
+            'category' => 'Commissioners',
+            'is_published' => true,
+        ]);
+
+        ContentAudit::create([
+            'site_content_id' => $content->id,
+            'user_id' => $admin->id,
+            'action' => 'revision_restored',
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee('Recent activity')
+            ->assertSee('Commissioner Grace Banda')
+            ->assertSee('Revision restored')
+            ->assertSee('About · Card · by '.$admin->name)
+            ->assertSee(route('admin.contents.edit', ['section' => 'about', 'id' => $content->id]), false)
+            ->assertDontSee('Publishing Audit')
+            ->assertDontSee('Recent Activity');
+    }
+
+    public function test_dashboard_recent_activity_shows_each_item_once(): void
+    {
+        $admin = $this->userWithRole('system_admin');
+        $content = SiteContent::create([
+            'section' => 'home',
+            'type' => 'update',
+            'title' => 'Repeated Campaign Story',
+        ]);
+
+        foreach (range(1, 3) as $ignored) {
+            ContentAudit::create([
+                'site_content_id' => $content->id,
+                'user_id' => $admin->id,
+                'action' => 'updated',
+                'changes' => ['title' => ['from' => 'Old', 'to' => 'New']],
+            ]);
+        }
+
+        $response = $this->actingAs($admin)->get(route('admin.dashboard'));
+
+        $response->assertOk();
+        $this->assertSame(1, substr_count($response->getContent(), 'Repeated Campaign Story'));
+    }
+
+    public function test_dashboard_recent_activity_keeps_context_for_deleted_items(): void
+    {
+        $admin = $this->userWithRole('system_admin');
+        $content = SiteContent::create([
+            'section' => 'about',
+            'type' => 'card',
+            'title' => 'Former Commissioner',
+            'category' => 'Commissioners',
+        ]);
+
+        $this->actingAs($admin)
+            ->delete(route('admin.contents.destroy', ['section' => 'about', 'id' => $content->id]))
+            ->assertRedirect(route('admin.contents.index', ['section' => 'about']));
+
+        $this->actingAs($admin)
+            ->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee('Deleted')
+            ->assertSee('Former Commissioner')
+            ->assertSee('About · Card · by '.$admin->name)
+            ->assertDontSee(route('admin.contents.edit', ['section' => 'about', 'id' => $content->id]), false);
     }
 
     public function test_admin_can_create_search_filter_and_publish_content(): void
