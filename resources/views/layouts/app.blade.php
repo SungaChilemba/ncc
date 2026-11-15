@@ -19,20 +19,18 @@
 
 				<body class="min-h-screen bg-slate-50 text-slate-900">
 								<header class="sticky top-0 z-40 bg-white shadow-sm" x-data="{ open: false, latestOpen: false }">
-												<!-- Top Header Bar: brand + helpline left, action items right -->
+												<!-- Top Header Bar: brand + commission name left, action items right -->
 												<div class="border-b border-brand-800 bg-brand-600">
 																<div class="mx-auto flex max-w-8xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:gap-4 lg:px-8">
-																				<!-- Brand + persistent helpline badge, shown on every page -->
+																				<!-- Brand + commission name, shown on every page -->
 																				<div class="flex min-w-0 items-center gap-2 sm:gap-3 lg:gap-4">
 																								<a href="{{ route("home") }}" class="flex shrink-0 items-center text-lg font-semibold text-white">
 																												<img src="{{ asset("images/NCClogo.png") }}" alt="NCC Logo" class="h-20 w-auto">
 																								</a>
 
-																								<a href="tel:116"
-																												class="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1.5 text-[11px] font-semibold tracking-wide text-brand-800 shadow-sm transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-brand-800 sm:gap-2 sm:px-3 sm:text-xs lg:px-3.5 lg:text-sm">
-																												<i class="fa-solid fa-phone text-brand-600" aria-hidden="true"></i>
-																												<span class="whitespace-nowrap">Child Helpline: <span class="font-bold">116</span></span>
-																								</a>
+<a href="{{ route("home") }}" class="flex shrink-0 items-center text-white font-bold tracking-tight text-sm sm:text-base transition hover:text-brand-300">
+																				<span class="text-white">N</span>ational Children's Commission
+</a>
 																				</div>
 
 																				<!-- Desktop action items -->
@@ -65,11 +63,17 @@
 																</div>
 												</div>
 
-												<!-- Navigation Menu Bar: full-width, directly below top header, right-aligned -->
+												<!-- Navigation Menu Bar: full-width, directly below top header -->
 												<div class="hidden border-b border-slate-200 bg-white lg:block">
-																<div class="mx-auto flex max-w-8xl justify-end px-4 sm:px-6 lg:px-8">
-																				<nav class="flex items-center justify-end gap-8 py-3 text-sm font-medium text-slate-800">
-																								<a href="{{ route("home") }}" class="transition hover:text-brand-700">Home</a>
+																<div class="mx-auto flex max-w-8xl justify-between px-4 sm:px-6 lg:px-8">
+																				<!-- Helpline badge, stands out to the left of the nav links -->
+																				<a href="tel:116"
+																				class="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1.5 text-[11px] font-semibold tracking-wide text-brand-800 shadow-sm transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-brand-800 sm:gap-2 sm:px-3 sm:text-xs lg:px-3.5 lg:text-sm">
+																				<i class="fa-solid fa-phone text-brand-600" aria-hidden="true"></i>
+																				<span class="whitespace-nowrap">Child Helpline: <span class="font-bold">116</span></span>
+																				</a>
+																				<nav class="flex items-center gap-8 py-3 text-sm font-medium text-slate-800">
+																				<a href="{{ route("home") }}" class="transition hover:text-brand-700">Home</a>
 																								<a href="{{ route("about") }}" class="transition hover:text-brand-700">About</a>
 																								<div class="relative">
 																												<button @click="latestOpen = !latestOpen"
@@ -95,6 +99,12 @@
 
 												<!-- Mobile collapsible menu -->
 												<div class="border-t border-slate-200 bg-white px-4 pb-5 lg:hidden" x-show="open" x-transition x-cloak>
+																<!-- Helpline badge at the top of the mobile menu -->
+																<a href="tel:116"
+																				class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1.5 text-[11px] font-semibold tracking-wide text-brand-800 shadow-sm transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-brand-800 sm:gap-2 sm:px-3 sm:text-xs lg:px-3.5 lg:text-sm mb-3">
+																				<i class="fa-solid fa-phone text-brand-600" aria-hidden="true"></i>
+																				<span class="whitespace-nowrap">Child Helpline: <span class="font-bold">116</span></span>
+																</a>
 																<nav class="mt-4 flex flex-col gap-3 text-sm font-medium text-slate-700">
 																				<a href="{{ route("home") }}" class="py-1 transition hover:text-brand-700">Home</a>
 																				<a href="{{ route("about") }}" class="py-1 transition hover:text-brand-700">About</a>
@@ -141,11 +151,11 @@
 												@endif
 								</main>
 
-								<footer class="bg-brand-600 text-white pt-12 pb-6">
-												<div class="max-w-8xl mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-5 gap-8">
+<footer class="bg-white text-gray-900 pt-12 pb-6">
+											<div class="max-w-8xl mx-auto px-6 md:px-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 lg:gap-8">
 																<!-- Partnerships -->
 																<div>
-																				<h3 class="font-bold text-white mb-4">Partnerships & Stakeholders</h3>
+																				<h3 class="font-bold text-gray-900 mb-4">Partnerships & Stakeholders</h3>
 																				<ul class="space-y-2">
 																								<li>Unicef</li>
 																								<li>NGOCCR</li>
@@ -157,47 +167,51 @@
 
 																<!-- Quick Links -->
 																<div>
-																				<h3 class="font-bold text-white mb-4">Quick Links</h3>
-																				<ul class="space-y-2">
-																								<li><a href="{{ route("home") }}" class="hover:text-brand-100">Home</a></li>
-																								<li><a href="{{ route("about") }}" class="hover:text-brand-100">About Us</a></li>
-																								<li><a href="{{ route("what-we-do") }}" class="hover:text-brand-100">What We Do</a></li>
-																								<li><a href="{{ route("resources") }}" class="hover:text-brand-100">Resources</a></li>
-																								<li><a href="{{ route("advertise") }}" class="hover:text-brand-100">Advertise</a></li>
+<h3 class="font-bold text-gray-900 mb-4">Quick Links</h3>
+											<ul class="space-y-2">
+												<li><a href="{{ route("home") }}" class="hover:text-brand-600">Home</a></li>
+												<li><a href="{{ route("about") }}" class="hover:text-brand-600">About Us</a></li>
+												<li><a href="{{ route("what-we-do") }}" class="hover:text-brand-600">What We Do</a></li>
+												<li><a href="{{ route("resources") }}" class="hover:text-brand-600">Resources</a></li>
+												<li><a href="{{ route("advertise") }}" class="hover:text-brand-600">Advertise</a></li>
 																				</ul>
 																</div>
 
 																<!-- Help & Support -->
 																<div>
-																				<h3 class="font-bold text-white mb-4">Help & Support</h3>
-																				<ul class="space-y-2">
-																								<li><a href="{{ route("reporting") }}" class="hover:text-brand-100">Report a Case</a></li>
-																								<li><a href="{{ route("donate") }}" class="hover:text-brand-100">Donate</a></li>
-																								<li><a href="{{ route("news") }}" class="hover:text-brand-100">Check Case Studies</a></li>
-																								<li><a href="{{ route("resources") }}" class="hover:text-brand-100">FAQs</a></li>
-																								<li><a href="mailto:nccmalawi@gmail.com" class="hover:text-brand-100">Contact Us</a></li>
+<h3 class="font-bold text-gray-900 mb-4">Help & Support</h3>
+											<ul class="space-y-2">
+												<li><a href="{{ route("reporting") }}" class="hover:text-brand-600">Report a Case</a></li>
+												<li><a href="{{ route("donate") }}" class="hover:text-brand-600">Donate</a></li>
+												<li><a href="{{ route("news") }}" class="hover:text-brand-600">Check Case Studies</a></li>
+												<li><a href="{{ route("resources") }}" class="hover:text-brand-600">FAQs</a></li>
+												<li><a href="mailto:nccmalawi@gmail.com" class="hover:text-brand-600">Contact Us</a></li>
 																				</ul>
 																</div>
 
 																<!-- Contact -->
 																<div>
-																				<h3 class="font-bold text-white mb-4">Contact Us</h3>
-																				<p>P.O Box 30346, Area 12<br> Lilongwe, Malawi</p>
-																				<p class="mt-2">📞 +265 (0) 880‑268‑418</p>
-																				<p>✉️ nccmalawi@gmail.com</p>
+<h3 class="font-bold text-gray-900 mb-4">Contact Us</h3>
+											<p class="text-gray-600">P.O Box 30346, Area 12<br> Lilongwe, Malawi</p>
+											<p class="mt-2 text-gray-600">📞 +265 (0) 880‑268‑418</p>
+											<p class="text-gray-600">✉️ nccmalawi@gmail.com</p>
 																</div>
 
-																<!-- Find Us -->
-																<div>
-																				<h3 class="font-bold text-white mb-4">Find Us</h3>
-																				<img src="{{ asset("images/map-placeholder.jpg") }}" alt="Map"
-																								class="rounded shadow-md w-full h-32 object-cover">
-																</div>
+<!-- Find Us -->
+															<div>
+																			<h3 class="font-bold text-gray-900 mb-4">Find Us</h3>
+																			<a href="https://maps.google.com/?q=NCC+Lilongwe+Malawi" target="_blank" rel="noopener noreferrer"
+																					class="inline-flex items-center gap-2 text-gray-600 hover:text-brand-600 transition-colors">
+																							<i class="fa-solid fa-location-dot"></i>
+																							View on Google Maps
+																			</a>
+																			<p class="mt-2 text-sm text-gray-500">P.O Box 30346, Area 12<br>Lilongwe, Malawi</p>
+															</div>
 												</div>
 
 												<!-- Bottom Section -->
-												<div
-																class="bg-slate-50 border-t border-brand-200 mt-8  px-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-6">
+											<div
+															class="bg-gray-50 border-t border-gray-200 mt-8  px-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-6">
 																<!-- Logo & Newsletter -->
 																<div class="flex flex-col md:flex-row items-center gap-6">
 																				<img src="{{ asset("images/ncc-logo.png") }}" alt="NCC Logo" class="h-16 w-auto">
@@ -205,9 +219,9 @@
 																												@csrf
 																												<label for="newsletter-email" class="sr-only">Email address</label>
 																								<input type="email" name="email" value="{{ old("email") }}" required autocomplete="email" placeholder="Enter your email to subscribe"
-																												class="border border-brand-300 placeholder:text-brand-700 text-black rounded px-3 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-brand-500">
-																								<button type="submit"
-																												class="bg-brand-700 text-white px-4 py-2 rounded hover:bg-brand-800">Subscribe</button>
+											class="border border-gray-300 placeholder:text-gray-400 text-gray-900 rounded px-3 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-brand-500">
+											<button type="submit"
+															class="bg-brand-600 text-white px-4 py-2 rounded hover:bg-brand-700">Subscribe</button>
 																				<div class="hidden" aria-hidden="true">
 																								<label for="newsletter-website">Website</label>
 																								<input id="newsletter-website" type="text" name="website" tabindex="-1" autocomplete="off">
@@ -224,17 +238,17 @@
 																<!-- Helpline & Social -->
 																<div class="flex flex-col items-center gap-4 md:flex-row md:items-center md:justify-end md:text-right">
 																				<div>
-																								<p class="font-semibold text-brand-700">Need Help? Call Our Helpline</p>
-																				</div>
-																				<div>
-																								<p class="text-base font-bold text-brand-800">116</p>
-																				</div>
-																				<div class="flex items-center gap-4 text-brand-700">
-																								<a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-																								<a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-																								<a href="#" aria-label="Twitter"><i class="fa-brands fa-twitter"></i></a>
-																								<a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
-																				</div>
+<p class="font-semibold text-gray-700">Need Help? Call Our Helpline</p>
+											</div>
+											<div>
+												<p class="text-base font-bold text-gray-900">116</p>
+											</div>
+											<div class="flex items-center gap-4 text-gray-400">
+												<a href="#" aria-label="Facebook" class="hover:text-brand-600"><i class="fa-brands fa-facebook-f"></i></a>
+												<a href="#" aria-label="Instagram" class="hover:text-brand-600"><i class="fa-brands fa-instagram"></i></a>
+												<a href="#" aria-label="Twitter" class="hover:text-brand-600"><i class="fa-brands fa-twitter"></i></a>
+												<a href="#" aria-label="YouTube" class="hover:text-brand-600"><i class="fa-brands fa-youtube"></i></a>
+											</div>
 																</div>
 												</div>
 								</footer>
