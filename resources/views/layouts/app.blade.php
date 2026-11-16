@@ -66,9 +66,9 @@
 												<!-- Navigation Menu Bar: full-width, directly below top header -->
 												<div class="hidden border-b border-slate-200 bg-white lg:block">
 																<div class="mx-auto flex max-w-8xl justify-between px-4 sm:px-6 lg:px-8">
-																				<!-- Helpline badge, stands out to the left of the nav links -->
+																				<!-- Helpline, aligned under the commission name -->
 																				<a href="tel:116"
-																				class="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1.5 text-[11px] font-semibold tracking-wide text-brand-800 shadow-sm transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-brand-800 sm:gap-2 sm:px-3 sm:text-xs lg:px-3.5 lg:text-sm">
+																				class="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-brand-800 transition hover:text-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 lg:ml-24">
 																				<i class="fa-solid fa-phone text-brand-600" aria-hidden="true"></i>
 																				<span class="whitespace-nowrap">Child Helpline: <span class="font-bold">116</span></span>
 																				</a>
@@ -99,9 +99,9 @@
 
 												<!-- Mobile collapsible menu -->
 												<div class="border-t border-slate-200 bg-white px-4 pb-5 lg:hidden" x-show="open" x-transition x-cloak>
-																<!-- Helpline badge at the top of the mobile menu -->
+																<!-- Helpline at the top of the mobile menu -->
 																<a href="tel:116"
-																				class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1.5 text-[11px] font-semibold tracking-wide text-brand-800 shadow-sm transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-brand-800 sm:gap-2 sm:px-3 sm:text-xs lg:px-3.5 lg:text-sm mb-3">
+																				class="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-brand-800 transition hover:text-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2">
 																				<i class="fa-solid fa-phone text-brand-600" aria-hidden="true"></i>
 																				<span class="whitespace-nowrap">Child Helpline: <span class="font-bold">116</span></span>
 																</a>
@@ -252,6 +252,10 @@
 																</div>
 												</div>
 								</footer>
+								<div class="bg-white px-6 pb-6 text-center text-sm text-gray-600">
+												<hr class="mx-auto mb-3 max-w-8xl border-gray-200">
+												Designed and Developed by the Departement of E-Government
+								</div>
 
 								@stack("scripts")
 				</body>
