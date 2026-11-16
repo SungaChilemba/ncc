@@ -26,6 +26,7 @@
         ? collect(old('bio_heading'))->map(fn ($heading, $index) => ['heading' => $heading, 'body' => old('bio_body.' . $index)])->all()
         : ($structuredData['bio_sections'] ?? [['heading' => 'Professional Background', 'body' => ''], ['heading' => 'Education & Certifications', 'body' => '']]);
     $source = $structuredData['source'] ?? [];
+    $statPlacements = old('stat_placements', $structuredData['placements'] ?? []);
     $newsPlacements = old('news_placement', $structuredData['placements'] ?? (($structuredData['is_featured'] ?? false) ? ['hero', 'featured'] : []));
     $structuredText = function (array $data, string $key) {
         $value = $data[$key] ?? null;
@@ -506,6 +507,21 @@
                                 <input type="checkbox" name="news_placement[]" value="featured" @checked(in_array('featured', (array) $newsPlacements, true)) class="rounded border-slate-300 dark:border-slate-700 text-green-700 dark:text-green-400 focus:ring-green-600">
                                 Featured slot
                             </label>
+                        </div>
+                    </div>
+
+                    <div data-editor-block="stat_placements" class="{{ $blockClass('stat_placements') }} md:col-span-2 rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50 p-4">
+                        <p class="text-sm font-semibold text-slate-950 dark:text-slate-100"><span data-field-label="stat_placements">{{ $fieldLabel('stat_placements', 'Show on pages') }}</span></p>
+                        @if ($fieldHelp('stat_placements'))
+                            <p data-field-help="stat_placements" class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ $fieldHelp('stat_placements') }}</p>
+                        @endif
+                        <div class="mt-3 grid gap-2 sm:grid-cols-2">
+                            @foreach (config('cms.field_meta.stat_placements.options') as $value => $label)
+                                <label class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    <input type="checkbox" name="stat_placements[]" value="{{ $value }}" @checked(in_array($value, (array) $statPlacements, true)) class="rounded border-slate-300 dark:border-slate-700 text-green-700 dark:text-green-400 focus:ring-green-600">
+                                    {{ $label }}
+                                </label>
+                            @endforeach
                         </div>
                     </div>
 

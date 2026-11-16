@@ -469,6 +469,8 @@ mibextid=rS40aB7S9Ucbxw6v"
 												@endforelse
 								</div>
 				</section>
+				<!-- Statistics -->
+				@include('partials.impact-stats', ['stats' => $stats ?? collect()])
 				<!-- Action Buttons Section -->
 				<section class="py-12 px-6 md:px-12">
 								<div class="flex flex-col md:flex-row justify-center gap-4">
@@ -484,26 +486,6 @@ mibextid=rS40aB7S9Ucbxw6v"
 																class="bg-urgent-600 hover:bg-urgent-700 text-white px-6 py-3 rounded-lg font-bold uppercase text-center">
 																REPORT A CASE NOW
 												</a>
-								</div>
-
-								<!-- Statistics -->
-								<div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center mt-12">
-												<div>
-																<h3 class="text-2xl font-bold text-brand-700">1,249+</h3>
-																<p class="text-slate-700">Children Supported</p>
-												</div>
-												<div>
-																<h3 class="text-2xl font-bold text-brand-700">2,000+</h3>
-																<p class="text-slate-700">Families Reached</p>
-												</div>
-												<div>
-																<h3 class="text-2xl font-bold text-brand-700">6,000+</h3>
-																<p class="text-slate-700">Community Members</p>
-												</div>
-												<div>
-																<h3 class="text-2xl font-bold text-brand-700">28</h3>
-																<p class="text-slate-700">Districts Covered</p>
-												</div>
 								</div>
 				</section>
 

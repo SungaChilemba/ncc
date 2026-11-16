@@ -10,14 +10,14 @@ class CmsEditorSchemaTest extends TestCase
     public function test_final_type_inventory_matches_the_plan(): void
     {
         $expected = [
-            'home' => ['hero', 'update', 'news'],
-            'about' => ['hero', 'card', 'stat'],
-            'what-we-do' => ['hero', 'card', 'stat', 'cta'],
+            'home' => ['hero', 'update', 'news', 'stat'],
+            'about' => ['hero', 'card'],
+            'what-we-do' => ['hero', 'card', 'cta'],
             'childrens-corner' => ['hero', 'card', 'gallery', 'news', 'resource', 'cta'],
             'reporting' => ['hero', 'card'],
             'resources' => ['hero', 'resource'],
             'news' => ['news'],
-            'donate' => ['hero', 'card', 'stat', 'cta'],
+            'donate' => ['hero', 'card', 'cta'],
             'advertise' => ['hero', 'card', 'stat', 'cta', 'submission'],
         ];
 

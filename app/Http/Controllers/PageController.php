@@ -30,6 +30,7 @@ class PageController extends Controller
             'sidebarUpdate' => $updates->slice(1),
             'news' => $news,
             'latestNews' => $latestNews,
+            'stats' => $this->content->statsFor('home'),
         ]);
     }
 
@@ -59,6 +60,7 @@ class PageController extends Controller
             'cmsNews' => $cmsNews,
             'cmsResources' => $this->content->type('childrens-corner', 'resource'),
             'cmsGallery' => $this->content->type('childrens-corner', 'gallery'),
+            'stats' => $this->content->statsFor('childrens-corner'),
             'suppressCmsBlocks' => true,
         ]);
     }
@@ -321,6 +323,7 @@ class PageController extends Controller
             'cmsNews' => $this->content->type($section, 'news'),
             'cmsResources' => $this->content->type($section, 'resource'),
             'cmsGallery' => $this->content->type($section, 'gallery'),
+            'stats' => $this->content->statsFor($section),
             'suppressCmsBlocks' => true,
         ], $extra));
     }

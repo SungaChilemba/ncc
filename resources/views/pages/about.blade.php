@@ -6,8 +6,9 @@
     @php
         $cards = $cmsCards ?? collect();
         $hero = $cmsHero ?? null;
-        $stats = $cmsContent->get("stat", collect()) ?? collect();
+        $stats = $stats ?? collect();
         $storyCards = $cards->whereIn("category", ["Mandate, Mission & Objectives", "Mandate, Mission & Vision"]);
+
 
         $findStory = function (array $slugs) use ($storyCards, $cards) {
             foreach ($slugs as $slug) {
@@ -245,18 +246,7 @@
         </div>
     </section>
 
-    @if ($stats->isNotEmpty())
-        <section class="px-4 py-12 sm:px-6 lg:px-8">
-            <div class="mx-auto grid max-w-7xl grid-cols-2 gap-6 text-center md:grid-cols-4">
-                @foreach ($stats as $stat)
-                    <div class="rounded-lg bg-white p-5 shadow-sm">
-                        <h3 class="text-2xl font-bold text-green-700">{{ $stat->title }}</h3>
-                        <p class="mt-1 text-sm text-gray-600">{{ $stat->description }}</p>
-                    </div>
-                @endforeach
-            </div>
-        </section>
-    @endif
+    @include('partials.impact-stats', ['stats' => $stats ?? collect()])
 
     @php
         // Cards already rendered by the bespoke sections above. Anything left

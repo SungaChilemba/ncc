@@ -427,6 +427,8 @@ class ContentController extends Controller
             'bullets.*' => ['nullable', 'string', 'max:5000'],
             'news_placement' => ['nullable', 'array'],
             'news_placement.*' => [Rule::in(['hero', 'featured'])],
+            'stat_placements' => ['nullable', 'array'],
+            'stat_placements.*' => [Rule::in(['home', 'about', 'what-we-do', 'childrens-corner', 'donate', 'advertise'])],
             'price' => ['nullable', 'string', 'max:50'],
             'badge' => ['nullable', 'string', 'max:50'],
             'reach' => ['nullable', 'string', 'max:100'],
@@ -625,6 +627,7 @@ class ContentController extends Controller
             $data['bio_body'],
             $data['bullets'],
             $data['news_placement'],
+            $data['stat_placements'],
             $data['price'],
             $data['badge'],
             $data['reach'],
@@ -735,6 +738,13 @@ class ContentController extends Controller
             $structured['placements'] = array_values(array_intersect(
                 array_map('strval', (array) ($data['news_placement'] ?? [])),
                 ['hero', 'featured']
+            ));
+        }
+
+        if (isset($allowed['stat_placements'])) {
+            $structured['placements'] = array_values(array_intersect(
+                array_map('strval', (array) ($data['stat_placements'] ?? [])),
+                ['home', 'about', 'what-we-do', 'childrens-corner', 'donate', 'advertise']
             ));
         }
 

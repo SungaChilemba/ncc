@@ -70,9 +70,9 @@ class CmsConfigParityTest extends TestCase
 
         $account = SiteContent::create([
             'section' => 'home',
-            'type' => 'stat',
-            'slug' => 'invalid-stat',
-            'title' => 'Invalid Stat',
+            'type' => 'card',
+            'slug' => 'invalid-card',
+            'title' => 'Invalid Card',
             'is_published' => true,
         ]);
 

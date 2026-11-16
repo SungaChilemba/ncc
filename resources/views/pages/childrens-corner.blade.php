@@ -439,6 +439,8 @@
         </section>
     @endif
 
+    @include('partials.impact-stats', ['stats' => $stats ?? collect()])
+
     {{-- Call to action: CMS CTAs when published, always ending with the core action path. --}}
     <section class="-mx-4 px-4 pb-16 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
         <div class="reveal mx-auto max-w-7xl overflow-hidden rounded-3xl bg-brand-900 px-6 py-14 text-center shadow-xl sm:px-12">

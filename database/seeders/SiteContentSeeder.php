@@ -403,7 +403,7 @@ class SiteContentSeeder extends Seeder
                 ],
                 'sort_order' => 23,
             ],
-            ...$this->impactStats('about', 30, 'green'),
+            ...$this->homeImpactStats(),
             [
                 'section' => 'what-we-do',
                 'type' => 'hero',
@@ -435,7 +435,6 @@ class SiteContentSeeder extends Seeder
                 'description' => 'We go to remote corners, villages, and cities where it is really tough to be a child. We ask children, their families, and communities what children need to be healthy, safe, and learning. We listen to their experiences, insights, and ideas. Together, we work hand in hand to adapt and create new solutions for children facing crisis, now and in the future.',
                 'sort_order' => 10,
             ],
-            ...$this->impactStats('what-we-do', 11, 'red'),
             [
                 'section' => 'childrens-corner',
                 'type' => 'hero',
@@ -595,7 +594,7 @@ class SiteContentSeeder extends Seeder
         ], $rows, array_keys($rows));
     }
 
-    private function impactStats(string $section, int $start, string $color): array
+    private function homeImpactStats(): array
     {
         $stats = [
             ['slug' => 'children-supported', 'title' => '1,249+', 'description' => 'Children Supported'],
@@ -603,13 +602,15 @@ class SiteContentSeeder extends Seeder
             ['slug' => 'community-members', 'title' => '6,000+', 'description' => 'Community Members'],
             ['slug' => 'districts-covered', 'title' => '28', 'description' => 'Districts Covered'],
         ];
+        $placements = ['home', 'about', 'what-we-do', 'childrens-corner', 'donate', 'advertise'];
 
         return array_map(fn ($row, $index) => [
             ...$row,
-            'section' => $section,
+            'section' => 'home',
             'type' => 'stat',
-            'accent_color' => $color,
-            'sort_order' => $start + $index,
+            'accent_color' => 'green',
+            'data' => ['placements' => $placements],
+            'sort_order' => 30 + $index,
         ], $stats, array_keys($stats));
     }
 

@@ -60,6 +60,23 @@ class CmsContent
         return $this->publishedNews($limit);
     }
 
+    public function statsFor(?string $section, ?int $limit = null): Collection
+    {
+        $stats = SiteContent::forSection('home')
+            ->ofType('stat')
+            ->published()
+            ->ordered()
+            ->get();
+
+        if ($section) {
+            $stats = $stats->filter(
+                fn (SiteContent $stat) => in_array($section, (array) data_get($stat->data, 'placements', []), true)
+            );
+        }
+
+        return $stats->take($limit ?? PHP_INT_MAX)->values();
+    }
+
     public function newsCategories(): Collection
     {
         return $this->publishedNews()

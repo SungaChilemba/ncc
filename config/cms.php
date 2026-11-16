@@ -53,6 +53,7 @@ return [
         'bio' => ['bio_heading', 'bio_body'],
         'bullets' => ['bullets'],
         'placements' => ['news_placement'],
+        'stat_placements' => ['stat_placements'],
         'tier' => ['price', 'badge', 'reach', 'tier_placement', 'tier_include'],
         'ad_expiry' => ['ends_at', 'hero_featured'],
         'stat_icon' => ['stat_icon'],
@@ -193,6 +194,19 @@ return [
             'options' => [
                 'hero' => 'Hero carousel',
                 'featured' => 'Featured slot',
+            ],
+        ],
+        'stat_placements' => [
+            'label' => 'Show on pages',
+            'help' => 'Tick every page where this statistic should appear.',
+            'control' => 'checkboxes',
+            'options' => [
+                'home' => 'Home',
+                'about' => 'About',
+                'what-we-do' => 'What We Do',
+                'childrens-corner' => "Children's Corner",
+                'donate' => 'Donate',
+                'advertise' => 'Advertise',
             ],
         ],
         'price' => [
@@ -488,7 +502,7 @@ return [
             'description' => 'Homepage hero, top stories, and news highlights.',
             'route' => 'home',
             'icon' => 'fa-house',
-            'types' => ['hero', 'update', 'news'],
+            'types' => ['hero', 'update', 'news', 'stat'],
             'type_options' => [
                 'hero' => [
                     'label' => 'Page header',
@@ -513,6 +527,18 @@ return [
                     'label' => 'News highlight',
                     'blocks' => ['identity', 'permalink', 'image', 'alt_text', 'sort', 'json', 'publish'],
                 ],
+                'stat' => [
+                    'label' => 'Impact statistic',
+                    'blocks' => ['identity', 'body', 'stat_icon', 'stat_placements', 'sort', 'json', 'publish'],
+                    'labels' => [
+                        'title' => 'Number',
+                        'description' => 'Label',
+                        'stat_icon' => 'Icon',
+                    ],
+                    'help' => [
+                        'stat_placements' => 'Tick every page where this statistic should appear. Leave blank to hide everywhere.',
+                    ],
+                ],
             ],
         ],
 
@@ -521,7 +547,7 @@ return [
             'description' => 'Mandate, mission, objectives, commissioners, and management content.',
             'route' => 'about',
             'icon' => 'fa-circle-info',
-            'types' => ['hero', 'card', 'stat'],
+            'types' => ['hero', 'card'],
             'type_options' => [
                 'hero' => [
                     'label' => 'Page header',
@@ -557,10 +583,6 @@ return [
                         ],
                     ],
                 ],
-                'stat' => [
-                    'label' => 'Impact statistic',
-                    'blocks' => ['identity', 'body', 'sort', 'json', 'publish'],
-                ],
             ],
         ],
 
@@ -569,7 +591,7 @@ return [
             'description' => 'Programs, service areas, and institutional focus areas.',
             'route' => 'what-we-do',
             'icon' => 'fa-hands-holding-heart',
-            'types' => ['hero', 'card', 'stat', 'cta'],
+            'types' => ['hero', 'card', 'cta'],
             'type_options' => [
                 'hero' => [
                     'label' => 'Page header',
@@ -579,10 +601,6 @@ return [
                     'label' => 'Card',
                     'blocks' => ['identity', 'category', 'subtitle', 'body', 'image', 'items', 'button', 'sort', 'json', 'publish'],
                     'category_options' => 'cms.what_we_do_categories',
-                ],
-                'stat' => [
-                    'label' => 'Impact statistic',
-                    'blocks' => ['identity', 'body', 'sort', 'json', 'publish'],
                 ],
                 'cta' => [
                     'label' => 'Call to action',
@@ -734,7 +752,7 @@ return [
             'description' => 'Donation page copy, calls to action, giving options, and trust messaging.',
             'route' => 'donate',
             'icon' => 'fa-hand-holding-heart',
-            'types' => ['hero', 'card', 'stat', 'cta'],
+            'types' => ['hero', 'card', 'cta'],
             'type_options' => [
                 'hero' => [
                     'label' => 'Page header',
@@ -779,10 +797,6 @@ return [
                             'description' => 'Answer',
                         ],
                     ],
-                ],
-                'stat' => [
-                    'label' => 'Impact statistic',
-                    'blocks' => ['identity', 'body', 'sort', 'json', 'publish'],
                 ],
                 'cta' => [
                     'label' => 'Call to action',
