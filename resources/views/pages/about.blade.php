@@ -106,7 +106,7 @@
             <div class="mx-auto max-w-7xl">
                 <div class="max-w-3xl text-white">
                     <p class="text-sm font-semibold uppercase tracking-wide text-green-100">{{ $hero?->subtitle ?: "Championing the Rights of Children in Malawi" }}</p>
-                    <h1 class="mt-3 text-3xl font-bold md:text-5xl">{{ $hero?->title ?: "About Us" }}</h1>
+                    <h1 class="mt-3 text-3xl font-bold md:text-5xl">{{ $hero?->title ?: "" }}</h1>
                     @if ($hero?->description)
                         <p class="mt-4 max-w-3xl text-base leading-7 text-white/90">{{ $hero->description }}</p>
                     @endif
